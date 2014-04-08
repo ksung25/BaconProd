@@ -24,10 +24,10 @@ process.load('BaconProd/Ntupler/myJetExtras07_cff')    # include gen jets and b-
 process.load('BaconProd/Ntupler/myJetExtras08_cff')    # include gen jets and b-tagging
 process.load('BaconProd/Ntupler/myJetExtras09_cff')    # include gen jets and b-tagging
 
-process.load('BaconProd/Ntupler/myMETFilters_cff')                  # apply MET filters set to tagging mode
-process.load('BaconProd/Ntupler/myMVAMet_cff')                      # MVA MET
-process.load("JetMETCorrections.Type1MET.pfMETCorrections_cff")     # PF MET corrections
-process.pfType1CorrectedMet.applyType0Corrections = cms.bool(True)
+process.load('BaconProd/Ntupler/myMETFilters_cff')        # apply MET filters set to tagging mode
+process.load('BaconProd/Ntupler/myMVAMet_cff')            # MVA MET
+process.load("BaconProd/Ntupler/myPFMETCorrections_cff")  # PF MET corrections
+process.pfJetMETcorr.jetCorrLabel = cms.string("ak5PFL1FastL2L3")
 
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
@@ -57,7 +57,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmPileupInfoName  = cms.untracked.string('addPileupInfo'),
     edmBeamspotName    = cms.untracked.string('offlineBeamSpot'),
     edmPFMETName       = cms.untracked.string('pfMet'),
-    edmPFMETCorrName   = cms.untracked.string('pfType1CorrectedMet'),
+    edmPFMETCorrName   = cms.untracked.string('pfType0p1CorrectedMet'),
     edmMVAMETName      = cms.untracked.string('pfMEtMVA'),
     edmMVAMETUnityName = cms.untracked.string('pfMEtMVAUnity'),
     edmRhoForIsoName   = cms.untracked.string('kt6PFJets'),
@@ -217,7 +217,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
 )
 
 process.baconSequence = cms.Sequence(process.metFilters*
-                                     process.pfType1CorrectedMet*
+                                     process.producePFMETCorrections*
                                      process.recojetsequence*
                                      process.genjetsequence*
                                      process.AK5jetsequence*

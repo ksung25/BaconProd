@@ -20,7 +20,7 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig):
   fPUInfoName (iConfig.getUntrackedParameter<std::string>("edmPileupInfoName","addPileupInfo")),
   fBSName     (iConfig.getUntrackedParameter<std::string>("edmBeamspotName","offlineBeamSpot")),
   fPFMETName  (iConfig.getUntrackedParameter<std::string>("edmPFMETName","pfMet")),
-  fPFMETCName (iConfig.getUntrackedParameter<std::string>("edmPFMETCorrName","pfType1CorrectedMet")),
+  fPFMETCName (iConfig.getUntrackedParameter<std::string>("edmPFMETCorrName","pfTypei0p1CorrectedMet")),
   fMVAMETName (iConfig.getUntrackedParameter<std::string>("edmMVAMETName","pfMEtMVA")),
   fMVAMETUName(iConfig.getUntrackedParameter<std::string>("edmMVAMETUnityName","pfMEtMVAUnity")),
   fRhoIsoName (iConfig.getUntrackedParameter<std::string>("edmRhoForIsoName","kt6PFJets")),
