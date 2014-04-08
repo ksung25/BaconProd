@@ -66,10 +66,7 @@ cp $PATCHDIR/RecoMET/METPUSubtraction/data/*Sep*.root                RecoMET/MET
 
 ### clean up large unncessary files to fit into CRAB input sandbox (100MB)
 rm -f RecoJets/JetProducers/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml.~1.1.~
-rm -f JetTools/AnalyzerToolbox/data/TMVAClassificationCategory_JetID_53X_Dec2012.weights.xml
-rm -f JetTools/AnalyzerToolbox/data/TMVAClassification_5x_BDT_chsSimpleNoVtxCat.weights.xml
-rm -f JetTools/AnalyzerToolbox/data/TMVAClassification_5x_BDT_simpleNoVtxCat.weights.xml
-rm -f JetTools/AnalyzerToolbox/data/TMVAClassification_PuJetIdOptMVA.weights.xml
+rm -f JetTools/AnalyzerToolbox/data/TMVAClassification*.xml
 
 ### remove any compiled python scrips from copied directories...
 rm -f */*/python/*.pyc
