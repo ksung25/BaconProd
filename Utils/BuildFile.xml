@@ -1,0 +1,11 @@
+<use name="RecoEcal/EgammaCoreTools"/>
+<use name="RecoEgamma/EgammaTools"/>
+<use name="MuScleFit/Calibration"/>
+<use name="root"/>
+<use name="roottmva"/>
+<use name="rootcintex"/>
+<use name="fastjet"/>
+<flags CXXFLAGS="-g -Wall"/>
+<export>
+  <lib name="1"/>
+</export>

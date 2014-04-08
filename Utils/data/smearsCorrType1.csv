@@ -1,0 +1,3 @@
+160000,190000,0.0096,0.0074,0.0196,0.0141,0.0279,0.0268,0.0301,0.0293 # Fall11 || Jan16ReReco; values from https://hypernews.cern.ch/HyperNews/CMS/get/higgs2g/634.html, consistant with Jan16ReReco corrections
+190645,203002,0.0103,0.0090,0.0190,0.0156,0.0269,0.0287,0.0364,0.0321 # Summer12_DR53X_HCP2012 || Moriond2013; Run2012A,B,C
+203003,999999,0.0109,0.0099,0.0182,0.0200,0.0282,0.0309,0.0386,0.0359 # Summer12_DR53X_HCP2012 || Moriond2013; Run2012D

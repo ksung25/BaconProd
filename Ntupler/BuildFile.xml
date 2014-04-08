@@ -1,0 +1,10 @@
+<use name="BaconAna/DataFormats"/>
+<use name="BaconProd/Utils"/>
+<use name="TrackingTools/IPTools"/>
+<use name="FWCore/Framework"/>
+<use name="EGamma/EGammaAnalysisTools"/>
+<use name="CondFormats/JetMETObjects"/>
+<flags CXXFLAGS="-g -Wall"/>
+<export>
+  <lib name="1"/>
+</export>

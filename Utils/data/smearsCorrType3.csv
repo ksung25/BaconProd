@@ -1,0 +1,4 @@
+000000,999999,0.0100,0.0099,0.0217,0.0157,0.0326,0.0330,0.0331,0.0378 # Summer11 || ReReco; values from https://indico.cern.ch/conferenceDisplay.py?confId=146386
+000000,999999,0.0096,0.0074,0.0196,0.0141,0.0279,0.0268,0.0301,0.0293 # Fall11 || Jan16ReReco; values from https://hypernews.cern.ch/HyperNews/CMS/get/higgs2g/634.html, consistant with Jan16ReReco corrections
+000000,999999,0.0119,0.0107,0.0240,0.0149,0.0330,0.0375,0.0602,0.0607 # Summer12 || ICHEP2012; values from https://twiki.cern.ch/twiki/pub/CMS/EcalEnergyResolutionWithZee/oriented-ICHEP-scales_resolution.pdf
+000000,999999,0.0099,0.0103,0.0219,0.0158,0.0222,0.0298,0.0318,0.0302 # Summer12_DR53X_HCP2012 || Moriond2013
