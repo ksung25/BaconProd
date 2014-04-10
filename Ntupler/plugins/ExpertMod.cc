@@ -29,7 +29,7 @@
 
 // ROOT classes
 #include <TFile.h>
-#include <TH1F.h>
+#include <TH1D.h>
 #include <TTree.h>
 #include <TClonesArray.h>
 #include <TLorentzVector.h>
@@ -132,7 +132,7 @@ void ExpertMod::beginJob()
   // Create output file, trees, and histograms
   //
   fOutputFile  = new TFile(fOutputName.c_str(), "RECREATE");
-  fTotalEvents = new TH1F("TotalEvents","TotalEvents",1,-10,10);
+  fTotalEvents = new TH1D("TotalEvents","TotalEvents",1,-10,10);
   fEventTree   = new TTree("Events","Events");
   
   if(fIsActiveEvtInfo) { fEventTree->Branch("Info",fEvtInfo); }

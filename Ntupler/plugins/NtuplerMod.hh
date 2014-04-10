@@ -9,7 +9,7 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 class TFile;
-class TH1F;
+class TH1D;
 class TTree;
 class TClonesArray;
 namespace edm {
@@ -106,7 +106,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     // Objects and arrays for output file
     std::string              fOutputName;
     TFile                   *fOutputFile;
-    TH1F                    *fTotalEvents;
+    TH1D                    *fTotalEvents;
     TTree                   *fEventTree;
     baconhep::TEventInfo    *fEvtInfo;
     baconhep::TGenEventInfo *fGenEvtInfo;
