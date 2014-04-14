@@ -81,11 +81,22 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const double coneSize, co
   fTrimmer2  = new fastjet::Filter( fastjet::Filter(fastjet::JetDefinition(fastjet::kt_algorithm, 0.2),  fastjet::SelectorPtFractionMin(0.03)));
   fTrimmer3  = new fastjet::Filter( fastjet::Filter(fastjet::JetDefinition(fastjet::kt_algorithm, 0.1),  fastjet::SelectorPtFractionMin(0.03)));
   fTrimmer4  = new fastjet::Filter( fastjet::Filter(fastjet::JetDefinition(fastjet::kt_algorithm, 0.05), fastjet::SelectorPtFractionMin(0.03)));
-
+  
   std::vector<std::string> empty_vstring;
   initJetCorr(iConfig.getUntrackedParameter< std::vector<std::string> >("jecFiles",empty_vstring),
               iConfig.getUntrackedParameter< std::vector<std::string> >("jecUncFiles",empty_vstring),
 	      iConfig.getUntrackedParameter< std::vector<std::string> >("jecFilesForID",empty_vstring));
+
+  std::string cmssw_base_src = getenv("CMSSW_BASE");
+  cmssw_base_src += "/src/";
+
+  std::vector<std::string> puIDFiles = iConfig.getUntrackedParameter< std::vector<std::string> >("jetPUIDFiles",empty_vstring);
+  assert(puIDFiles.size()==2);
+  std::string lowPtWeightFile  = (puIDFiles[0].length()>0) ? (cmssw_base_src + puIDFiles[0]) : "";
+  std::string highPtWeightFile = (puIDFiles[1].length()>0) ? (cmssw_base_src + puIDFiles[1]) : "";
+  fJetPUIDMVACalc.initialize(baconhep::JetPUIDMVACalculator::k53,
+                             "BDT",lowPtWeightFile,
+			     "BDT",highPtWeightFile);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -112,9 +123,13 @@ void FillerJet::initJetCorr(const std::vector<std::string> &jecFiles,
                             const std::vector<std::string> &jecUncFiles,
 			    const std::vector<std::string> &jecFilesForID)
 {
+  assert(jecFiles.size()>0);
+  assert(jecUncFiles.size()>0);
+  assert(jecFilesForID.size()>0);
+  
   std::string cmssw_base_src = getenv("CMSSW_BASE");
   cmssw_base_src += "/src/";
-
+  
   std::vector<JetCorrectorParameters> corrParams;
   for(unsigned int icorr=0; icorr<jecFiles.size(); icorr++) {
     corrParams.push_back(JetCorrectorParameters( (cmssw_base_src + jecFiles[icorr]).c_str() ));
@@ -152,6 +167,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
 {
   assert(array);
   assert(!fComputeFullJetInfo || iExtraArray);
+  assert(fJetPUIDMVACalc.isInitialized());
   
   // Get jet collection
   edm::Handle<reco::PFJetCollection> hJetProduct;
@@ -479,99 +495,7 @@ fastjet::PseudoJet FillerJet::CACluster   (fastjet::PseudoJet &iJet, fastjet::Cl
   std::vector<fastjet::PseudoJet>  lOutJets = sorted_by_pt(iCAClustering.inclusive_jets(0.0));
   return lOutJets[0];
 }
-/*
-float FillerJet::getTau( fastjet::PseudoJet &iJet,int iN, float iKappa ){
-  fastjet::Nsubjettiness nSubNKT(iN, Njettiness::onepass_kt_axes, iKappa, fConeSize,fConeSize);
-  float lTauN = nSubNKT(iJet);
-  return lTauN;
-}
-void FillerJet::addJetExtras() { 
-  reco::PFCandidatePtr leadCand, secondCand, leadNeuCand, leadEmCand, leadChCand;
-  double dR2Mean=0;
-  double beta=0, betaStar=0, ptD=0;
-  double frac01=0, frac02=0, frac03=0, frac04=0, frac05=0;
-  std::vector<reco::PFCandidatePtr> pfConstituents = itJet->getPFConstituents(); 
-  for(unsigned int ic=0; ic<pfConstituents.size(); ic++) {
-    reco::PFCandidatePtr pfcand = pfConstituents[ic];
-    
-    double candPt   = pfcand->pt();
-    double candDr   = reco::deltaR(pfcand->eta(), pfcand->phi(), itJet->eta(), itJet->phi());
-    double candPtDr = candPt*candDr/itJet->pt();
-    if(leadCand.isNull() || pfcand->pt() > leadCand->pt()) {
-      secondCand = leadCand;
-      leadCand   = pfcand;
-    } else if(secondCand.isNull() || pfcand->pt() > secondCand->pt()) {
-      secondCand = pfcand;
-    }
-  }
-  pAddJet->leadPt   = (leadCand.isNonnull()) ? leadCand->pt()  : 0;
-  pAddJet->leadEta  = (leadCand.isNonnull()) ? leadCand->eta() : 0;
-  pAddJet->leadPhi  = (leadCand.isNonnull()) ? leadCand->phi() : 0;
-  pAddJet->leadFrac = (leadCand.isNonnull()) ? leadCand->energy() / itJet->energy() : 0;
-  
-  pAddJet->secondPt  = (secondCand.isNonnull()) ? secondCand->pt()  : 0;
-  pAddJet->secondEta = (secondCand.isNonnull()) ? secondCand->eta() : 0;
-  pAddJet->secondPhi = (secondCand.isNonnull()) ? secondCand->phi() : 0;
-  
-  pAddJet->leadNeuPt  = (leadNeuCand.isNonnull()) ? leadNeuCand->pt()  : 0;
-  pAddJet->leadNeuEta = (leadNeuCand.isNonnull()) ? leadNeuCand->eta() : 0;
-  pAddJet->leadNeuPhi = (leadNeuCand.isNonnull()) ? leadNeuCand->phi() : 0;
-  
-  pAddJet->leadEmPt  = (leadEmCand.isNonnull()) ? leadEmCand->pt()  : 0;
-  pAddJet->leadEmEta = (leadEmCand.isNonnull()) ? leadEmCand->eta() : 0;
-  pAddJet->leadEmPhi = (leadEmCand.isNonnull()) ? leadEmCand->phi() : 0;
-  
-  pAddJet->leadChPt  = (leadChCand.isNonnull()) ? leadChCand->pt()  : 0;
-  pAddJet->leadChEta = (leadChCand.isNonnull()) ? leadChCand->eta() : 0;
-  pAddJet->leadChPhi = (leadChCand.isNonnull()) ? leadChCand->phi() : 0;
-  
-  pAddJet->dRLeadCent = (leadCand.isNonnull()) ? reco::deltaR(leadCand->eta(), leadCand->phi(), itJet->eta(), itJet->phi()) : -999;
-  pAddJet->dRLead2nd  = (secondCand.isNonnull()) ? reco::deltaR(secondCand->eta(), secondCand->phi(), itJet->eta(), itJet->phi()): -999;
-  
-  dRMeanNeu = JetTools::dRMean(*itJet, reco::PFCandidate::h0);
-  dRMeanEm  = JetTools::dRMean(*itJet, reco::PFCandidate::gamma);
-  dRMeanCh  = JetTools::dRMean(*itJet, reco::PFCandidate::h);   
-  pAddJet->dRMeanNeu = dRMeanNeu;
-  pAddJet->dRMeanEm  = dRMeanEm;
-  pAddJet->dRMeanCh  = dRMeanCh;
-  dRMean    = JetTools::dRMean(*itJet);
-  frac01    = JetTools::frac(*itJet,0.1);
-  frac02    = JetTools::frac(*itJet,0.2);
-  frac03    = JetTools::frac(*itJet,0.3);
-  frac04    = JetTools::frac(*itJet,0.4);
-  frac05    = JetTools::frac(*itJet,0.5);
-  
-  pJet->mva = -2;
-  if(passLoose) {
-    fJetCorrForID->setJetPt(ptRaw);
-    fJetCorrForID->setJetEta(itJet->eta());
-    fJetCorrForID->setJetPhi(itJet->phi());
-    fJetCorrForID->setJetE(itJet->energy());
-    fJetCorrForID->setRho(*hRho);
-    fJetCorrForID->setJetA(itJet->jetArea());
-    fJetCorrForID->setJetEMF(-99.0);
-      double jetcorrForID = fJetCorrForID->getCorrection();
-      
-      pJet->mva = fJetPUIDMVACalc.mvaValue((float)pvCol->size(), ptRaw*jetcorrForID, itJet->eta(), itJet->phi(),
-			                   d0, dz, beta, betaStar, itJet->chargedMultiplicity(), itJet->neutralMultiplicity(),
-			                   dRMean, dR2Mean, ptD, frac01, frac02, frac03, frac04, frac05);
-  }
-  
-  float qgvals[3];
-  qgvals[0] = qgvals[1] = qgvals[2] = -2;
-  if(passLoose) {
-    fQGLLCalc.mvaValues(qgvals, (float)pvCol->size(),
-			ptRaw*jetcorr, itJet->eta(), itJet->phi(),
-			beta, betaStar, 
-			itJet->getPFConstituents().size(), itJet->chargedMultiplicity(),
-			dRMean, ptD,
-			frac01, frac02, frac03, frac04, frac05);
-  }
-  pJet->quarkLL = qgvals[0];
-  pJet->gluonLL = qgvals[1];
-  pJet->puLL    = qgvals[2];
-}
-  */
+
 //--------------------------------------------------------------------------------------------------
 const reco::BasicJet* FillerJet::match( const reco::PFJet *iJet,const reco::BasicJetCollection *jets ) { 
   int lId = -1;
