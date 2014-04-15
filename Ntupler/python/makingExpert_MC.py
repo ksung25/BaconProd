@@ -5,21 +5,35 @@ process = cms.Process('MakingJetMETExpert')
 # import of standard configurations
 process.load('Configuration/StandardSequences/Services_cff')
 process.load('FWCore/MessageService/MessageLogger_cfi')
-process.load('Configuration.StandardSequences.GeometryDB_cff')
+process.load('Configuration/StandardSequences/GeometryDB_cff')
 process.load('Configuration/StandardSequences/MagneticField_38T_cff')
 process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
 process.load('Configuration/EventContent/EventContent_cff')
 process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
 process.load('RecoParticleFlow/PFClusterProducer/particleFlowCluster_cff')
-process.load('RecoLocalCalo.EcalRecAlgos.EcalSeverityLevelESProducer_cfi')
-process.load('RecoLocalCalo.HcalRecAlgos.hcalRecAlgoESProd_cfi')
+process.load('RecoLocalCalo/EcalRecAlgos/EcalSeverityLevelESProducer_cfi')
+process.load('RecoLocalCalo/HcalRecAlgos/hcalRecAlgoESProd_cfi')
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.GlobalTag.globaltag = 'START53_V7G::All'
 
 
-process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
-process.load("BaconProd.Ntupler.myRho_cff")
+process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
+process.load("BaconProd/Ntupler/myRho_cff")
+
+# trigger filter
+import os
+cmssw_base = os.environ['CMSSW_BASE']
+hlt_filename = "BaconAna/DataFormats/data/HLTFile_v0"
+process.load('HLTrigger/HLTfilters/hltHighLevel_cfi')
+process.hltHighLevel.throw = cms.bool(False)
+process.hltHighLevel.HLTPaths = cms.vstring()
+hlt_file = open(cmssw_base + "/src/" + hlt_filename, "r")
+for line in hlt_file.readlines():
+  line = line.strip()              # strip preceding and trailing whitespaces
+  if (line[0:3] == 'HLT'):         # assumes typical lines begin with HLT path name (e.g. HLT_Mu15_v1)
+    hlt_path = line.split()[0]
+    process.hltHighLevel.HLTPaths.extend(cms.untracked.vstring(hlt_path))
 
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
@@ -41,10 +55,11 @@ process.options = cms.untracked.PSet(
 )
 
 is_data_flag = False
+do_hlt_filter = False
 process.ntupler = cms.EDAnalyzer('ExpertMod',
-  skipOnHLTFail = ( cms.untracked.bool(True) if is_data_flag else cms.untracked.bool(False) ),
+  skipOnHLTFail = cms.untracked.bool(do_hlt_filter),
   outputName    = cms.untracked.string('expert.root'),
-  TriggerFile   = cms.untracked.string("BaconAna/DataFormats/data/HLTFile_v0"), 
+  TriggerFile   = cms.untracked.string(hlt_filename), 
 
   Info = cms.untracked.PSet(
     isActive             = cms.untracked.bool(True),
@@ -89,7 +104,10 @@ process.baconSequence = cms.Sequence(process.particleFlowCluster*
                                      process.kt6PFJets*
                                      process.ntupler)
 				     
-process.p = cms.Path(process.baconSequence)
+if do_hlt_filter:
+  process.p = cms.Path(process.hltHighLevel*process.baconSequence)
+else:
+  process.p = cms.Path(process.baconSequence)
 
 process.output = cms.OutputModule("PoolOutputModule",                                                                                                                                                      
                                   outputCommands = cms.untracked.vstring('keep *'),                                                                                                                        
