@@ -20,9 +20,10 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig):
   fPUInfoName (iConfig.getUntrackedParameter<std::string>("edmPileupInfoName","addPileupInfo")),
   fBSName     (iConfig.getUntrackedParameter<std::string>("edmBeamspotName","offlineBeamSpot")),
   fPFMETName  (iConfig.getUntrackedParameter<std::string>("edmPFMETName","pfMet")),
-  fPFMETCName (iConfig.getUntrackedParameter<std::string>("edmPFMETCorrName","pfTypei0p1CorrectedMet")),
+  fPFMETCName (iConfig.getUntrackedParameter<std::string>("edmPFMETCorrName","pfType0p1CorrectedMet")),
   fMVAMETName (iConfig.getUntrackedParameter<std::string>("edmMVAMETName","pfMEtMVA")),
   fMVAMETUName(iConfig.getUntrackedParameter<std::string>("edmMVAMETUnityName","pfMEtMVAUnity")),
+  fMVAMET0Name(iConfig.getUntrackedParameter<std::string>("edmMVAMETNoSmearName","pfMEtMVANoSmear")),
   fRhoIsoName (iConfig.getUntrackedParameter<std::string>("edmRhoForIsoName","kt6PFJets")),
   fRhoJetName (iConfig.getUntrackedParameter<std::string>("edmRhoForJetEnergy","kt6PFJets")),
   fFillMET    (iConfig.getUntrackedParameter<bool>("doFillMET",true))
@@ -221,6 +222,17 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     evtInfo->mvaMETUCov00 = inMVAMETU.getSignificanceMatrix()(0,0);
     evtInfo->mvaMETUCov01 = inMVAMETU.getSignificanceMatrix()(0,1);
     evtInfo->mvaMETUCov11 = inMVAMETU.getSignificanceMatrix()(1,1);
+    
+    // MVA MET without jet smearing (relevant only for MC)
+    edm::Handle<reco::PFMETCollection> hMVAMET0Product;
+    iEvent.getByLabel(fMVAMET0Name,hMVAMET0Product);
+    assert(hMVAMET0Product.isValid());
+    const reco::PFMET &inMVAMET0 = hMVAMET0Product.product()->front();
+    evtInfo->mvaMET0      = inMVAMET0.pt();
+    evtInfo->mvaMET0phi   = inMVAMET0.phi();
+    evtInfo->mvaMET0Cov00 = inMVAMET0.getSignificanceMatrix()(0,0);
+    evtInfo->mvaMET0Cov01 = inMVAMET0.getSignificanceMatrix()(0,1);
+    evtInfo->mvaMET0Cov11 = inMVAMET0.getSignificanceMatrix()(1,1);
     
     // Track MET
     edm::Handle<reco::PFCandidateCollection> hPFCandProduct;

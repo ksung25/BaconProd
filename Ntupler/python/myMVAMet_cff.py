@@ -110,10 +110,13 @@ pfCandidatesSmeared = cms.EDProducer("ShiftedPFCandidateProducerForPFMEtMVA",
 smearedCorrJets     = smearedCorrJetsInput.clone()
 smearedCorrJets.src = 'smearedJets'
 
+pfMEtMVANoSmear = pfMEtMVA.clone()
+
 pfMEtMVA.srcCorrJets     = 'smearedCorrJets'
 pfMEtMVA.srcUncorrJets   = 'smearedJets'
 pfMEtMVA.srcPFCandidates = 'pfCandidatesSmeared'
-pfMEtMVAUnity            = pfMEtMVA.clone()
+
+pfMEtMVAUnity = pfMEtMVA.clone()
 pfMEtMVAUnity.inputFileNames = cms.PSet(
   U	= cms.FileInPath('RecoMET/METPUSubtraction/data/gbrmet_53_Sep2013_type1_UnityResponse_v2.root'),
   DPhi  = cms.FileInPath('RecoMET/METPUSubtraction/data/gbrmetphi_53_June2013_type1.root'),
@@ -129,5 +132,6 @@ MVAMetSeq = cms.Sequence(pfCandsNotInJet*
 			 pfCandidatesSmeared* 
                          PFTau*
 			 pfMEtMVAsequence*
+			 pfMEtMVANoSmear*
 			 pfMEtMVAUnity)
 

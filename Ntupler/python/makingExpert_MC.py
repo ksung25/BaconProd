@@ -47,17 +47,18 @@ process.ntupler = cms.EDAnalyzer('ExpertMod',
   TriggerFile   = cms.untracked.string("BaconAna/DataFormats/data/HLTFile_v0"), 
 
   Info = cms.untracked.PSet(
-    isActive           = cms.untracked.bool(True),
-    edmPFCandName      = cms.untracked.string('particleFlow'),
-    edmPileupInfoName  = cms.untracked.string('addPileupInfo'),
-    edmBeamspotName    = cms.untracked.string('offlineBeamSpot'),
-    edmPFMETName       = cms.untracked.string('pfMet'),
-    edmPFMETCorrName   = cms.untracked.string('pfType1CorrectedMet'),
-    edmMVAMETName      = cms.untracked.string('pfMEtMVA'),
-    edmMVAMETUnityName = cms.untracked.string('pfMEtMVAUnity'),
-    edmRhoForIsoName   = cms.untracked.string('kt6PFJets'),
-    edmRhoForJetEnergy = cms.untracked.string('kt6PFJets'),
-    doFillMET          = cms.untracked.bool(False)
+    isActive             = cms.untracked.bool(True),
+    edmPFCandName        = cms.untracked.string('particleFlow'),
+    edmPileupInfoName    = cms.untracked.string('addPileupInfo'),
+    edmBeamspotName      = cms.untracked.string('offlineBeamSpot'),
+    edmPFMETName         = cms.untracked.string('pfMet'),
+    edmPFMETCorrName     = cms.untracked.string('pfType0p1CorrectedMet'),
+    edmMVAMETName        = cms.untracked.string('pfMEtMVA'),
+    edmMVAMETUnityName   = cms.untracked.string('pfMEtMVAUnity'),
+    edmMVAMETNoSmearName = cms.untracked.string('pfMEtMVANoSmear'),
+    edmRhoForIsoName     = cms.untracked.string('kt6PFJets'),
+    edmRhoForJetEnergy   = cms.untracked.string('kt6PFJets'),
+    doFillMET            = cms.untracked.bool(False)
   ),
 
   GenInfo = cms.untracked.PSet(

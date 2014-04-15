@@ -52,17 +52,18 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   edmPFCandName = cms.untracked.string('particleFlow'),
   
   Info = cms.untracked.PSet(
-    isActive           = cms.untracked.bool(True),
-    edmPFCandName      = cms.untracked.string('particleFlow'),
-    edmPileupInfoName  = cms.untracked.string('addPileupInfo'),
-    edmBeamspotName    = cms.untracked.string('offlineBeamSpot'),
-    edmPFMETName       = cms.untracked.string('pfMet'),
-    edmPFMETCorrName   = cms.untracked.string('pfType0p1CorrectedMet'),
-    edmMVAMETName      = cms.untracked.string('pfMEtMVA'),
-    edmMVAMETUnityName = cms.untracked.string('pfMEtMVAUnity'),
-    edmRhoForIsoName   = cms.untracked.string('kt6PFJets'),
-    edmRhoForJetEnergy = cms.untracked.string('kt6PFJets'),
-    doFillMET          = cms.untracked.bool(True)
+    isActive             = cms.untracked.bool(True),
+    edmPFCandName        = cms.untracked.string('particleFlow'),
+    edmPileupInfoName    = cms.untracked.string('addPileupInfo'),
+    edmBeamspotName      = cms.untracked.string('offlineBeamSpot'),
+    edmPFMETName         = cms.untracked.string('pfMet'),
+    edmPFMETCorrName     = cms.untracked.string('pfType0p1CorrectedMet'),
+    edmMVAMETName        = cms.untracked.string('pfMEtMVA'),
+    edmMVAMETUnityName   = cms.untracked.string('pfMEtMVAUnity'),
+    edmMVAMETNoSmearName = cms.untracked.string('pfMEtMVANoSmear'),
+    edmRhoForIsoName     = cms.untracked.string('kt6PFJets'),
+    edmRhoForJetEnergy   = cms.untracked.string('kt6PFJets'),
+    doFillMET            = cms.untracked.bool(True)
   ),
   
   GenInfo = cms.untracked.PSet(
