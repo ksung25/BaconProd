@@ -156,7 +156,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   
   Photon = cms.untracked.PSet(
     isActive              = cms.untracked.bool(True),
-    minPt                 = cms.untracked.double(10),
+    minPt                 = cms.untracked.double(0),
     edmName               = cms.untracked.string('photons'),
     edmPFCandName         = cms.untracked.string('particleFlow'),
     edmElectronName       = cms.untracked.string('gsfElectrons'),
@@ -169,7 +169,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   
   Tau = cms.untracked.PSet(
     isActive = cms.untracked.bool(True),
-    minPt    = cms.untracked.double(20),
+    minPt    = cms.untracked.double(15),
     edmName  = cms.untracked.string('hpsPFTauProducer'),
     ringIsoFile      = cms.untracked.string('BaconProd/Utils/data/gbrfTauIso_apr29a.root'),
     ringIso2File     = cms.untracked.string('BaconProd/Utils/data/gbrfTauIso_v2.root'),
