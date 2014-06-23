@@ -29,6 +29,7 @@ namespace baconhep {
   class FillerTau;
   class FillerJet;
   class FillerPF;
+  class FillerRH;
 }
 
 //
@@ -77,7 +78,8 @@ class NtuplerMod : public edm::EDAnalyzer {
     std::string fPVName;
     std::string fPFCandName;
 
-    std::vector<double> fConeSizes;
+    std::vector<std::string> fJetPostFix;
+    std::vector<double>      fConeSizes;
     bool fComputeFullJetInfo;
     
     // bacon fillers
@@ -90,6 +92,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     baconhep::FillerTau       *fFillerTau;
     baconhep::FillerJet       **fFillerJet;
     baconhep::FillerPF        *fFillerPF;    
+    baconhep::FillerRH        *fFillerRH;    
     
     baconhep::TTrigger        *fTrigger;
     
@@ -102,6 +105,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     bool fIsActiveTau;
     bool fIsActiveJet;
     bool fIsActivePF;
+    bool fIsActiveRH;
     
     // Objects and arrays for output file
     std::string              fOutputName;
@@ -118,5 +122,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     TClonesArray	    *fPhotonArr;
     TClonesArray	    *fPVArr;
     TClonesArray	    **fAddJetArr;
+    TClonesArray	    **fTopJetArr;
     TClonesArray	    *fPFParArr;
+    TClonesArray	    *fRHParArr;
 };

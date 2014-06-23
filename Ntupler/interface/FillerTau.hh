@@ -2,7 +2,7 @@
 #define BACONPROD_NTUPLER_FILLERTAU_HH
 
 #include "BaconProd/Utils/interface/TriggerTools.hh"
-#include "BaconProd/Utils/interface/TauIsoMVACalculator.hh"
+//#include "BaconProd/Utils/interface/TauIsoMVACalculator.hh"
 #include "DataFormats/TauReco/interface/PFTauDiscriminator.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include <vector>
@@ -58,8 +58,8 @@ namespace baconhep
       std::string fRhoName;
       
       // Tau isolation MVAs
-      TauIsoMVACalculator fRingIso;
-      TauIsoMVACalculator fRingIso2;
+      //TauIsoMVACalculator fRingIso;
+      //TauIsoMVACalculator fRingIso2;
   
     protected:
       std::vector<MyTauDiscHandle*> fMyTauDiscHandles;
