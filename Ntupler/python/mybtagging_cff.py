@@ -33,8 +33,8 @@ mySimpleSecondaryVertexHighPurBJetTags = simpleSecondaryVertexHighPurBJetTags.cl
 mySimpleSecondaryVertexHighPurBJetTags.tagInfos = cms.VInputTag( cms.InputTag("mySecondaryVertexTagInfos") )
 myCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
 myCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("myImpactParameterTagInfos"), cms.InputTag("mySecondaryVertexTagInfos") )
-myCombinedSecondaryVertexMVABJetTags = combinedSecondaryVertexMVABJetTags.clone()
-myCombinedSecondaryVertexMVABJetTags.tagInfos = cms.VInputTag( cms.InputTag("myImpactParameterTagInfos"), cms.InputTag("mySecondaryVertexTagInfos") )
+myCombinedSecondaryVertexBJetTags = combinedSecondaryVertexBJetTags.clone()
+myCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("myImpactParameterTagInfos"), cms.InputTag("mySecondaryVertexTagInfos") )
 
 
 # ghost track b-tag
@@ -84,7 +84,7 @@ myJetBtaggingSV = cms.Sequence(
     mySimpleSecondaryVertexHighEffBJetTags +
     mySimpleSecondaryVertexHighPurBJetTags +
     myCombinedSecondaryVertexBJetTags +
-    myCombinedSecondaryVertexMVABJetTags
+    myCombinedSecondaryVertexBJetTags
   )
 )
 

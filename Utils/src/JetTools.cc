@@ -1,4 +1,6 @@
 #include "BaconProd/Utils/interface/JetTools.hh"
+#include "BaconProd/Utils/interface/QjetsPlugin.h"
+#include "BaconProd/Utils/interface/Qjets.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -6,6 +8,8 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
+#include "fastjet/GhostedAreaSpec.hh"
+#include "fastjet/ClusterSequenceArea.hh"
 #include <TLorentzVector.h>
 #include <TMath.h>
 #include <TMatrixDSym.h>
@@ -195,7 +199,48 @@ double JetTools::jetWidth(const reco::PFJet &jet, const int varType, const int p
 
   return ptD;
 }
+//--------------------------------------------------------------------------------------------------
+double JetTools::jetWidth(fastjet::PseudoJet &jet, const int varType) { 
+  double ptD=0, sumPt=0, sumPt2=0;
+  TMatrixDSym covMatrix(2); covMatrix=0.;
+  const unsigned int nPFCands = jet.constituents().size();
+  for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
+    fastjet::PseudoJet pfcand = jet.constituents()[ipf];
+    
+    double dEta = jet.eta() - pfcand.eta();
+    double dPhi = reco::deltaPhi(jet.phi(), pfcand.phi());
+    
+    covMatrix(0,0) += pfcand.pt() * pfcand.pt() * dEta * dEta;
+    covMatrix(0,1) += pfcand.pt() * pfcand.pt() * dEta * dPhi;
+    covMatrix(1,1) += pfcand.pt() * pfcand.pt() * dPhi * dPhi;
+    ptD            += pfcand.pt() * pfcand.pt();
+    sumPt          += pfcand.pt();
+    sumPt2         += pfcand.pt() * pfcand.pt();
+  }
+  covMatrix(0,0) /= sumPt2;
+  covMatrix(0,1) /= sumPt2;
+  covMatrix(1,1) /= sumPt2;
+  covMatrix(1,0) = covMatrix(0,1);
+  
+  ptD /= sqrt(ptD);
+  ptD /= sumPt;
+  
+  double etaW = sqrt(covMatrix(0,0));
+  double phiW = sqrt(covMatrix(1,1));
+  double jetW = 0.5*(etaW+phiW);
+  
+  TVectorD eigVals(2);
+  eigVals = TMatrixDSymEigen(covMatrix).GetEigenValues();
+  double majW = sqrt(fabs(eigVals(0)));
+  double minW = sqrt(fabs(eigVals(1)));
 
+  if     (varType==1) { return majW; }
+  else if(varType==2) { return minW; }
+  else if(varType==3) { return etaW; }
+  else if(varType==4) { return phiW; }
+  else if(varType==5) { return jetW; }
+  return ptD;
+}
 //--------------------------------------------------------------------------------------------------
 bool JetTools::passPFLooseID(const reco::PFJet &jet)
 {
@@ -292,3 +337,51 @@ double JetTools::jetPullAngle(const reco::PFJet &jet ,edm::Handle<reco::PFJetCol
   double lPhi = lJet.DeltaPhi(lPull);
   return lPhi;
 }
+//--------------------------------------------------------------------------------------------------
+float JetTools::findRMS( std::vector<float> &iQJetMass) {
+  float total = 0.;
+  float ctr = 0.;
+  for (unsigned int i = 0; i < iQJetMass.size(); i++){
+    total = total + iQJetMass[i];
+    ctr++;
+  }
+  float mean =  total/ctr;
+    
+  float totalsquared = 0.;
+  for (unsigned int i = 0; i < iQJetMass.size(); i++){
+    totalsquared += (iQJetMass[i] - mean)*(iQJetMass[i] - mean) ;
+  }
+  float RMS = sqrt( totalsquared/ctr );
+  return RMS;
+}
+//--------------------------------------------------------------------------------------------------
+float JetTools::findMean( std::vector<float> &iQJetMass ){
+  float total = 0.;
+  float ctr = 0.;
+  for (unsigned int i = 0; i < iQJetMass.size(); i++){
+    total = total + iQJetMass[i];
+    ctr++;
+  }
+  return total/ctr;
+}
+//-------------------------------------------------------------------------------------P-------------
+double JetTools::qJetVolatility(std::vector <fastjet::PseudoJet> &iConstits, int iQJetsN, int iSeed){
+  std::vector< float > qjetmasses;
+  double zcut(0.1), dcut_fctr(0.5), exp_min(0.), exp_max(0.), rigidity(0.1), truncationFactor(0.01);          
+  for(unsigned int ii = 0 ; ii < (unsigned int) iQJetsN ; ii++){
+    QjetsPlugin qjet_plugin(zcut, dcut_fctr, exp_min, exp_max, rigidity, truncationFactor);
+    qjet_plugin.SetRandSeed(iSeed+ii); // new feature in Qjets to set the random seed
+    fastjet::JetDefinition qjet_def(&qjet_plugin);
+    fastjet::ClusterSequence qjet_seq(iConstits, qjet_def);
+    std::vector<fastjet::PseudoJet> inclusive_jets2 = sorted_by_pt(qjet_seq.inclusive_jets(5.0));
+    if (inclusive_jets2.size()>0) { qjetmasses.push_back( inclusive_jets2[0].m() ); }
+  }
+  // find RMS of a vector
+  float qjetsRMS = findRMS( qjetmasses );
+  // find mean of a vector
+  float qjetsMean = findMean( qjetmasses );
+  float qjetsVolatility = qjetsRMS/qjetsMean;
+  return qjetsVolatility;
+}
+
+

@@ -14,6 +14,8 @@ process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.GlobalTag.globaltag = 'START53_V7G::All'
 
+process.load('CommonTools/ParticleFlow/PFBRECO_cff')
+process.load('Dummy/Puppi/Puppi_cff')
 process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
 
 # import custom configurations
@@ -23,6 +25,22 @@ process.load('BaconProd/Ntupler/myJetExtras06_cff')    # include gen jets and b-
 process.load('BaconProd/Ntupler/myJetExtras07_cff')    # include gen jets and b-tagging
 process.load('BaconProd/Ntupler/myJetExtras08_cff')    # include gen jets and b-tagging
 process.load('BaconProd/Ntupler/myJetExtras09_cff')    # include gen jets and b-tagging
+
+process.load('BaconProd/Ntupler/myJetExtras04CHS_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras05CHS_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras06CHS_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras07CHS_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras08CHS_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras09CHS_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras12CHS_cff')    # include gen jets and b-tagging
+
+process.load('BaconProd/Ntupler/myJetExtras04Puppi_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras05Puppi_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras06Puppi_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras07Puppi_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras08Puppi_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras09Puppi_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras12Puppi_cff')    # include gen jets and b-tagging
 
 process.load('BaconProd/Ntupler/myMETFilters_cff')        # apply MET filters set to tagging mode
 process.load('BaconProd/Ntupler/myMVAMet_cff')            # MVA MET
@@ -77,7 +95,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmMVAMETUnityName   = cms.untracked.string('pfMEtMVAUnity'),
     edmMVAMETNoSmearName = cms.untracked.string('pfMEtMVANoSmear'),
     edmRhoForIsoName     = cms.untracked.string('kt6PFJets'),
-    edmRhoForJetEnergy   = cms.untracked.string('kt6PFJets'),
+    Edmrhoforjetenergy   = cms.untracked.string('kt6PFJets'),
     doFillMET            = cms.untracked.bool(True)
   ),
   
@@ -158,8 +176,12 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmEBSuperClusterName = cms.untracked.string('correctedHybridSuperClusters'),
     edmEESuperClusterName = cms.untracked.string('correctedMulti5x5SuperClustersWithPreshower'),
     edmEBRecHitName       = cms.untracked.string('reducedEcalRecHitsEB'),
-    edmEERecHitName       = cms.untracked.string('reducedEcalRecHitsEE')
-  ),
+    edmEERecHitName       = cms.untracked.string('reducedEcalRecHitsEE'),
+    edmRhoForEnergyRegression = cms.untracked.string('kt6PFJets'),
+    edmPVName                 = cms.untracked.string('offlinePrimaryVertices')
+    edmRhoForEnergyRegression = cms.untracked.string('kt6PFJets'),
+    edmPVName                 = cms.untracked.string('offlinePrimaryVertices')
+    ),
   
   Tau = cms.untracked.PSet(
     isActive = cms.untracked.bool(True),
@@ -176,8 +198,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     doComputeFullJetInfo = cms.untracked.bool(True),
     doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
     
-    coneSizes = cms.untracked.vdouble(0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
-    
+    coneSizes = cms.untracked.vdouble(0.5,0.8)
+    postFix   = cms.untracked.vstring("","CHS","Puppi"),
     edmPVName = cms.untracked.string('offlinePrimaryVertices'),
     
     # ORDERED lists of jet energy correction input files
@@ -217,8 +239,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     jetFlavorPhysName  = cms.untracked.string('byValPhys'),
     pruneJetName       = cms.untracked.string('caPFJetsPruned'),
     subJetName         = cms.untracked.string('caPFJetsPruned'),
-    csvBTagName        = cms.untracked.string('jetCombinedSecondaryVertexMVABJetTags'),
-    csvBTagSubJetName  = cms.untracked.string('jetCombinedSecondaryVertexMVABJetTagsSJ'),
+    csvBTagName        = cms.untracked.string('jetCombinedSecondaryVertexBJetTags'),
+    csvBTagSubJetName  = cms.untracked.string('jetCombinedSecondaryVertexBJetTagsSJ'),
     jettiness          = cms.untracked.string('Njettiness'),
     qgLikelihood       = cms.untracked.string('QGTagger'),
     qgLikelihoodSubjet = cms.untracked.string('QGTaggerSubJets')
@@ -232,23 +254,20 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   )
 )
 
-process.baconSequence = cms.Sequence(process.metFilters*
+process.baconSequence = cms.Sequence(process.PFBRECO*
+                                     process.puppi*
+                                     process.metFilters*
                                      process.producePFMETCorrections*
                                      process.recojetsequence*
                                      process.genjetsequence*
-                                     process.AK4jetsequence*
-                                     process.AK4genjetsequence*
                                      process.AK5jetsequence*
-                                     process.AK5genjetsequence*
-                                     process.AK6jetsequence*
-                                     process.AK6genjetsequence*
-                                     process.AK7jetsequence*
-                                     process.AK7genjetsequence*
+                                     process.AK5jetsequenceCHS*
+                                     process.AK5jetsequencePuppi*
                                      process.AK8jetsequence*
+                                     process.AK8jetsequenceCHS*
+                                     process.AK8jetsequencePuppi*
                                      process.AK8genjetsequence*
-                                     process.AK9jetsequence*
-                                     process.AK9genjetsequence*
-                                     process.recoTauClassicHPSSequence*   ### must come after antiktGenJets otherwise conflict on RecoJets/JetProducers/plugins
+                                     process.recoTau*   ### must come after antiktGenJets otherwise conflict on RecoJets/JetProducers/plugins
 				     process.MVAMetSeq*
 				     process.ntupler)
 				     
