@@ -7,7 +7,9 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/Common/interface/ValueMap.h"
+#include "fastjet/PseudoJet.hh"
 #include "TLorentzVector.h"
+
 
 namespace baconhep {
 
@@ -37,7 +39,9 @@ namespace baconhep {
       static double jetD0(const reco::PFJet &jet, const reco::Vertex &pv);
       
       // jet width variables
-      static double jetWidth(const reco::PFJet &jet, const int varType=0, const int pfType=-1);
+      static double jetWidth(const reco::PFJet  &jet, const int varType=0, const int pfType=-1);
+      static double jetWidth(fastjet::PseudoJet &jet, const int varType=0); 
+      
       
       // Check if PF jet passes loose ID cuts
       static bool passPFLooseID(const reco::PFJet &jet);
@@ -56,6 +60,11 @@ namespace baconhep {
 
       //Jet Pull Angle an event better measure of color flow
       static double jetPullAngle(const reco::PFJet &jet ,edm::Handle<reco::PFJetCollection> &subJets,double iConeSize);
+
+      //Q-jet volatility http://arxiv.org/pdf/1201.1914.pdf
+      static double qJetVolatility(std::vector<fastjet::PseudoJet> &iConstits, int iQJetsN, int iSeed);
+      static float findRMS ( std::vector<float> &iQJetMass);
+      static float findMean( std::vector<float> &iQJetMass);
   };
 }
 #endif

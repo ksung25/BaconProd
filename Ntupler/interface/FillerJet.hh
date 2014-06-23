@@ -3,6 +3,10 @@
 
 #include "BaconProd/Utils/interface/TriggerTools.hh"
 #include "BaconProd/Utils/interface/JetPUIDMVACalculator.hh"
+#include "BaconProd/Utils/interface/SoftDrop.hh"
+#include "BaconProd/Utils/interface/CMSTopTagger.hh"
+#include "BaconProd/Utils/interface/HEPTopTaggerWrapper.h"
+#include "BaconAna/DataFormats/interface/TTopJet.hh"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/BasicJet.h"
@@ -13,7 +17,8 @@
 #include "fastjet/tools/Filter.hh"
 #include "fastjet/tools/Pruner.hh"
 #include "fastjet/GhostedAreaSpec.hh"
-#include <fastjet/PseudoJet.hh>
+#include "fastjet/PseudoJet.hh"
+#include "TRandom2.h"
 #include <vector>
 #include <string>
 
@@ -33,12 +38,13 @@ namespace baconhep
   class FillerJet
   {
     public:
-      FillerJet(const edm::ParameterSet &iConfig, const double coneSize=0.5, const std::string prefix="");		
+       FillerJet(const edm::ParameterSet &iConfig, const double coneSize=0.5, const std::string prefix="",std::string postfix="");		
       ~FillerJet();
       
       
       void fill(TClonesArray                     *array,           // output array to be filled
 		TClonesArray                     *iExtraArray,     // Extra Array to be filled
+		TClonesArray                     *iTopArray,       // Top Jet Array to be filled
                 const edm::Event                 &iEvent,          // event info
 		const edm::EventSetup            &iSetup,          // event setup info
 	        const reco::Vertex		 &pv,	           // event primary vertex
@@ -48,11 +54,12 @@ namespace baconhep
     protected:
       void initJetCorr(const std::vector<std::string> &jecFiles, 
                        const std::vector<std::string> &jecUncFiles,
-		       const std::vector<std::string> &jecFilesForID);
+		       const std::vector<std::string> &jecFilesForID,
+		       bool iCHS=false);
       
       double correction(fastjet::PseudoJet &iJet,double iRho);      
       void   addJet(TAddJet *pPFJet,const reco::PFJet &itJet,double iRho);
-
+      void   topJet(TTopJet *pPFJet,const reco::PFJet &itJet,double iRho);
       fastjet::PseudoJet CACluster(fastjet::PseudoJet &iJet, fastjet::ClusterSequenceArea &iCAClustering); 
       //float              getTau( fastjet::PseudoJet &iJet,int iN, float iKappa );
       const reco::BasicJet*    match( const reco::PFJet *jet,const reco::BasicJetCollection  *jets );
@@ -97,11 +104,20 @@ namespace baconhep
       fastjet::Filter* fFilter1;
       fastjet::Filter* fFilter2;
 
+      fastjet::contrib::SoftDropTagger *fSoftDrop1;
+      fastjet::contrib::SoftDropTagger *fSoftDrop2;
+      fastjet::contrib::SoftDropTagger *fSoftDrop3;
+
       fastjet::Filter* fTrimmer1;
       fastjet::Filter* fTrimmer2;
       fastjet::Filter* fTrimmer3;
       fastjet::Filter* fTrimmer4;
-    
+
+      fastjet::CMSTopTagger* fCMSTopTagger;
+      fastjet::HEPTopTagger* fHEPTopTagger;
+
+      TRandom2*        fRand;
+
       bool passPFLooseID();
       
       // jet correctors

@@ -9,7 +9,7 @@ fi
 if test -z "$CVSROOT"; then
   echo "[BaconProd] Need to set CVSROOT!"
   echo "[BaconProd] Something like:"
-  echo "            export CVSROOT=:ext:<cern-user-account>@lxplus.cern.ch:/afs/cern.ch/user/c/cvscmssw/public/CMSSW"
+  echo "            export CVSROOT=:ext:pharris@lxplus.cern.ch:/afs/cern.ch/user/c/cvscmssw/public/CMSSW"
   echo
   return 0;
 fi
@@ -38,6 +38,9 @@ mv EGamma/EGammaAnalysisTools/test/BuildFile.xml EGamma/EGammaAnalysisTools/test
 mv EGamma/EGammaAnalysisTools/plugins/BuildFile.xml EGamma/EGammaAnalysisTools/plugins/BuildFile.xmlSilent
 cp $PATCHDIR/EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h.53Xpatch EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h
 
+### New Tau Id
+git cms-merge-topic -u cms-tau-pog:CMSSW_5_3_X_boostedTaus_2013Dec17
+
 
 ### MET filters
 echo
@@ -52,7 +55,8 @@ echo "[BaconProd] Checking out jet/MET packages..."
 git clone https://github.com/nhanvtran/JetTools.git
 cp $PATCHDIR/JetTools/AnalyzerToolbox/python/njettinessadder_cfi.py JetTools/AnalyzerToolbox/python/
 
-cp -r /afs/cern.ch/work/p/pharris/public/tmp/CMSSW_5_3_13/src/RecoMET/METPUSubtraction RecoMET
+mkdir RecoMET
+cp -r /afs/cern.ch/work/p/pharris/public/bacon/prod/CMSSW_5_3_18/src/RecoMET/METPUSubtraction RecoMET/METPUSubtraction
 cp -r /afs/cern.ch/work/p/pharris/public/tmp/CMSSW_5_3_13/src/DataFormats .
 cp -r /afs/cern.ch/work/p/pharris/public/tmp/CMSSW_5_3_13/src/RecoJets .
 cp -r /afs/cern.ch/work/p/pharris/public/tmp/CMSSW_5_3_13/src/CondFormats .

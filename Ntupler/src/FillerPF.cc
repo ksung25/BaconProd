@@ -132,10 +132,10 @@ void FillerPF::fill(TClonesArray *array,TClonesArray *iVtxCol,
     bool lFirst = true;
     for(reco::VertexCollection::const_iterator iV = pvCol->begin(); iV!=pvCol->end(); ++iV) {
       if(lFirst) { 
-	if      ( itPF->trackRef().isNonnull()    ) pPF->dz = itPF->trackRef()   ->dz(iV->position());
-	else if ( itPF->gsfTrackRef().isNonnull() ) pPF->dz = itPF->gsfTrackRef()->dz(iV->position());
-	if      ( itPF->trackRef().isNonnull()    ) pPF->d0 = itPF->trackRef()   ->d0();
-	else if ( itPF->gsfTrackRef().isNonnull() ) pPF->d0 = itPF->gsfTrackRef()->d0();
+	if      ( itPF->trackRef().isNonnull()    ) pPF->dz = itPF->trackRef()   ->dz (iV->position());
+	else if ( itPF->gsfTrackRef().isNonnull() ) pPF->dz = itPF->gsfTrackRef()->dz (iV->position());
+	if      ( itPF->trackRef().isNonnull()    ) pPF->d0 = itPF->trackRef()   ->dxy(iV->position());
+	else if ( itPF->gsfTrackRef().isNonnull() ) pPF->d0 = itPF->gsfTrackRef()->dxy(iV->position());
 	lFirst = false;
       }
       if(iV->trackWeight(itPF->trackRef())>0) {

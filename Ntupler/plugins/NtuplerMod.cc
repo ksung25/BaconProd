@@ -13,7 +13,9 @@
 #include "BaconAna/DataFormats/interface/TPhoton.hh"
 #include "BaconAna/DataFormats/interface/TVertex.hh"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
+#include "BaconAna/DataFormats/interface/TTopJet.hh"
 #include "BaconAna/DataFormats/interface/TPFPart.hh"
+#include "BaconAna/DataFormats/interface/TRHPart.hh"
 
 #include "BaconProd/Ntupler/interface/FillerEventInfo.hh"
 #include "BaconProd/Ntupler/interface/FillerGenInfo.hh"
@@ -24,6 +26,7 @@
 #include "BaconProd/Ntupler/interface/FillerTau.hh"
 #include "BaconProd/Ntupler/interface/FillerJet.hh"
 #include "BaconProd/Ntupler/interface/FillerPF.hh"
+#include "BaconProd/Ntupler/interface/FillerRH.hh"
 
 // tools to parse HLT name patterns
 #include <boost/foreach.hpp>
@@ -66,6 +69,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fFillerTau         (0),
   fFillerJet         (0),
   fFillerPF          (0),
+  fFillerRH          (0),
   fTrigger           (0),
   fIsActiveEvtInfo   (false),
   fIsActiveGenInfo   (false),
@@ -76,6 +80,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fIsActiveTau       (false),
   fIsActiveJet       (false),
   fIsActivePF        (false),
+  fIsActiveRH        (false),
   fOutputName        (iConfig.getUntrackedParameter<std::string>("outputName", "ntuple.root")),
   fOutputFile        (0),
   fTotalEvents       (0),
@@ -90,7 +95,9 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fPhotonArr         (0),
   fPVArr             (0),
   fAddJetArr         (0),
-  fPFParArr          (0)
+  fTopJetArr         (0),
+  fPFParArr          (0),
+  fRHParArr          (0)
 {
   // Don't write TObject part of the objects
   baconhep::TEventInfo::Class()->IgnoreTObjectStreamer();
@@ -105,6 +112,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   baconhep::TVertex::Class()->IgnoreTObjectStreamer();
   baconhep::TAddJet::Class()->IgnoreTObjectStreamer();
   baconhep::TPFPart::Class()->IgnoreTObjectStreamer();
+  baconhep::TRHPart::Class()->IgnoreTObjectStreamer();
   
   //
   // Set up bacon objects and configure fillers
@@ -183,25 +191,36 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
     fConeSizes = cfg.getUntrackedParameter< std::vector<double> >("coneSizes",empty_vdouble);
     const unsigned int kNCones = fConeSizes.size();
     if(kNCones==0) { fIsActiveJet = false; }
+
+    std::vector<std::string> empty_vstring;
+    fJetPostFix = cfg.getUntrackedParameter< std::vector<std::string> >("postFix",empty_vstring);
   
     fComputeFullJetInfo = cfg.getUntrackedParameter<bool>("doComputeFullJetInfo");
     if(fIsActiveJet) {
-      fFillerJet = new baconhep::FillerJet*[kNCones];
-      fJetArr = new TClonesArray*[kNCones];
-      if(fComputeFullJetInfo) { fAddJetArr = new TClonesArray*[kNCones]; }
+      fFillerJet = new baconhep::FillerJet*[kNCones*(fJetPostFix.size())];
+      fJetArr    = new TClonesArray        *[kNCones*(fJetPostFix.size())];
+      if(fComputeFullJetInfo) {
+	fAddJetArr = new TClonesArray*[kNCones*(fJetPostFix.size())]; 
+	fTopJetArr = new TClonesArray*[kNCones*(fJetPostFix.size())];
+      }
       
       for(unsigned int i0=0; i0<kNCones; i0++) {
-        fJetArr[i0] = new TClonesArray("baconhep::TJet");
-	assert(fJetArr[i0]);
-        
-	if(fComputeFullJetInfo) {
-	  fAddJetArr[i0] = new TClonesArray("baconhep::TAddJet");
-	  assert(fAddJetArr[i0]);
+	for(unsigned int i1 = 0; i1 < fJetPostFix.size(); i1++) { 
+	  int iId = i0*fJetPostFix.size()+i1;
+	  fJetArr[iId] = new TClonesArray("baconhep::TJet");
+	  assert(fJetArr[iId]);
+	  
+	  if(fComputeFullJetInfo) {
+	    fAddJetArr[iId] = new TClonesArray("baconhep::TAddJet");
+	    assert(fAddJetArr[iId]);
+	    fTopJetArr[iId] = new TClonesArray("baconhep::TTopJet");
+	    assert(fTopJetArr[iId]);
+	  }
+	  
+	  std::stringstream pSS; pSS << "AK" << int(fConeSizes[i0]*10);  // assumes cone sizes are multiples of 0.1 
+	  fFillerJet[iId] = new baconhep::FillerJet(cfg, fConeSizes[i0], pSS.str(),fJetPostFix[i1]);
+	  assert(fFillerJet);
 	}
-      
-        std::stringstream pSS; pSS << "AK" << int(fConeSizes[i0]*10);  // assumes cone sizes are multiples of 0.1 
-        fFillerJet[i0] = new baconhep::FillerJet(cfg, fConeSizes[i0], pSS.str());
-        assert(fFillerJet);
       }
     }
   }  
@@ -212,6 +231,14 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
     if(fIsActivePF) {
       fPFParArr = new TClonesArray("baconhep::TPFPart",5000); assert(fPFParArr);
       fFillerPF = new baconhep::FillerPF(cfg);                assert(fFillerPF);
+    }
+  } 
+  if(iConfig.existsAs<edm::ParameterSet>("RecHit",false)) {
+    edm::ParameterSet cfg(iConfig.getUntrackedParameter<edm::ParameterSet>("RecHit"));
+    fIsActiveRH = cfg.getUntrackedParameter<bool>("isActive");
+    if(fIsActiveRH) {
+      fRHParArr = new TClonesArray("baconhep::TRHPart",50000); assert(fRHParArr);
+      fFillerRH = new baconhep::FillerRH(cfg);                 assert(fFillerRH);
     }
   } 
 }
@@ -227,6 +254,7 @@ NtuplerMod::~NtuplerMod()
   delete fFillerPhoton;
   delete fFillerTau;
   delete fFillerPF;
+  delete fFillerRH;
   
   delete fTrigger;
   delete fEvtInfo;
@@ -238,6 +266,7 @@ NtuplerMod::~NtuplerMod()
   delete fPhotonArr;
   delete fPVArr;
   delete fPFParArr;
+  delete fRHParArr;
   
   if(fIsActiveJet) {
     for(unsigned int i0=0; i0<fConeSizes.size(); i0++) { delete fFillerJet[i0]; }
@@ -248,6 +277,8 @@ NtuplerMod::~NtuplerMod()
     if(fComputeFullJetInfo) {
       for(unsigned int i0=0; i0<fConeSizes.size(); i0++) { delete fAddJetArr[i0]; }
       delete [] fAddJetArr;
+      for(unsigned int i0=0; i0<fConeSizes.size(); i0++) { delete fTopJetArr[i0]; }
+      delete [] fTopJetArr;
     }
   }
 }
@@ -274,12 +305,17 @@ void NtuplerMod::beginJob()
   if(fIsActivePV)     { fEventTree->Branch("PV",       &fPVArr); }
   if(fIsActiveJet) {
     for(unsigned int i0=0; i0 < fConeSizes.size(); i0++) { 
-      std::stringstream pSS; pSS << "Jet0" << int(fConeSizes[i0]*10);  // assumes cone sizes are multiples of 0.1 
-      fEventTree->Branch(pSS.str().c_str(), &fJetArr[i0]);
-      if(fComputeFullJetInfo) fEventTree->Branch(("Add"+pSS.str()).c_str(), &fAddJetArr[i0]);
+      for(unsigned int i1 = 0; i1 < fJetPostFix.size(); i1++) { 
+	std::stringstream pSS; pSS << "Jet0" << int(fConeSizes[i0]*10) << fJetPostFix[i1];  // assumes cone sizes are multiples of 0.1 
+	int iId = i0*fJetPostFix.size() + i1;
+	fEventTree->Branch(pSS.str().c_str(), &fJetArr[iId]);
+	if(fComputeFullJetInfo) fEventTree->Branch(("Add"+pSS.str()).c_str(), &fAddJetArr[iId]);
+	if(fComputeFullJetInfo) fEventTree->Branch(("Top"+pSS.str()).c_str(), &fTopJetArr[iId]);
+      }
     }
   }
   if(fIsActivePF) fEventTree->Branch("PFPart", &fPFParArr);
+  if(fIsActiveRH) fEventTree->Branch("RHPart", &fRHParArr);
   
   //
   // Triggers
@@ -375,13 +411,14 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   }
   
   if(fIsActiveJet) {
-    for(unsigned int i0=0; i0<fConeSizes.size(); i0++) { 
+    for(unsigned int i0=0; i0<fConeSizes.size()*(fJetPostFix.size()); i0++) { 
       fJetArr[i0]->Clear();
       if(fComputeFullJetInfo) {
         fAddJetArr[i0]->Clear();      
-        fFillerJet[i0]->fill(fJetArr[i0], fAddJetArr[i0], iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);
+        fTopJetArr[i0]->Clear();      
+        fFillerJet[i0]->fill(fJetArr[i0], fAddJetArr[i0], fTopJetArr[i0], iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);
       } else {
-        fFillerJet[i0]->fill(fJetArr[i0], 0, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);
+        fFillerJet[i0]->fill(fJetArr[i0], 0, 0, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);
       }
     }
   }
@@ -390,7 +427,11 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     fPFParArr->Clear();
     fFillerPF->fill(fPFParArr,fPVArr,iEvent);
   }
-  
+  if(fIsActiveRH) { 
+    fRHParArr->Clear();
+    fFillerRH->fill(fRHParArr,iEvent,iSetup);
+  }
+
   fEventTree->Fill();
 }
 

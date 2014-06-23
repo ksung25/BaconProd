@@ -74,15 +74,15 @@ jetImpactParameterTagInfos                      = impactParameterTagInfos.clone(
 jetImpactParameterTagInfos.jetTracks            = "jetTracksAssociatorAtVertex"
 jetSecondaryVertexTagInfos                      = secondaryVertexTagInfos.clone()
 jetSecondaryVertexTagInfos.trackIPTagInfos      = "jetImpactParameterTagInfos"
-jetCombinedSecondaryVertexMVABJetTags           = combinedSecondaryVertexMVABJetTags.clone()
-jetCombinedSecondaryVertexMVABJetTags.tagInfos = cms.VInputTag( cms.InputTag("jetImpactParameterTagInfos"), cms.InputTag("jetSecondaryVertexTagInfos") )
+jetCombinedSecondaryVertexBJetTags           = combinedSecondaryVertexBJetTags.clone()
+jetCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("jetImpactParameterTagInfos"), cms.InputTag("jetSecondaryVertexTagInfos") )
 
 jetImpactParameterTagInfosSJ                   = impactParameterTagInfos.clone()
 jetImpactParameterTagInfosSJ.jetTracks         = "jetTracksAssociatorAtVertexSJ"
 jetSecondaryVertexTagInfosSJ                   = secondaryVertexTagInfos.clone()
 jetSecondaryVertexTagInfosSJ.trackIPTagInfos     = "jetImpactParameterTagInfosSJ"
-jetCombinedSecondaryVertexMVABJetTagsSJ          = combinedSecondaryVertexMVABJetTags.clone()
-jetCombinedSecondaryVertexMVABJetTagsSJ.tagInfos = cms.VInputTag( cms.InputTag("jetImpactParameterTagInfosSJ"), cms.InputTag("jetSecondaryVertexTagInfosSJ") )
+jetCombinedSecondaryVertexBJetTagsSJ          = combinedSecondaryVertexBJetTags.clone()
+jetCombinedSecondaryVertexBJetTagsSJ.tagInfos = cms.VInputTag( cms.InputTag("jetImpactParameterTagInfosSJ"), cms.InputTag("jetSecondaryVertexTagInfosSJ") )
 
 from JetTools.AnalyzerToolbox.QGTagger_RecoJets_cff import *
 QGTagger.srcJets                               = cms.InputTag('ak5PFJets')
@@ -107,8 +107,8 @@ jetsequence = cms.Sequence(
     jetTracksAssociatorAtVertexSJ  *
     jetImpactParameterTagInfosSJ   *
     jetSecondaryVertexTagInfosSJ   *
-    jetCombinedSecondaryVertexMVABJetTags * 
-    jetCombinedSecondaryVertexMVABJetTagsSJ  *
+    jetCombinedSecondaryVertexBJetTags * 
+    jetCombinedSecondaryVertexBJetTagsSJ  *
     goodOfflinePrimaryVerticesQG   *
     kt6PFJetsQG                    *
     kt6PFJetsIsoQG                 *

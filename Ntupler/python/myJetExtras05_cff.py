@@ -81,15 +81,15 @@ AK5jetImpactParameterTagInfos                      = impactParameterTagInfos.clo
 AK5jetImpactParameterTagInfos.jetTracks            = "AK5jetTracksAssociatorAtVertex"
 AK5jetSecondaryVertexTagInfos                      = secondaryVertexTagInfos.clone()
 AK5jetSecondaryVertexTagInfos.trackIPTagInfos      = "AK5jetImpactParameterTagInfos"
-AK5jetCombinedSecondaryVertexMVABJetTags           = combinedSecondaryVertexMVABJetTags.clone()
-AK5jetCombinedSecondaryVertexMVABJetTags.tagInfos = cms.VInputTag( cms.InputTag("AK5jetImpactParameterTagInfos"), cms.InputTag("AK5jetSecondaryVertexTagInfos") )
+AK5jetCombinedSecondaryVertexBJetTags           = combinedSecondaryVertexBJetTags.clone()
+AK5jetCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("AK5jetImpactParameterTagInfos"), cms.InputTag("AK5jetSecondaryVertexTagInfos") )
 
 AK5jetImpactParameterTagInfosSJ                   = impactParameterTagInfos.clone()
 AK5jetImpactParameterTagInfosSJ.jetTracks         = "AK5jetTracksAssociatorAtVertexSJ"
 AK5jetSecondaryVertexTagInfosSJ                   = secondaryVertexTagInfos.clone()
 AK5jetSecondaryVertexTagInfosSJ.trackIPTagInfos     = "AK5jetImpactParameterTagInfosSJ"
-AK5jetCombinedSecondaryVertexMVABJetTagsSJ          = combinedSecondaryVertexMVABJetTags.clone()
-AK5jetCombinedSecondaryVertexMVABJetTagsSJ.tagInfos = cms.VInputTag( cms.InputTag("AK5jetImpactParameterTagInfosSJ"), cms.InputTag("AK5jetSecondaryVertexTagInfosSJ") )
+AK5jetCombinedSecondaryVertexBJetTagsSJ          = combinedSecondaryVertexBJetTags.clone()
+AK5jetCombinedSecondaryVertexBJetTagsSJ.tagInfos = cms.VInputTag( cms.InputTag("AK5jetImpactParameterTagInfosSJ"), cms.InputTag("AK5jetSecondaryVertexTagInfosSJ") )
 
 from JetTools.AnalyzerToolbox.QGTagger_RecoJets_cff import *
 AK5QGTagger                                       = QGTagger.clone()
@@ -128,8 +128,8 @@ AK5jetsequence = cms.Sequence(
     AK5jetTracksAssociatorAtVertexSJ  *
     AK5jetImpactParameterTagInfosSJ   *
     AK5jetSecondaryVertexTagInfosSJ   *
-    AK5jetCombinedSecondaryVertexMVABJetTags * 
-    AK5jetCombinedSecondaryVertexMVABJetTagsSJ  *
+    AK5jetCombinedSecondaryVertexBJetTags * 
+    AK5jetCombinedSecondaryVertexBJetTagsSJ  *
     AK5QGTagger                       *
     AK5QGTaggerSubJets                *                
     AK5Njettiness                     
