@@ -197,7 +197,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     doComputeFullJetInfo = cms.untracked.bool(True),
     doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
     
-    coneSizes = cms.untracked.vdouble(0.5)#,0.8,1.2),
+    coneSizes = cms.untracked.vdouble(0.5),#,0.8,1.2),
     postFix   = cms.untracked.vstring("CHS"),
     
     edmPVName = cms.untracked.string('offlinePrimaryVertices'),

@@ -163,7 +163,7 @@ void FillerTau::fill(TClonesArray *array,
     //
     // Impact Parameter
     //==============================
-    const reco::PFCandidatePtr& leadChHad = itTau->leadPFChargedHadrCand();
+    const reco::PFCandidateRef& leadChHad = itTau->leadPFChargedHadrCand();
     pTau->dzLeadChHad = (leadChHad.isNonnull() && leadChHad->trackRef().isNonnull()) ? leadChHad->trackRef()->dz(pv.position()) : -999.;    
    
     //

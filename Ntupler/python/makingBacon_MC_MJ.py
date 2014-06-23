@@ -179,9 +179,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmEERecHitName       = cms.untracked.string('reducedEcalRecHitsEE'),
     edmRhoForEnergyRegression = cms.untracked.string('kt6PFJets'),
     edmPVName                 = cms.untracked.string('offlinePrimaryVertices')
-    edmRhoForEnergyRegression = cms.untracked.string('kt6PFJets'),
-    edmPVName                 = cms.untracked.string('offlinePrimaryVertices')
-    ),
+  ),
   
   Tau = cms.untracked.PSet(
     isActive = cms.untracked.bool(True),
@@ -198,7 +196,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     doComputeFullJetInfo = cms.untracked.bool(True),
     doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
     
-    coneSizes = cms.untracked.vdouble(0.5,0.8)
+    coneSizes = cms.untracked.vdouble(0.5,0.8),
     postFix   = cms.untracked.vstring("","CHS","Puppi"),
     edmPVName = cms.untracked.string('offlinePrimaryVertices'),
     
