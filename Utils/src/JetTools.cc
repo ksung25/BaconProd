@@ -333,8 +333,12 @@ double JetTools::jetPullAngle(const reco::PFJet &jet ,edm::Handle<reco::PFJetCol
   }
   if(subjet0 == 0 || subjet1 == 0) return -20;
   TLorentzVector lPull = jetPull(*subjet0);
-  TLorentzVector lJet; lJet.SetPtEtaPhiM(subjet1->pt(),subjet1->eta(),subjet1->phi(),subjet1->mass());
-  double lPhi = lJet.DeltaPhi(lPull);
+  TLorentzVector lJet0; lJet0.SetPtEtaPhiM(subjet0->pt(),subjet0->eta(),subjet0->phi(),subjet0->mass());
+  TLorentzVector lJet1; lJet1.SetPtEtaPhiM(subjet1->pt(),subjet1->eta(),subjet1->phi(),subjet1->mass());
+  //Rotate Jet into subjet0 coordinates                                                                                                                                                                     
+  lJet1.RotateZ(-lJet0.Phi());
+  lJet1.RotateY(-lJet0.Theta()+TMath::Pi()/2.);
+  double lPhi = lJet1.DeltaPhi(lPull);
   return lPhi;
 }
 //--------------------------------------------------------------------------------------------------

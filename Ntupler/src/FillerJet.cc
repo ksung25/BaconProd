@@ -316,24 +316,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     const int index = rArray.GetEntries();
     new(rArray[index]) baconhep::TJet();
     baconhep::TJet    *pJet = (baconhep::TJet*)rArray[index];
-    baconhep::TAddJet *pAddJet = 0; 
-    if(fComputeFullJetInfo) {
-      assert(rExtraArray.GetEntries() < rExtraArray.GetSize());
-      const int extraIndex = rExtraArray.GetEntries();
-      new(rExtraArray[extraIndex]) baconhep::TAddJet();
-      pAddJet = (baconhep::TAddJet*)rExtraArray[extraIndex];
-      pAddJet->index = index;
-    }
-
-    baconhep::TTopJet *pTopJet = 0; 
-    if(fComputeFullJetInfo && itJet->pt() > 150.) {
-      assert(rTopArray.GetEntries() < rTopArray.GetSize());
-      const int topIndex = rTopArray.GetEntries();
-      new(rTopArray[topIndex]) baconhep::TTopJet();
-      pTopJet = (baconhep::TTopJet*)rTopArray[topIndex];
-      pTopJet->index = index;
-    }
-  
+ 
     //
     // Kinematics
     //==============================    
@@ -424,8 +407,26 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
       pJet->genm                   = matchGenJet->mass();
     }
     pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, triggerEvent);
-    //Add Extras
-    if(fComputeFullJetInfo)                        addJet(pAddJet,*itJet,*(hRho.product()));
+
+    ////Add Extras
+    baconhep::TAddJet *pAddJet = 0; 
+    if(fComputeFullJetInfo && itJet->pt() > 100 ) {
+      assert(rExtraArray.GetEntries() < rExtraArray.GetSize());
+      const int extraIndex = rExtraArray.GetEntries();
+      new(rExtraArray[extraIndex]) baconhep::TAddJet();
+      pAddJet = (baconhep::TAddJet*)rExtraArray[extraIndex];
+      pAddJet->index = index;
+    }
+    if(fComputeFullJetInfo && itJet->pt() > 100)                        addJet(pAddJet,*itJet,*(hRho.product()));
+
+    baconhep::TTopJet *pTopJet = 0; 
+    if(fComputeFullJetInfo && itJet->pt() > 150.) {
+      assert(rTopArray.GetEntries() < rTopArray.GetSize());
+      const int topIndex = rTopArray.GetEntries();
+      new(rTopArray[topIndex]) baconhep::TTopJet();
+      pTopJet = (baconhep::TTopJet*)rTopArray[topIndex];
+      pTopJet->index = index;
+    }
     if(fComputeFullJetInfo && itJet->pt() >  150.) topJet(pTopJet,*itJet,*(hRho.product()));
   } 
 }
@@ -523,7 +524,8 @@ void FillerJet::addJet(baconhep::TAddJet *pPFJet,const reco::PFJet &itJet,double
   pPFJet->phi_m1      = pM1Jet.phi(); 
   pPFJet->mass_m1     = pM1Jet.m()*pCorr; 
   pPFJet->area_m1     = pM1Jet.area();                                                                                                                                                                       
-  fastjet::PseudoJet pM2Jet = (*fSoftDrop2)( iJet);                                                                                                                                                          pCorr               = correction(pM2Jet,iRho);
+  fastjet::PseudoJet pM2Jet = (*fSoftDrop2)( iJet);                                                                                                                                       
+  pCorr               = correction(pM2Jet,iRho);
   pPFJet->pt_m2       = pM2Jet.pt()*pCorr;
   pPFJet->ptraw_m2    = pM2Jet.pt(); 
   pPFJet->eta_m2      = pM2Jet.eta(); 
@@ -531,7 +533,8 @@ void FillerJet::addJet(baconhep::TAddJet *pPFJet,const reco::PFJet &itJet,double
   pPFJet->mass_m2     = pM2Jet.m()*pCorr; 
   pPFJet->area_m2     = pM2Jet.area();      
 
-  fastjet::PseudoJet pM3Jet = (*fSoftDrop3)( iJet);                                                                                                                                                          pCorr               = correction(pM3Jet,iRho);
+  fastjet::PseudoJet pM3Jet = (*fSoftDrop3)( iJet);                                                                                                                                                 
+  pCorr               = correction(pM3Jet,iRho);
   pPFJet->pt_m3       = pM3Jet.pt()*pCorr;
   pPFJet->ptraw_m3    = pM3Jet.pt(); 
   pPFJet->eta_m3      = pM3Jet.eta(); 
@@ -554,7 +557,8 @@ void FillerJet::addJet(baconhep::TAddJet *pPFJet,const reco::PFJet &itJet,double
   pPFJet->c2_1P0  = C2beta10(inclusive_jets[0]);
   pPFJet->c2_2P0  = C2beta20(inclusive_jets[0]);
   //QJets
-  pPFJet->qjet    = JetTools::qJetVolatility(lClusterParticles,25.,fRand->Rndm());
+  pPFJet->qjet    = 0; 
+  if(itJet.pt() > 100) pPFJet->qjet  = JetTools::qJetVolatility(lClusterParticles,25.,fRand->Rndm());
   //Subjet q/g
   std::vector<fastjet::PseudoJet>  lSubJets = pP1Jet.pieces();//fClustering->exclusive_subjets_up_to(iJet, 2.);
   if(lSubJets.size() > 0) pPFJet->sj1_npart = float(lSubJets[0].constituents().size());
@@ -565,6 +569,7 @@ void FillerJet::addJet(baconhep::TAddJet *pPFJet,const reco::PFJet &itJet,double
   if(lSubJets.size() > 1) pPFJet->sj2_ptd   = JetTools::jetWidth(lSubJets[1],6); 
   if(lSubJets.size() > 1) pPFJet->sj2_maxW  = JetTools::jetWidth(lSubJets[1],1); 
   if(lSubJets.size() > 1) pPFJet->sj2_minW  = JetTools::jetWidth(lSubJets[1],2); 
+  delete fClustering;
 }
 void FillerJet::topJet(TTopJet *pPFJet,const reco::PFJet &itJet,double iRho) {
   std::vector<reco::PFCandidatePtr> pfConstituents = itJet.getPFConstituents(); 
@@ -618,16 +623,11 @@ void FillerJet::topJet(TTopJet *pPFJet,const reco::PFJet &itJet,double iRho) {
     pPFJet->mass_cms3   = pNWjet.m()*pCorr; 
     pPFJet->area_cms3   = pNWjet.area();        
   }
-  std::cout << "----> heptop " << std::endl; 
   fastjet::PseudoJet hepTopJet = fHEPTopTagger->result(iJet);
-  std::cout << "----> heptop 1" << std::endl; 
   bool lCheckTop2 = (hepTopJet.structure_non_const_ptr() == 0);
-  std::cout << "----> heptop 2" << std::endl; 
   if(!lCheckTop2) { 
     std::vector<fastjet::PseudoJet> lPieces = hepTopJet.pieces();
-    std::cout << "Top===> " << lPieces.size() << " -- " << std::endl;
     fastjet::PseudoJet pHW1jet    = ((fastjet::HEPTopTaggerStructure*) hepTopJet.structure_non_const_ptr())->W1();
-    std::cout << " --- Top compare : " << pHW1jet.pt() << " -- " << lPieces[0].pt() << std::endl; 
     fastjet::PseudoJet pHW2jet    = ((fastjet::HEPTopTaggerStructure*) hepTopJet.structure_non_const_ptr())->W2();
     fastjet::PseudoJet pHNWjet    = ((fastjet::HEPTopTaggerStructure*) hepTopJet.structure_non_const_ptr())->non_W();
    

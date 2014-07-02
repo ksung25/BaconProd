@@ -5,13 +5,13 @@ from RecoJets.JetProducers.ak5PFJetsPruned_cfi  import ak5PFJetsPruned
 
 #for each jet collection run Pruning, subjet b-tagging, quark gluon discrimination,n-subjettiness and subjet quark gluon discrimination
 AK6PFJetsCHS = ak5PFJets.clone(
-    src      = cms.InputTag('PFBRECO','pfNoElectron'),
+    src      = cms.InputTag('pfNoElectron'),
     rParam   = cms.double(0.4),
     jetPtMin = cms.double(20)
     )
 
 AK6caPFJetsPrunedCHS = ak5PFJetsPruned.clone(
-    src      = cms.InputTag('PFBRECO','pfNoElectron'),
+    src      = cms.InputTag('pfNoElectron'),
     jetAlgorithm = cms.string("CambridgeAachen"),
     rParam = cms.double(0.4),
     doAreaFastjet = cms.bool(False),

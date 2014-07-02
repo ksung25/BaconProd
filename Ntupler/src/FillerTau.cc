@@ -135,7 +135,6 @@ void FillerTau::fill(TClonesArray *array,
   //edm::Handle<double> hRho;
   //edm::InputTag rhoTag(fRhoName,"","RECO");
   //iEvent.getByLabel(rhoTag,hRho);
-
   for(reco::PFTauCollection::const_iterator itTau = tauCol->begin(); itTau!=tauCol->end(); ++itTau) {
     
     reco::PFTauRef tauRef(hTauProduct, itTau - tauCol->begin());
@@ -163,7 +162,7 @@ void FillerTau::fill(TClonesArray *array,
     //
     // Impact Parameter
     //==============================
-    const reco::PFCandidateRef& leadChHad = itTau->leadPFChargedHadrCand();
+    const reco::PFCandidatePtr& leadChHad = itTau->leadPFChargedHadrCand();
     pTau->dzLeadChHad = (leadChHad.isNonnull() && leadChHad->trackRef().isNonnull()) ? leadChHad->trackRef()->dz(pv.position()) : -999.;    
    
     //

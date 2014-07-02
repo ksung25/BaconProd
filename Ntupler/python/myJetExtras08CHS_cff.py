@@ -25,6 +25,7 @@ AK8jetFlavorCHS    = cms.Sequence(AK8byRefCHS*AK8byValPhysCHS*AK8byValAlgoCHS)
 #for each jet collection run Pruning, subjet b-tagging, quark gluon discrimination,n-subjettiness and subjet quark gluon discrimination
 AK8PFJetsCHS = ak5PFJets.clone(
     src      = cms.InputTag('pfNoElectron'),
+    jetAlgorithm = cms.string("CambridgeAachen"),
     rParam   = cms.double(0.8),
     jetPtMin = cms.double(20)
     )

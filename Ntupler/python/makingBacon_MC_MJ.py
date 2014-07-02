@@ -14,7 +14,7 @@ process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.GlobalTag.globaltag = 'START53_V7G::All'
 
-process.load('CommonTools/ParticleFlow/PFBRECO_cff')
+process.load('BaconProd/Ntupler/PFBRECO_v2_cff')
 process.load('Dummy/Puppi/Puppi_cff')
 process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
 
@@ -64,7 +64,7 @@ for line in hlt_file.readlines():
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
-  fileNames  = cms.untracked.vstring('AAA')
+  fileNames  = cms.untracked.vstring('/store/cmst3/group/cmgtools/CMG/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM/V5_B/PFAOD_299.root')#AAA')
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -79,7 +79,7 @@ is_data_flag = False
 do_hlt_filter = False
 process.ntupler = cms.EDAnalyzer('NtuplerMod',
   skipOnHLTFail = cms.untracked.bool(do_hlt_filter),
-  outputName    = cms.untracked.string('BBB'),
+  outputName    = cms.untracked.string('BBB.root'),
   TriggerFile   = cms.untracked.string(hlt_filename),
   edmPVName     = cms.untracked.string('offlinePrimaryVertices'),
   edmPFCandName = cms.untracked.string('particleFlow'),
@@ -197,7 +197,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
     
     coneSizes = cms.untracked.vdouble(0.5,0.8),
-    postFix   = cms.untracked.vstring("","CHS","Puppi"),
+    postFix   = cms.untracked.vstring("","CHS"),
     edmPVName = cms.untracked.string('offlinePrimaryVertices'),
     
     # ORDERED lists of jet energy correction input files
@@ -253,34 +253,32 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
 )
 
 process.baconSequence = cms.Sequence(process.PFBRECO*
-                                     process.puppi*
+                                     #process.puppi*
                                      process.metFilters*
                                      process.producePFMETCorrections*
                                      process.recojetsequence*
                                      process.genjetsequence*
                                      process.AK5jetsequence*
                                      process.AK5jetsequenceCHS*
-                                     process.AK5jetsequencePuppi*
+                                     process.AK5genjetsequence*
                                      process.AK8jetsequence*
                                      process.AK8jetsequenceCHS*
-                                     process.AK8jetsequencePuppi*
                                      process.AK8genjetsequence*
-                                     process.recoTau*   ### must come after antiktGenJets otherwise conflict on RecoJets/JetProducers/plugins
+                                     process.PFTau*   ### must come after antiktGenJets otherwise conflict on RecoJets/JetProducers/plugins
 				     process.MVAMetSeq*
 				     process.ntupler)
 				     
+
+#process.output = cms.OutputModule("PoolOutputModule",                                                                                                                                               #                                  outputCommands = cms.untracked.vstring('keep *'),                                                                                                                 #     
+#                                  fileName       = cms.untracked.string ("test.root")                                                                                                               #)
+
+# schedule definition                                                                                                       
+#process.outpath  = cms.EndPath(process.output)                                                                                                                                                
+
 if do_hlt_filter:
   process.p = cms.Path(process.hltHighLevel*process.baconSequence)
 else:
   process.p = cms.Path(process.baconSequence)
-
-#process.output = cms.OutputModule("PoolOutputModule",                                                                                                                                                     
-#                                  outputCommands = cms.untracked.vstring('keep *'),                                                                                                                      
-#                                  fileName       = cms.untracked.string ("BBB")                                                                                                                    
-#)
-
-# schedule definition                                                                                                       
-#process.outpath  = cms.EndPath(process.output)                                                                                                                                                
 
 #
 # simple checks to catch some mistakes...

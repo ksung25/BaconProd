@@ -3,15 +3,35 @@ import FWCore.ParameterSet.Config as cms
 from RecoJets.JetProducers.ak5PFJets_cfi        import ak5PFJets
 from RecoJets.JetProducers.ak5PFJetsPruned_cfi  import ak5PFJetsPruned
 
+# Flavour byValue PhysDef
+AK5byRefCHS = cms.EDProducer("JetPartonMatcher",
+                          jets = cms.InputTag("AK5PFJetsCHS"),
+                          coneSizeToAssociate = cms.double(0.3),
+                          partons = cms.InputTag("partons")
+                          )
+
+AK5byValPhysCHS = cms.EDProducer("JetFlavourIdentifier",
+                              srcByReference = cms.InputTag("AK5byRefCHS"),
+                              physicsDefinition = cms.bool(True),
+                              leptonInfo = cms.bool(True)
+                              )                              
+
+AK5byValAlgoCHS = cms.EDProducer("JetFlavourIdentifier",
+                                 srcByReference = cms.InputTag("AK5byRefCHS"),
+                                 physicsDefinition = cms.bool(False),
+                                 leptonInfo = cms.bool(True))
+
+AK5jetFlavorCHS    = cms.Sequence(AK5byRefCHS*AK5byValPhysCHS*AK5byValAlgoCHS)
+
 #for each jet collection run Pruning, subjet b-tagging, quark gluon discrimination,n-subjettiness and subjet quark gluon discrimination
 AK5PFJetsCHS = ak5PFJets.clone(
-    src      = cms.InputTag('PFBRECO','pfNoElectron'),
+    src      = cms.InputTag('pfNoElectron'),
     rParam   = cms.double(0.4),
     jetPtMin = cms.double(20)
     )
 
 AK5caPFJetsPrunedCHS = ak5PFJetsPruned.clone(
-    src      = cms.InputTag('PFBRECO','pfNoElectron'),
+    src      = cms.InputTag('pfNoElectron'),
     jetAlgorithm = cms.string("CambridgeAachen"),
     rParam = cms.double(0.4),
     doAreaFastjet = cms.bool(False),
@@ -68,5 +88,6 @@ AK5jetsequenceCHS = cms.Sequence(
     AK5jetCombinedSecondaryVertexBJetTagsSJCHS  *
     AK5QGTaggerCHS                       *
     AK5QGTaggerSubJetsCHS                *                
-    AK5NjettinessCHS                     
+    AK5NjettinessCHS                     *
+    AK5jetFlavorCHS                   
     )

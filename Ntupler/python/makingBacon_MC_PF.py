@@ -18,8 +18,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.GlobalTag.globaltag = 'START53_V7G::All'
 
 #process.load('CommonTools/ParticleFlow/PFBRECO_cff')
+process.load('BaconProd/Ntupler/PFBRECO_v2_cff')
 process.load('Dummy/Puppi/Puppi_cff')
-#process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
+process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
 
 # import custom configurations
 process.load('BaconProd/Ntupler/myJetExtras04_cff')    # include gen jets and b-tagging
