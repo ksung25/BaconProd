@@ -14,7 +14,8 @@ process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.GlobalTag.globaltag = 'FT_53_V21_AN3::All'
 
-process.load('CommonTools/ParticleFlow/PFBRECO_cff')
+#process.load('CommonTools/ParticleFlow/PFBRECO_cff')
+process.load('BaconProd/Ntupler/PFBRECO_v2_cff')
 process.load('Dummy/Puppi/Puppi_cff')
 process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
 
