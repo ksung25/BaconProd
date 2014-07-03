@@ -110,7 +110,7 @@ void Qjets::Cluster(fastjet::ClusterSequence & cs){
       cs.plugin_record_iB_recombination(i,1.);
     }
 
-  assert(num_merged_final < 2);
+  //assert(num_merged_final < 2);
 }
 
 void Qjets::ComputeDCut(fastjet::ClusterSequence & cs){
