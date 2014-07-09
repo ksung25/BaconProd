@@ -337,7 +337,7 @@ double JetTools::jetPullAngle(const reco::PFJet &jet ,edm::Handle<reco::PFJetCol
   
   // work in dy-dphi space of subjet0
   TVector2 lPull = jetPull(*subjet0);
-  TVector2 lJet(subjet1->rapidity() - subjet0->rapidity(), subjet1->phi() - subjet0->phi());
+  TVector2 lJet(subjet1->rapidity() - subjet0->rapidity(), reco::deltaPhi(subjet1->phi(), subjet0->phi()));
   double lThetaP = lPull.DeltaPhi(lJet);
   return lThetaP;
 }
