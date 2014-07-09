@@ -9,6 +9,7 @@
 #include "DataFormats/Common/interface/ValueMap.h"
 #include "fastjet/PseudoJet.hh"
 #include "TLorentzVector.h"
+#include <TVector2.h>
 
 
 namespace baconhep {
@@ -56,7 +57,7 @@ namespace baconhep {
       static double* subJetBTag(const reco::PFJet &jet,reco::JetTagCollection &subJetVal,double iConeSize );
  
       //Jet Pull Vector and measure of color flow
-      static TLorentzVector jetPull(const reco::PFJet &jet );
+      static TVector2 jetPull(const reco::PFJet &jet );
 
       //Jet Pull Angle an event better measure of color flow
       static double jetPullAngle(const reco::PFJet &jet ,edm::Handle<reco::PFJetCollection> &subJets,double iConeSize);
