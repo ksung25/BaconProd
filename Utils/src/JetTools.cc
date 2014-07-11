@@ -304,20 +304,22 @@ double* JetTools::subJetQG(const reco::PFJet &jet,edm::Handle<reco::PFJetCollect
   return vals;
 }
 //--------------------------------------------------------------------------------------------------
-TLorentzVector JetTools::jetPull(const reco::PFJet &jet )
+TVector2 JetTools::jetPull(const reco::PFJet &jet)
 {
-  TLorentzVector lPull;
+  double dYSum=0, dPhiSum=0;
   const unsigned int nPFCands = jet.getPFConstituents().size();
   for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
     const reco::PFCandidatePtr pfcand = jet.getPFConstituents().at(ipf);
-    double dEta = pfcand->eta()-jet.eta();
-    double dPhi = reco::deltaPhi(pfcand->phi(),jet.phi());
-    double dR2  = dEta*dEta + dPhi*dPhi;
-    TLorentzVector pVec; pVec.SetPtEtaPhiM((pfcand->pt()/jet.pt()) *dR2 ,dEta,dPhi,0);
-    lPull += pVec;
+    double dY     = pfcand->rapidity()-jet.rapidity();
+    double dPhi   = reco::deltaPhi(pfcand->phi(),jet.phi());
+    double weight = pfcand->pt()*sqrt(dY*dY + dPhi*dPhi);
+    dYSum   += weight*dY;
+    dPhiSum += weight*dPhi;
   }
-  return lPull;
+  
+  return TVector2(dYSum/jet.pt(), dPhiSum/jet.pt());
 }
+
 //--------------------------------------------------------------------------------------------------
 double JetTools::jetPullAngle(const reco::PFJet &jet ,edm::Handle<reco::PFJetCollection> &subJets,double iConeSize)
 {
@@ -333,14 +335,12 @@ double JetTools::jetPullAngle(const reco::PFJet &jet ,edm::Handle<reco::PFJetCol
     lCount++;
   }
   if(subjet0 == 0 || subjet1 == 0) return -20;
-  TLorentzVector lPull = jetPull(*subjet0);
-  TLorentzVector lJet0; lJet0.SetPtEtaPhiM(subjet0->pt(),subjet0->eta(),subjet0->phi(),subjet0->mass());
-  TLorentzVector lJet1; lJet1.SetPtEtaPhiM(subjet1->pt(),subjet1->eta(),subjet1->phi(),subjet1->mass());
-  //Rotate Jet into subjet0 coordinates                                                                                                                                                                     
-  lJet1.RotateZ(-lJet0.Phi());
-  lJet1.RotateY(-lJet0.Theta()+TMath::Pi()/2.);
-  double lPhi = lJet1.DeltaPhi(lPull);
-  return lPhi;
+  
+  // work in dy-dphi space of subjet0
+  TVector2 lPull = jetPull(*subjet0);
+  TVector2 lJet(subjet1->rapidity() - subjet0->rapidity(), reco::deltaPhi(subjet1->phi(), subjet0->phi()));
+  double lThetaP = lPull.DeltaPhi(lJet);
+  return lThetaP;
 }
 //--------------------------------------------------------------------------------------------------
 float JetTools::findRMS( std::vector<float> &iQJetMass) {

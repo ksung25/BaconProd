@@ -360,10 +360,10 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->dR2Mean    = JetTools::dR2Mean(*itJet);
     pJet->ptD        = JetTools::jetWidth(*itJet);
     pJet->q          = JetTools::jetCharge(*itJet);
-    TLorentzVector lPull = JetTools::jetPull(*itJet);   //Color Flow observables
-    pJet->pullPt     = lPull.Pt();
-    pJet->pullEta    = (lPull.Pt()>0) ? lPull.Eta() : -999;
-    pJet->pullPhi    = (lPull.Pt()>0) ? lPull.Phi() : -999;
+    TVector2 lPull = JetTools::jetPull(*itJet);   //Color Flow observables
+    pJet->pullPt     = lPull.Mod();
+    pJet->pullEta    = lPull.X();
+    pJet->pullPhi    = lPull.Y();
     pJet->pullAngle  = JetTools::jetPullAngle(*itJet,hSubJetProduct,fConeSize);
     pJet->mva = -2;
     if(passLoose) {
