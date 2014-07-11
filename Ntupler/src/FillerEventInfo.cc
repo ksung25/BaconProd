@@ -1,5 +1,6 @@
 #include "BaconProd/Ntupler/interface/FillerEventInfo.hh"
 #include "BaconAna/DataFormats/interface/TEventInfo.hh"
+#include "BaconAna/DataFormats/interface/TSusyGen.hh"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -9,8 +10,10 @@
 #include "DataFormats/METReco/interface/PFMET.h"
 #include "DataFormats/METReco/interface/PFMETCollection.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "DataFormats/METReco/interface/BeamHaloSummary.h"
 #include <TLorentzVector.h>
+#include <string>
 
 using namespace baconhep;
 
@@ -26,7 +29,9 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig):
   fMVAMET0Name(iConfig.getUntrackedParameter<std::string>("edmMVAMETNoSmearName","pfMEtMVANoSmear")),
   fRhoIsoName (iConfig.getUntrackedParameter<std::string>("edmRhoForIsoName","kt6PFJets")),
   fRhoJetName (iConfig.getUntrackedParameter<std::string>("edmRhoForJetEnergy","kt6PFJets")),
-  fFillMET    (iConfig.getUntrackedParameter<bool>("doFillMET",true))
+  fFillMET    (iConfig.getUntrackedParameter<bool>("doFillMET",true)),
+  fFillMETFilters(iConfig.getUntrackedParameter<bool>("doFillMETFilters",true)),
+  fAddSusyGen (iConfig.getUntrackedParameter<bool>("addSusyGen",false))
 {}
 
 //--------------------------------------------------------------------------------------------------
@@ -35,7 +40,7 @@ FillerEventInfo::~FillerEventInfo(){}
 //--------------------------------------------------------------------------------------------------
 void FillerEventInfo::fill(TEventInfo *evtInfo,
                            const edm::Event &iEvent, const reco::Vertex &pv, const bool hasGoodPV,
-			   const TriggerBits triggerBits)
+			   const TriggerBits triggerBits,TSusyGen *iSusyGen)
 {
   assert(evtInfo);
   
@@ -89,8 +94,30 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
   	
   
   evtInfo->metFilterFailBits=0;
+
+  if(fAddSusyGen) { 
+    edm::Handle<LHEEventProduct> comments;
+    iEvent.getByLabel("source", comments);
+    
+    std::string pSusy;
+    int lId = 0;
+    for(LHEEventProduct::comments_const_iterator pComment = comments->comments_begin(); pComment != comments->comments_end(); pComment++) { 
+      if(lId == 1) pSusy = *pComment;
+      lId++;
+    }
+    std::string delimeter  = "_";
+    std::string delimeter1 = " ";
+    int lSpace = pSusy.find(delimeter1,2)+1;
+    std::string pSubSusy   = pSusy.substr(lSpace,pSusy.find(delimeter1,lSpace+2)-lSpace);
+    lSpace     = pSubSusy.find(delimeter)+1;
+    int m1 = atoi((pSubSusy.substr(lSpace,(pSubSusy.rfind(delimeter)-lSpace))).c_str());
+    int m2 = atoi((pSubSusy.substr(pSubSusy.rfind(delimeter)+1)).c_str());
+    iSusyGen->id = pSusy;
+    iSusyGen->m1 = m1;
+    iSusyGen->m2 = m2;
+  }
   
-  if(fFillMET) { 
+  if(fFillMETFilters) { 
     //
     // MET filter tags
     //==============================
@@ -173,8 +200,9 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     if(*hTrkPOGFilter_logErrorTooManyClusters) {  // if result is "true", then event is flagged as bad
       evtInfo->metFilterFailBits |= kTrkPOGFilter_logErrorTooManyClusters;
     }
-  
-    
+  }
+   
+  if(fFillMET) { 
     //
     // MET info
     //==============================
@@ -249,14 +277,14 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
   
   // Rho for isolation correction
   edm::Handle<double> hRhoIso;
-  edm::InputTag rhoIsoTag(fRhoIsoName,"rho","RECO");
+  edm::InputTag rhoIsoTag(fRhoIsoName,"rho");
   iEvent.getByLabel(rhoIsoTag,hRhoIso);
   assert(hRhoIso.isValid());
   evtInfo->rhoIso = *hRhoIso;
   
   // Rho for jet energy correction
   edm::Handle<double> hRhoJet;
-  edm::InputTag rhoJetTag(fRhoJetName,"rho","RECO");
+  edm::InputTag rhoJetTag(fRhoJetName,"rho");
   iEvent.getByLabel(rhoJetTag,hRhoJet);
   assert(hRhoJet.isValid());
   evtInfo->rhoJet = *hRhoJet;

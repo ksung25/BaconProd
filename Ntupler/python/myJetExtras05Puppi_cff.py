@@ -3,6 +3,27 @@ import FWCore.ParameterSet.Config as cms
 from RecoJets.JetProducers.ak5PFJets_cfi        import ak5PFJets
 from RecoJets.JetProducers.ak5PFJetsPruned_cfi  import ak5PFJetsPruned
 
+# Flavour byValue PhysDef
+AK5byRefPuppi = cms.EDProducer("JetPartonMatcher",
+                          jets = cms.InputTag("AK5PFJetsPuppi"),
+                          coneSizeToAssociate = cms.double(0.3),
+                          partons = cms.InputTag("partons")
+                          )
+
+AK5byValPhysPuppi = cms.EDProducer("JetFlavourIdentifier",
+                              srcByReference = cms.InputTag("AK5byRefPuppi"),
+                              physicsDefinition = cms.bool(True),
+                              leptonInfo = cms.bool(True)
+                              )                              
+
+AK5byValAlgoPuppi = cms.EDProducer("JetFlavourIdentifier",
+                                 srcByReference = cms.InputTag("AK5byRefPuppi"),
+                                 physicsDefinition = cms.bool(False),
+                                 leptonInfo = cms.bool(True))
+
+AK5jetFlavorPuppi    = cms.Sequence(AK5byRefPuppi*AK5byValPhysPuppi*AK5byValAlgoPuppi)
+
+
 #for each jet collection run Pruning, subjet b-tagging, quark gluon discrimination,n-subjettiness and subjet quark gluon discrimination
 AK5PFJetsPuppi = ak5PFJets.clone(
     src      = cms.InputTag('puppi','Puppi'),
@@ -68,5 +89,6 @@ AK5jetsequencePuppi = cms.Sequence(
     AK5jetCombinedSecondaryVertexBJetTagsSJPuppi*
     AK5QGTaggerPuppi                     *
     AK5QGTaggerSubJetsPuppi              *                
-    AK5NjettinessPuppi                    
+    AK5NjettinessPuppi                   *
+    AK5jetFlavorPuppi           
     )

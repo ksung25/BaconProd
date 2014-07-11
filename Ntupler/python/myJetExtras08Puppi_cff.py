@@ -24,6 +24,7 @@ AK8jetFlavorPuppi    = cms.Sequence(AK8byRefPuppi*AK8byValPhysPuppi*AK8byValAlgo
 
 #for each jet collection run Pruning, subjet b-tagging, quark gluon discrimination,n-subjettiness and subjet quark gluon discrimination
 AK8PFJetsPuppi = ak5PFJets.clone(
+    jetAlgorithm = cms.string("CambridgeAachen"),
     src      = cms.InputTag('puppi','Puppi'),
     rParam   = cms.double(0.8),
     jetPtMin = cms.double(20)

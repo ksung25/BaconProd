@@ -18,6 +18,7 @@ namespace edm {
 }
 namespace baconhep {
   class TEventInfo;
+  class TSusyGen;
   class TGenEventInfo;
   class TTrigger;
   class FillerEventInfo;
@@ -77,11 +78,12 @@ class NtuplerMod : public edm::EDAnalyzer {
     // AOD collection names
     std::string fPVName;
     std::string fPFCandName;
+    bool fAddSusyGen;
 
     std::vector<std::string> fJetPostFix;
     std::vector<double>      fConeSizes;
     bool fComputeFullJetInfo;
-    
+      
     // bacon fillers
     baconhep::FillerEventInfo *fFillerEvtInfo;
     baconhep::FillerGenInfo   *fFillerGenInfo;
@@ -113,6 +115,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     TH1D                    *fTotalEvents;
     TTree                   *fEventTree;
     baconhep::TEventInfo    *fEvtInfo;
+    baconhep::TSusyGen      *fSusyGen;
     baconhep::TGenEventInfo *fGenEvtInfo;
     TClonesArray            *fGenParArr;
     TClonesArray	    *fEleArr;

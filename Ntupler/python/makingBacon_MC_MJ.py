@@ -64,7 +64,7 @@ for line in hlt_file.readlines():
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
-  fileNames  = cms.untracked.vstring('/store/cmst3/group/cmgtools/CMG/WJetsToLNu_TuneZ2Star_8TeV-madgraph-tarball/Summer12_DR53X-PU_S10_START53_V7A-v2/AODSIM/V5_B/PFAOD_299.root')#AAA')
+  fileNames  = cms.untracked.vstring('/store/mc/Summer12/SMS-T2cc_NoFilter_mStop-175to250_mLSP-95to240_8TeV-Pythia6Z/AODSIM/START52_V9_FSIM-v1/00000/FC261D73-2160-E211-B37C-20CF305B051B.root')
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -95,8 +95,10 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmMVAMETUnityName   = cms.untracked.string('pfMEtMVAUnity'),
     edmMVAMETNoSmearName = cms.untracked.string('pfMEtMVANoSmear'),
     edmRhoForIsoName     = cms.untracked.string('kt6PFJets'),
-    Edmrhoforjetenergy   = cms.untracked.string('kt6PFJets'),
-    doFillMET            = cms.untracked.bool(True)
+    edmRhoForJetEnergy   = cms.untracked.string('kt6PFJets'),
+    doFillMET            = cms.untracked.bool(True),
+    doFillMETFilters     = cms.untracked.bool(False),
+    addSusyGen           = cms.untracked.bool(True)
   ),
   
   GenInfo = cms.untracked.PSet(
@@ -227,7 +229,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     
     # ORDERD list of pileup jet ID input files
     jetPUIDFiles = cms.untracked.vstring('',
-                                         'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_Dec2012.weights.xml'),
+                                         'RecoJets/JetProducers/data/TMVAClassificationCategory_JetID_53X_Dec2012.weights.xml'),
     
     # names of various jet-related collections WITHOUT prefix (e.g. 'PFJets' instead of 'AK5PFJets')
     # prefix string will be determined by ntupler module based on cone size
@@ -254,8 +256,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
 
 process.baconSequence = cms.Sequence(process.PFBRECO*
                                      #process.puppi*
-                                     process.metFilters*
+                                     #process.metFilters*
                                      process.producePFMETCorrections*
+                                     process.kt6PFJets*
                                      process.recojetsequence*
                                      process.genjetsequence*
                                      process.AK5jetsequence*

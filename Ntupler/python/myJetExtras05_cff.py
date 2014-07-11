@@ -112,6 +112,7 @@ recojetsequence = cms.Sequence(
     goodOfflinePrimaryVerticesQG   *
     kt6PFJetsQG                    *
     kt6PFJetsIsoQG                 
+    #kt6PFJets                   
 )
 
 AK5genjetsequence = cms.Sequence(

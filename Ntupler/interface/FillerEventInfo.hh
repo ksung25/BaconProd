@@ -17,6 +17,7 @@ namespace trigger {
 namespace baconhep
 {
   class TEventInfo;  // foward declaration
+  class TSusyGen;    // ditto
   class FillerEventInfo
   {
     public:
@@ -27,7 +28,8 @@ namespace baconhep
                 const edm::Event   &iEvent,        // EDM event info
 		const reco::Vertex &pv,            // event primary vertex
 		const bool          hasGoodPV,     // flag for if PV passing cuts is found
-		const TriggerBits   triggerBits);  // bits for corresponding fired triggers
+		const TriggerBits   triggerBits,   // bits for corresponding fired triggers
+		TSusyGen           *susyGen=0);      // output for SUSY objects
 	       
     protected:
       void computeTrackMET(const reco::Vertex &pv, 
@@ -47,6 +49,8 @@ namespace baconhep
       std::string fRhoIsoName;
       std::string fRhoJetName;
       bool        fFillMET;
+      bool        fFillMETFilters;
+      bool        fAddSusyGen;
   };
 }
 #endif

@@ -110,7 +110,7 @@ void FillerElectron::fill(TClonesArray *array,
 
   // event energy density
   edm::Handle<double> hRho;
-  edm::InputTag rhoTag(fRhoName,"rho","RECO");
+  edm::InputTag rhoTag(fRhoName,"rho");
   iEvent.getByLabel(rhoTag,hRho);
   
   // Get SuperCluster collections

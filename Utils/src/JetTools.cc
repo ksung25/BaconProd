@@ -298,6 +298,7 @@ double* JetTools::subJetQG(const reco::PFJet &jet,edm::Handle<reco::PFJetCollect
     if(pDR  > iConeSize) continue;
     edm::RefToBase<reco::Jet> jetRef(edm::Ref<reco::PFJetCollection>(subJets,i));
     vals[lCount] = (iQGLikelihood)[jetRef];
+    if(vals[lCount] == -1) std::cout << "===> " << (*subJets)[i].pt() << " -- " << (*subJets)[i].eta() << std::endl;
     lCount++;
   }
   return vals;

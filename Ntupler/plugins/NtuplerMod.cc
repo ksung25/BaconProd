@@ -3,6 +3,7 @@
 // bacon classes and constants
 #include "BaconAna/DataFormats/interface/BaconAnaDefs.hh"
 #include "BaconAna/DataFormats/interface/TEventInfo.hh"
+#include "BaconAna/DataFormats/interface/TSusyGen.hh"
 #include "BaconAna/DataFormats/interface/TTrigger.hh"
 #include "BaconAna/DataFormats/interface/TGenEventInfo.hh"
 #include "BaconAna/DataFormats/interface/TGenParticle.hh"
@@ -101,7 +102,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
 {
   // Don't write TObject part of the objects
   baconhep::TEventInfo::Class()->IgnoreTObjectStreamer();
-  baconhep::TEventInfo::Class()->IgnoreTObjectStreamer();
+  baconhep::TSusyGen::Class()->IgnoreTObjectStreamer();
   baconhep::TGenEventInfo::Class()->IgnoreTObjectStreamer();
   baconhep::TGenParticle::Class()->IgnoreTObjectStreamer();
   baconhep::TMuon::Class()->IgnoreTObjectStreamer();
@@ -120,9 +121,12 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   if(iConfig.existsAs<edm::ParameterSet>("Info",false)) {
     edm::ParameterSet cfg(iConfig.getUntrackedParameter<edm::ParameterSet>("Info"));
     fIsActiveEvtInfo = cfg.getUntrackedParameter<bool>("isActive");
+    fAddSusyGen      = cfg.getUntrackedParameter<bool>("addSusyGen",false);
+
     if(fIsActiveEvtInfo) {
-      fEvtInfo       = new baconhep::TEventInfo();         assert(fEvtInfo);
-      fFillerEvtInfo = new baconhep::FillerEventInfo(cfg); assert(fFillerEvtInfo);
+      fEvtInfo       = new baconhep::TEventInfo();                        assert(fEvtInfo);
+      fFillerEvtInfo = new baconhep::FillerEventInfo(cfg);                assert(fFillerEvtInfo);
+      if(fAddSusyGen)  fSusyGen       = new baconhep::TSusyGen();         assert(fSusyGen);
     }
   }
   
@@ -257,6 +261,7 @@ NtuplerMod::~NtuplerMod()
   delete fFillerRH;
   
   delete fTrigger;
+  delete fSusyGen;
   delete fEvtInfo;
   delete fGenEvtInfo;
   delete fGenParArr;
@@ -293,7 +298,10 @@ void NtuplerMod::beginJob()
   fTotalEvents = new TH1D("TotalEvents","TotalEvents",1,-10,10);
   fEventTree   = new TTree("Events","Events");
   
-  if(fIsActiveEvtInfo) { fEventTree->Branch("Info",fEvtInfo); }
+  if(fIsActiveEvtInfo) { 
+    fEventTree->Branch("Info",fEvtInfo); 
+    if(fAddSusyGen)     fEventTree->Branch("SusyGen",fSusyGen); 
+  }
   if(fIsActiveGenInfo) {
     fEventTree->Branch("GenEvtInfo",fGenEvtInfo);
     fEventTree->Branch("GenParticle",&fGenParArr);
@@ -384,7 +392,7 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   separatePileUp(iEvent, *pv);
   
   if(fIsActiveEvtInfo) {
-    fFillerEvtInfo->fill(fEvtInfo, iEvent, *pv, (nvertices>0), triggerBits);
+    fFillerEvtInfo->fill(fEvtInfo, iEvent, *pv, (nvertices>0), triggerBits,fSusyGen);
   }
   
   edm::Handle<trigger::TriggerEvent> hTrgEvt;
