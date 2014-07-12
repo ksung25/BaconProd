@@ -257,7 +257,7 @@ bool JetTools::passPFLooseID(const reco::PFJet &jet)
   return true;
 }
 //--------------------------------------------------------------------------------------------------
-double JetTools::jetCharge(const reco::PFJet &jet)
+double JetTools::jetCharge(const reco::PFJet &jet,bool iSquare)
 {
   // Assumes constituents are stored by descending pT
   double charge=0; double lSumPt = 0;
@@ -266,7 +266,8 @@ double JetTools::jetCharge(const reco::PFJet &jet)
     const reco::PFCandidatePtr pfcand = jet.getPFConstituents().at(ipf);
     const reco::TrackRef       track  = pfcand->trackRef();
     if(track.isNull()) continue;
-    charge += pfcand->pt()*track->charge();
+    if(!iSquare) charge += pfcand->pt()*track->charge();
+    if( iSquare) charge += pfcand->pt()*track->charge()*pfcand->pt();
     lSumPt += pfcand->pt();
   }
   if(lSumPt == 0) lSumPt = 1;
@@ -277,20 +278,33 @@ double* JetTools::subJetBTag(const reco::PFJet &jet,reco::JetTagCollection &subJ
 {
   // Following CMS convention first two daughters are leading subjets
   double* vals = new double[2]; 
+  double* pt   = new double[2]; 
+  vals[0] = -10; vals[1] = -10; 
+  pt[0]   =   0; pt[1]   =   0; 
   int lCount = 0;
   for (unsigned int i = 0; i != subJetVal.size(); ++i) {
     if(lCount > 1) break;
     double pDR = reco::deltaR(subJetVal[i].first->eta(),subJetVal[i].first->phi(),jet.eta(),jet.phi());
     if(pDR  > iConeSize) continue;
     vals[lCount] = subJetVal[i].second;
+    pt  [lCount] = subJetVal[i].first->pt();
     lCount++;
+  }
+  if(pt[1] > pt[0]) {
+    double pVal = vals[1];
+    vals[1] = vals[0]; 
+    vals[0] = pVal;
   }
   return vals;
 }
 //--------------------------------------------------------------------------------------------------
 double* JetTools::subJetQG(const reco::PFJet &jet,edm::Handle<reco::PFJetCollection> &subJets,const edm::ValueMap<float> iQGLikelihood,double iConeSize)
 {
-  double* vals = new double[2];
+  double* vals = new double[4];
+  double* pt   = new double[2]; 
+  double* q    = new double[2]; 
+  vals[0] = -10; vals[1] = -10; 
+  pt[0]   =   0; pt[1]   = 0; 
   int lCount = 0;
   for (unsigned int i = 0; i != subJets->size(); ++i) {
     if(lCount > 1) break;
@@ -298,9 +312,20 @@ double* JetTools::subJetQG(const reco::PFJet &jet,edm::Handle<reco::PFJetCollect
     if(pDR  > iConeSize) continue;
     edm::RefToBase<reco::Jet> jetRef(edm::Ref<reco::PFJetCollection>(subJets,i));
     vals[lCount] = (iQGLikelihood)[jetRef];
-    if(vals[lCount] == -1) std::cout << "===> " << (*subJets)[i].pt() << " -- " << (*subJets)[i].eta() << std::endl;
+    pt  [lCount] = (*subJets)[i].pt();
+    q   [lCount] = jetCharge((*subJets)[i],true);
     lCount++;
   }
+  if(pt[1] > pt[0]) {
+    double pVal = vals[1];
+    double pQ   = q[1];
+    vals[1] = vals[0]; 
+    vals[0] = pVal;
+    q[1]    = q[0]; 
+    q[0]    = pQ;
+  }
+  vals[2] = q[0];
+  vals[3] = q[1];
   return vals;
 }
 //--------------------------------------------------------------------------------------------------

@@ -64,7 +64,7 @@ for line in hlt_file.readlines():
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
-  fileNames  = cms.untracked.vstring('/store/mc/Summer12/SMS-T2cc_NoFilter_mStop-175to250_mLSP-95to240_8TeV-Pythia6Z/AODSIM/START52_V9_FSIM-v1/00000/FC261D73-2160-E211-B37C-20CF305B051B.root')
+  fileNames  = cms.untracked.vstring('/store/cmst3/group/cmgtools/CMG/QCD_Pt-15to3000_TuneEE3C_Flat_8TeV_herwigpp/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM/V5_B/PFAOD_99.root'),
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -97,8 +97,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmRhoForIsoName     = cms.untracked.string('kt6PFJets'),
     edmRhoForJetEnergy   = cms.untracked.string('kt6PFJets'),
     doFillMET            = cms.untracked.bool(True),
-    doFillMETFilters     = cms.untracked.bool(False),
-    addSusyGen           = cms.untracked.bool(True)
+    doFillMETFilters     = cms.untracked.bool(True),
+    addSusyGen           = cms.untracked.bool(False)
   ),
   
   GenInfo = cms.untracked.PSet(
@@ -256,7 +256,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
 
 process.baconSequence = cms.Sequence(process.PFBRECO*
                                      #process.puppi*
-                                     #process.metFilters*
+                                     process.metFilters*
                                      process.producePFMETCorrections*
                                      process.kt6PFJets*
                                      process.recojetsequence*

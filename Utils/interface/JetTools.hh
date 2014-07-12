@@ -48,7 +48,7 @@ namespace baconhep {
       static bool passPFLooseID(const reco::PFJet &jet);
     
       //Jet Chrge pT weighted 
-      static double jetCharge(const reco::PFJet &jet); 
+      static double jetCharge(const reco::PFJet &jet,bool iSquare=false); 
     
       //Sub Jet Quark Gluon
       static double* subJetQG(const reco::PFJet &jet,edm::Handle<reco::PFJetCollection> &subJets,const edm::ValueMap<float> iQGLikelihood,double iConeSize);     

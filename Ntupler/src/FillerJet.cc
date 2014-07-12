@@ -349,6 +349,8 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     double *lCSV = JetTools::subJetQG  (*itJet,hSubJetProduct,(*(hQGLikelihoodSubJets.product())),fConeSize);
     pJet->qg1        = lQG[0];
     pJet->qg2        = lQG[1];
+    pJet->q1         = lQG[2];
+    pJet->q2         = lQG[3];
     pJet->csv1       = lCSV[0];
     pJet->csv2       = lCSV[1];
     if(matchJet) pJet->prunedm = matchJet->mass();
@@ -359,7 +361,8 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->betaStar   = JetTools::betaStar(*itJet, pv, pvCol);
     pJet->dR2Mean    = JetTools::dR2Mean(*itJet);
     pJet->ptD        = JetTools::jetWidth(*itJet);
-    pJet->q          = JetTools::jetCharge(*itJet);
+    pJet->q          = JetTools::jetCharge(*itJet,false);
+    pJet->qsq        = JetTools::jetCharge(*itJet,true);
     TVector2 lPull = JetTools::jetPull(*itJet);   //Color Flow observables
     pJet->pullPt     = lPull.Mod();
     pJet->pullEta    = lPull.X();
@@ -561,10 +564,22 @@ void FillerJet::addJet(baconhep::TAddJet *pPFJet,const reco::PFJet &itJet,double
   if(itJet.pt() > 100) pPFJet->qjet  = JetTools::qJetVolatility(lClusterParticles,25.,fRand->Rndm());
   //Subjet q/g
   std::vector<fastjet::PseudoJet>  lSubJets = pP1Jet.pieces();//fClustering->exclusive_subjets_up_to(iJet, 2.);
+  if(lSubJets.size() > 1 && lSubJets[0].pt() < lSubJets[1].pt()) std::cout << "==> not pt ordered" << std::endl;
+  if(lSubJets.size() > 0) pPFJet->sj1_pt    = lSubJets[0].pt();
+  if(lSubJets.size() > 0) pPFJet->sj1_eta   = lSubJets[0].eta();
+  if(lSubJets.size() > 0) pPFJet->sj1_phi   = lSubJets[0].phi();
+  if(lSubJets.size() > 0) pPFJet->sj1_m     = lSubJets[0].m();
+  if(lSubJets.size() > 1) pPFJet->sj2_pt    = lSubJets[1].pt();
+  if(lSubJets.size() > 1) pPFJet->sj2_eta   = lSubJets[1].eta();
+  if(lSubJets.size() > 1) pPFJet->sj2_phi   = lSubJets[1].phi();
+  if(lSubJets.size() > 1) pPFJet->sj2_m     = lSubJets[1].m();
+
+  //if(lSubJets.size() > 0) pPFJet->sj1_q2    = JetTools::jetCharge(lSubJets[0],true);
   if(lSubJets.size() > 0) pPFJet->sj1_npart = float(lSubJets[0].constituents().size());
   if(lSubJets.size() > 0) pPFJet->sj1_ptd   = JetTools::jetWidth(lSubJets[0],6); 
   if(lSubJets.size() > 0) pPFJet->sj1_maxW  = JetTools::jetWidth(lSubJets[0],1); 
   if(lSubJets.size() > 0) pPFJet->sj1_minW  = JetTools::jetWidth(lSubJets[0],2); 
+  //  if(lSubJets.size() > 0) pPFJet->sj2_q2    = JetTools::jetCharge(lSubJets[0],true);
   if(lSubJets.size() > 1) pPFJet->sj2_npart = float(lSubJets[1].constituents().size());
   if(lSubJets.size() > 1) pPFJet->sj2_ptd   = JetTools::jetWidth(lSubJets[1],6); 
   if(lSubJets.size() > 1) pPFJet->sj2_maxW  = JetTools::jetWidth(lSubJets[1],1); 
