@@ -71,7 +71,12 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
       int pId = 0;
       reco::GenParticleRef lMom = itGenP->motherRef(); 
       for( std::vector<reco::GenParticle>::const_iterator itMomP = lMothers.begin(); itMomP != lMothers.end(); ++itMomP) { 
-	if(reco::deltaR(itMomP->eta(),itMomP->phi(),lMom->eta(),lMom->phi()) < 0.01) {lId = pId;  break;}
+        // TODO: figure out how to match motherRef with GenParticle
+	if(itMomP->pdgId() == lMom->pdgId() && itMomP->status() == lMom->status() &&
+	   reco::deltaR(itMomP->eta(),itMomP->phi(),lMom->eta(),lMom->phi()) < 0.001) {
+	  lId = pId;  
+	  break;
+	}
 	pId++;
       }
       pGenPart->parent =  lId;

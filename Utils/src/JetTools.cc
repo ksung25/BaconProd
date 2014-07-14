@@ -257,10 +257,10 @@ bool JetTools::passPFLooseID(const reco::PFJet &jet)
   return true;
 }
 //--------------------------------------------------------------------------------------------------
-double JetTools::jetCharge(const reco::PFJet &jet,bool iSquare)
+double JetTools::jetCharge(const reco::PFJet &jet, const bool iSquare)
 {
   // Assumes constituents are stored by descending pT
-  double charge=0; double lSumPt = 0;
+  double charge=0;
   const unsigned int nPFCands = jet.getPFConstituents().size();
   for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
     const reco::PFCandidatePtr pfcand = jet.getPFConstituents().at(ipf);
@@ -268,97 +268,146 @@ double JetTools::jetCharge(const reco::PFJet &jet,bool iSquare)
     if(track.isNull()) continue;
     if(!iSquare) charge += pfcand->pt()*track->charge();
     if( iSquare) charge += pfcand->pt()*track->charge()*pfcand->pt();
-    lSumPt += pfcand->pt();
   }
-  if(lSumPt == 0) lSumPt = 1;
-  return charge/lSumPt;
+  if(iSquare) return charge/jet.pt()/jet.pt();
+  else        return charge/jet.pt();
+}
+double JetTools::jetCharge(const reco::PFJet &jet, const double kappa)
+{
+  // Assumes constituents are stored by descending pT
+  double charge=0;
+  const unsigned int nPFCands = jet.getPFConstituents().size();
+  for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
+    const reco::PFCandidatePtr pfcand = jet.getPFConstituents().at(ipf);
+    const reco::TrackRef       track  = pfcand->trackRef();
+    if(track.isNull()) continue;
+    charge += pow(pfcand->pt(),kappa)*track->charge();
+  }
+  double denom = pow(jet.pt(),kappa);
+  return charge/denom;
 }
 //--------------------------------------------------------------------------------------------------
 double* JetTools::subJetBTag(const reco::PFJet &jet,reco::JetTagCollection &subJetVal,double iConeSize )
 {
   // Following CMS convention first two daughters are leading subjets
-  double* vals = new double[2]; 
-  double* pt   = new double[2]; 
-  vals[0] = -10; vals[1] = -10; 
-  pt[0]   =   0; pt[1]   =   0; 
-  int lCount = 0;
+  double* vals = new double[2];
+  double pt[2]; 
+  int subjetIndex[2];
+  vals[0] = vals[1] = -10; 
+  pt[0]   = pt[1]   =   0; 
+  subjetIndex[0] = subjetIndex[1] = -1;
   for (unsigned int i = 0; i != subJetVal.size(); ++i) {
-    if(lCount > 1) break;
     double pDR = reco::deltaR(subJetVal[i].first->eta(),subJetVal[i].first->phi(),jet.eta(),jet.phi());
-    if(pDR  > iConeSize) continue;
-    vals[lCount] = subJetVal[i].second;
-    pt  [lCount] = subJetVal[i].first->pt();
-    lCount++;
+    if(pDR  > iConeSize) continue;    
+    double sjpt = subJetVal[i].first->pt();
+    if(sjpt > pt[0]) {
+      pt[1] = pt[0]; subjetIndex[1] = subjetIndex[0];
+      pt[0] = sjpt;  subjetIndex[0] = i;
+    } else if(sjpt > pt[1]) {
+      pt[1] = sjpt;  subjetIndex[1] = i;
+    }
   }
-  if(pt[1] > pt[0]) {
-    double pVal = vals[1];
-    vals[1] = vals[0]; 
-    vals[0] = pVal;
+  if(subjetIndex[0]>=0) {
+    vals[0] = subJetVal[subjetIndex[0]].second;
   }
+  if(subjetIndex[1]>=0) {
+    vals[1] = subJetVal[subjetIndex[1]].second;
+  }  
   return vals;
 }
 //--------------------------------------------------------------------------------------------------
 double* JetTools::subJetQG(const reco::PFJet &jet,edm::Handle<reco::PFJetCollection> &subJets,const edm::ValueMap<float> iQGLikelihood,double iConeSize)
 {
   double* vals = new double[4];
-  double* pt   = new double[2]; 
-  double* q    = new double[2]; 
-  vals[0] = -10; vals[1] = -10; 
-  vals[2] = -10; vals[3] = -10;
-  pt[0]   =   0; pt[1]   = 0; 
-  int lCount = 0;
+  double pt[2];
+  int subjetIndex[2];
+  vals[0] = vals[1] = vals[2] = vals[3] = -10;
+  pt[0]   = pt[1]   = 0;
+  subjetIndex[0] = subjetIndex[1] = -1;
   for (unsigned int i = 0; i != subJets->size(); ++i) {
-    if(lCount > 1) break;
     double pDR = reco::deltaR((*subJets)[i].eta(),(*subJets)[i].phi(),jet.eta(),jet.phi());
     if(pDR  > iConeSize) continue;
-    edm::RefToBase<reco::Jet> jetRef(edm::Ref<reco::PFJetCollection>(subJets,i));
-    vals[lCount] = (iQGLikelihood)[jetRef];
-    pt  [lCount] = (*subJets)[i].pt();
-    q   [lCount] = jetCharge((*subJets)[i],true);
-    lCount++;
+    double sjpt = (*subJets)[i].pt();
+    if(sjpt > pt[0]) {
+      pt[1] = pt[0]; subjetIndex[1] = subjetIndex[0];
+      pt[0] = sjpt;  subjetIndex[0] = i;
+    } else if(sjpt > pt[1]) {
+      pt[1] = sjpt;  subjetIndex[1] = i;
+    }
   }
-  if(pt[1] > pt[0]) {
-    double pVal = vals[1];
-    double pQ   = q[1];
-    vals[1] = vals[0]; 
-    vals[0] = pVal;
-    q[1]    = q[0]; 
-    q[0]    = pQ;
+  if(subjetIndex[0]>=0) {
+    edm::RefToBase<reco::Jet> jetRef0(edm::Ref<reco::PFJetCollection>(subJets,subjetIndex[0]));
+    vals[0] = (iQGLikelihood)[jetRef0];
+    vals[2] = jetCharge((*subJets)[subjetIndex[0]],true);
   }
-  vals[2] = q[0];
-  vals[3] = q[1];
-  return vals;
+  if(subjetIndex[1]>=0) {
+    edm::RefToBase<reco::Jet> jetRef1(edm::Ref<reco::PFJetCollection>(subJets,subjetIndex[1]));
+    vals[1] = (iQGLikelihood)[jetRef1];
+    vals[3] = jetCharge((*subJets)[subjetIndex[1]],true);
+  }
+  return vals;  
 }
 //--------------------------------------------------------------------------------------------------
-TVector2 JetTools::jetPull(const reco::PFJet &jet)
+TVector2 JetTools::jetPull(const reco::PFJet &jet, const int type)
 {
   double dYSum=0, dPhiSum=0;
   const unsigned int nPFCands = jet.getPFConstituents().size();
   for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
     const reco::PFCandidatePtr pfcand = jet.getPFConstituents().at(ipf);
-    double dY     = pfcand->rapidity()-jet.rapidity();
-    double dPhi   = reco::deltaPhi(pfcand->phi(),jet.phi());
-    double weight = pfcand->pt()*sqrt(dY*dY + dPhi*dPhi);
+    
+    double pt_i=0, y_i=0, phi_i=0;
+    if(type==0) {  // PF jet pull
+      pt_i  = pfcand->pt();
+      y_i   = pfcand->rapidity();
+      phi_i = pfcand->phi();
+    
+    } else if(type==1) {  // charged jet pull component
+      if(pfcand->charge()!=0) {
+        pt_i  = pfcand->pt();
+        y_i   = pfcand->rapidity();
+        phi_i = pfcand->phi();  
+      }
+          
+    } else if(type==2) {  // neutral jet pull component
+      if(pfcand->charge()==0) {
+        pt_i  = pfcand->pt();
+        y_i   = pfcand->rapidity();
+        phi_i = pfcand->phi();  
+      }
+      
+    } else {
+      assert(0);
+    }
+    
+    double dY     = y_i - jet.rapidity();
+    double dPhi   = reco::deltaPhi(phi_i,jet.phi());
+    double weight = pt_i*sqrt(dY*dY + dPhi*dPhi);
     dYSum   += weight*dY;
     dPhiSum += weight*dPhi;
   }
   
   return TVector2(dYSum/jet.pt(), dPhiSum/jet.pt());
+
 }
 
 //--------------------------------------------------------------------------------------------------
 double JetTools::jetPullAngle(const reco::PFJet &jet ,edm::Handle<reco::PFJetCollection> &subJets,double iConeSize)
 {
-  // Following CMS convention first two daughters are leading subjets
-  int lCount = 0;
   const reco::PFJet *subjet0 = 0;
   const reco::PFJet *subjet1 = 0;
-  for(unsigned int i0 = 0; i0 < subJets->size(); i0++) { 
-    if(lCount > 1) break;
-    double pDR = reco::deltaR((*subJets)[i0].eta(),(*subJets)[i0].phi(),jet.eta(),jet.phi());
-    if(pDR  > iConeSize) continue;
-    lCount == 0 ? subjet0 = &(*subJets)[i0] : subjet1 = &(*subJets)[i0];
-    lCount++;
+  for(unsigned int i0 = 0; i0 < subJets->size(); i0++) {
+    const reco::PFJet *sj = &(*subJets)[i0];
+    
+    double pDR = reco::deltaR(sj->eta(),sj->phi(),jet.eta(),jet.phi());
+    if(pDR > iConeSize) continue;
+    
+    if(!subjet0 || subjet0->pt() < sj->pt()) {
+      subjet1 = subjet0;
+      subjet0 = sj;
+            
+    } else if(!subjet1 || subjet1->pt() < sj->pt()) {
+      subjet1 = sj;
+    }
   }
   if(subjet0 == 0 || subjet1 == 0) return -20;
   

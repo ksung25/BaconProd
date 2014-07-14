@@ -48,8 +48,9 @@ namespace baconhep {
       static bool passPFLooseID(const reco::PFJet &jet);
     
       //Jet Chrge pT weighted 
-      static double jetCharge(const reco::PFJet &jet,bool iSquare=false); 
-    
+      static double jetCharge(const reco::PFJet &jet, const bool iSquare=false); 
+      static double jetCharge(const reco::PFJet &jet, const double kappa); 
+   
       //Sub Jet Quark Gluon
       static double* subJetQG(const reco::PFJet &jet,edm::Handle<reco::PFJetCollection> &subJets,const edm::ValueMap<float> iQGLikelihood,double iConeSize);     
   
@@ -57,7 +58,10 @@ namespace baconhep {
       static double* subJetBTag(const reco::PFJet &jet,reco::JetTagCollection &subJetVal,double iConeSize );
  
       //Jet Pull Vector and measure of color flow
-      static TVector2 jetPull(const reco::PFJet &jet );
+      // type == 0: jet pull
+      // type == 1: charged component of jet pull
+      // type == 2: neutral component of jet pull
+      static TVector2 jetPull(const reco::PFJet &jet, const int type=0);
 
       //Jet Pull Angle an event better measure of color flow
       static double jetPullAngle(const reco::PFJet &jet ,edm::Handle<reco::PFJetCollection> &subJets,double iConeSize);
