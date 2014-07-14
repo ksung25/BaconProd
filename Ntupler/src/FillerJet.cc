@@ -363,7 +363,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->ptD        = JetTools::jetWidth(*itJet);
     pJet->q          = JetTools::jetCharge(*itJet,false);
     pJet->qsq        = JetTools::jetCharge(*itJet,true);
-    TVector2 lPull = JetTools::jetPull(*itJet);   //Color Flow observables
+    TVector2 lPull   = JetTools::jetPull(*itJet);   //Color Flow observables
     pJet->pullPt     = lPull.Mod();
     pJet->pullEta    = lPull.X();
     pJet->pullPhi    = lPull.Y();
@@ -564,7 +564,7 @@ void FillerJet::addJet(baconhep::TAddJet *pPFJet,const reco::PFJet &itJet,double
   if(itJet.pt() > 100) pPFJet->qjet  = JetTools::qJetVolatility(lClusterParticles,25.,fRand->Rndm());
   //Subjet q/g
   std::vector<fastjet::PseudoJet>  lSubJets = pP1Jet.pieces();//fClustering->exclusive_subjets_up_to(iJet, 2.);
-  if(lSubJets.size() > 1 && lSubJets[0].pt() < lSubJets[1].pt()) std::cout << "==> not pt ordered" << std::endl;
+  //if(lSubJets.size() > 1) if(lSubJets[0].pt() < lSubJets[1].pt()) std::cout << "==> not pt ordered" << std::endl;
   if(lSubJets.size() > 0) pPFJet->sj1_pt    = lSubJets[0].pt();
   if(lSubJets.size() > 0) pPFJet->sj1_eta   = lSubJets[0].eta();
   if(lSubJets.size() > 0) pPFJet->sj1_phi   = lSubJets[0].phi();

@@ -304,6 +304,7 @@ double* JetTools::subJetQG(const reco::PFJet &jet,edm::Handle<reco::PFJetCollect
   double* pt   = new double[2]; 
   double* q    = new double[2]; 
   vals[0] = -10; vals[1] = -10; 
+  vals[2] = -10; vals[3] = -10;
   pt[0]   =   0; pt[1]   = 0; 
   int lCount = 0;
   for (unsigned int i = 0; i != subJets->size(); ++i) {
