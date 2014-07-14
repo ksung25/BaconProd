@@ -345,14 +345,16 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->tau3       = (*(hTau3.product())) [jetBaseRef];
     pJet->tau4       = (*(hTau4.product())) [jetBaseRef];
     const reco::BasicJet* matchJet = match(&(*itJet),pruneJetCol);
-    double *lQG  = JetTools::subJetBTag(*itJet,hCSVbtagSubJets                                   ,fConeSize );
-    double *lCSV = JetTools::subJetQG  (*itJet,hSubJetProduct,(*(hQGLikelihoodSubJets.product())),fConeSize);
+    double *lQG   = JetTools::subJetQG  (*itJet,hSubJetProduct,(*(hQGLikelihoodSubJets.product())),fConeSize);
+    double *lCSV  = JetTools::subJetBTag(*itJet,hCSVbtagSubJets                                   ,fConeSize );
     pJet->qg1        = lQG[0];
     pJet->qg2        = lQG[1];
     pJet->q1         = lQG[2];
     pJet->q2         = lQG[3];
     pJet->csv1       = lCSV[0];
     pJet->csv2       = lCSV[1];
+    delete [] lQG;
+    delete [] lCSV;
     if(matchJet) pJet->prunedm = matchJet->mass();
     pJet->nCharged   = itJet->chargedMultiplicity();
     pJet->nNeutrals  = itJet->neutralMultiplicity();
@@ -361,13 +363,19 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->betaStar   = JetTools::betaStar(*itJet, pv, pvCol);
     pJet->dR2Mean    = JetTools::dR2Mean(*itJet);
     pJet->ptD        = JetTools::jetWidth(*itJet);
+    pJet->q03        = JetTools::jetCharge(*itJet,0.3);
     pJet->q          = JetTools::jetCharge(*itJet,false);
     pJet->qsq        = JetTools::jetCharge(*itJet,true);
-    TVector2 lPull = JetTools::jetPull(*itJet);   //Color Flow observables
-    pJet->pullPt     = lPull.Mod();
-    pJet->pullEta    = lPull.X();
+    TVector2 lPull = JetTools::jetPull(*itJet,0);   //Color Flow observables
+    pJet->pullY      = lPull.X();
     pJet->pullPhi    = lPull.Y();
     pJet->pullAngle  = JetTools::jetPullAngle(*itJet,hSubJetProduct,fConeSize);
+    TVector2 lChPull = JetTools::jetPull(*itJet,1);
+    pJet->chPullY    = lChPull.X();
+    pJet->chPullPhi  = lChPull.Y();
+    TVector2 lNeuPull = JetTools::jetPull(*itJet,2);
+    pJet->neuPullY   = lNeuPull.X();
+    pJet->neuPullPhi = lNeuPull.Y();
     pJet->mva = -2;
     if(passLoose) {
       double dRMean = JetTools::dRMean(*itJet);
