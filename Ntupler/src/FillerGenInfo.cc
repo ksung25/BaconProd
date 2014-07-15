@@ -6,6 +6,7 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "DataFormats/Common/interface/RefToPtr.h"
 #include <TClonesArray.h>
 
 using namespace baconhep;
@@ -45,7 +46,7 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
   assert(hGenParProduct.isValid());  
   const reco::GenParticleCollection genParticles = *(hGenParProduct.product());  
   // loop over GEN particles
-  std::vector<reco::GenParticle> lMothers;
+  std::vector<edm::Ptr<reco::GenParticle>> lMothers;
   TClonesArray &rArray = *array;
   for (reco::GenParticleCollection::const_iterator itGenP = genParticles.begin(); itGenP!=genParticles.end(); ++itGenP) {
     if((itGenP->status() == 1     || itGenP->status()      == 99)    &&   //Remove all Status 1 and 99 particles
@@ -68,20 +69,17 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
     pGenPart->mass   = itGenP->mass();
     if(itGenP->numberOfMothers() >  0 ) {
       int lId = -2;
-      int pId = 0;
-      reco::GenParticleRef lMom = itGenP->motherRef(); 
-      for( std::vector<reco::GenParticle>::const_iterator itMomP = lMothers.begin(); itMomP != lMothers.end(); ++itMomP) { 
-        // TODO: figure out how to match motherRef with GenParticle
-	if(itMomP->pdgId() == lMom->pdgId() && itMomP->status() == lMom->status() &&
-	   reco::deltaR(itMomP->eta(),itMomP->phi(),lMom->eta(),lMom->phi()) < 0.001) {
-	  lId = pId;  
+      edm::Ptr<reco::GenParticle> lMomPtr = edm::refToPtr(itGenP->motherRef()); 
+      for(unsigned int im=0; im < lMothers.size(); ++im) { 
+	if(lMothers[im] == lMomPtr) {
+	  lId = im;  
 	  break;
 	}
-	pId++;
       }
-      pGenPart->parent =  lId;
+      pGenPart->parent = lId;
     }
     if(itGenP->numberOfMothers() == 0 ) pGenPart->parent = -1;
-    lMothers.push_back(*itGenP);
+    edm::Ptr<reco::GenParticle> thePtr(hGenParProduct, itGenP - genParticles.begin());
+    lMothers.push_back(thePtr);
   }
 }
