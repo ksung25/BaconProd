@@ -363,6 +363,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->betaStar   = JetTools::betaStar(*itJet, pv, pvCol);
     pJet->dR2Mean    = JetTools::dR2Mean(*itJet);
     pJet->ptD        = JetTools::jetWidth(*itJet);
+    pJet->minW       = JetTools::jetWidth(*itJet,2);
     pJet->q03        = JetTools::jetCharge(*itJet,0.3);
     pJet->q          = JetTools::jetCharge(*itJet,false);
     pJet->qsq        = JetTools::jetCharge(*itJet,true);
