@@ -230,9 +230,10 @@ void FillerPhoton::fill(TClonesArray *array,
     //
     // Identification
     //==============================    
-    pPhoton->hovere = itPho->hadronicOverEm();
-    pPhoton->sieie  = itPho->sigmaIetaIeta();
-    pPhoton->sipip  = isnan(vCov[2]) ? 0 : sqrt(vCov[2]);
+    pPhoton->hovere  = itPho->hadronicOverEm();
+    pPhoton->sthovere= itPho->hadTowOverEm();
+    pPhoton->sieie   = itPho->sigmaIetaIeta();
+    pPhoton->sipip   = isnan(vCov[2]) ? 0 : sqrt(vCov[2]);
 
     pPhoton->fiducialBits=0;
     if(itPho->isEB())        pPhoton->fiducialBits |= kIsEB;
@@ -266,8 +267,8 @@ void FillerPhoton::fill(TClonesArray *array,
     }
     
     pPhoton->hasPixelSeed = itPho->hasPixelSeed();
-    
     pPhoton->isConv = ConversionTools::hasMatchedPromptElectron(itPho->superCluster(), hEleProduct, hConvProduct, pv.position(), 2.0, 1e-6, 0);
+    pPhoton->passElectronVeto = !(pPhoton->isConv) // here for backwards compatibility
 
     //Apply the gg MVA
     pPhoton->mva             = fPhotonMVA->mvaValue((*itPho),lazyTools,*hRho,pPhoton->gammaIso03,pPhoton->chHadIso03SelVtx,pPhoton->chHadIso03WstVtx,lRR);
