@@ -421,14 +421,14 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
 
     ////Add Extras
     baconhep::TAddJet *pAddJet = 0; 
-    if(fComputeFullJetInfo && itJet->pt() > 100 ) {
+    if(fComputeFullJetInfo && itJet->pt() > 150 ) {
       assert(rExtraArray.GetEntries() < rExtraArray.GetSize());
       const int extraIndex = rExtraArray.GetEntries();
       new(rExtraArray[extraIndex]) baconhep::TAddJet();
       pAddJet = (baconhep::TAddJet*)rExtraArray[extraIndex];
       pAddJet->index = index;
     }
-    if(fComputeFullJetInfo && itJet->pt() > 100)                        addJet(pAddJet,*itJet,*(hRho.product()));
+    if(fComputeFullJetInfo && itJet->pt() > 150)                        addJet(pAddJet,*itJet,*(hRho.product()));
 
     baconhep::TTopJet *pTopJet = 0; 
     if(fComputeFullJetInfo && itJet->pt() > 150.) {
