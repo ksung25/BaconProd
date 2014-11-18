@@ -268,7 +268,7 @@ void FillerPhoton::fill(TClonesArray *array,
     
     pPhoton->hasPixelSeed = itPho->hasPixelSeed();
     pPhoton->isConv = ConversionTools::hasMatchedPromptElectron(itPho->superCluster(), hEleProduct, hConvProduct, pv.position(), 2.0, 1e-6, 0);
-    pPhoton->passElectronVeto = !(pPhoton->isConv) // here for backwards compatibility
+    pPhoton->passElectronVeto = !(pPhoton->isConv); // here for backwards compatibility
 
     //Apply the gg MVA
     pPhoton->mva             = fPhotonMVA->mvaValue((*itPho),lazyTools,*hRho,pPhoton->gammaIso03,pPhoton->chHadIso03SelVtx,pPhoton->chHadIso03WstVtx,lRR);
