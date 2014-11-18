@@ -17,7 +17,7 @@ pfMEtMVA = cms.EDProducer("PFMETProducerMVA",
     srcUncorrJets = cms.InputTag('ak5PFJets'),
     srcPFCandidates = cms.InputTag('particleFlow'),
     srcVertices = cms.InputTag('offlinePrimaryVertices'),
-    srcLeptons = cms.VInputTag("isomuons","isoelectrons","isotaus"), # NOTE: you need to set this to collections of electrons, muons and tau-jets
+    srcLeptons = cms.VInputTag("isomuons","isoelectrons","isotaus","isophotons"), # NOTE: you need to set this to collections of electrons, muons and tau-jets
                                  #                                             passing the lepton reconstruction & identification criteria applied in your analysis
     minNumLeptons = cms.int32(0),
     srcRho = cms.InputTag('kt6PFJets','rho'),
@@ -64,7 +64,7 @@ pfMEtMVA = cms.EDProducer("PFMETProducerMVA",
 )
 
 pfMEtMVAsequence  = cms.Sequence(
-    (isomuonseq+isotauseq+isoelectronseq)*
+    (isomuonseq+isotauseq+isoelectronseq+isophotonseq)*
     calibratedAK5PFJetsForPFMEtMVA*
     pfMEtMVA
     )
