@@ -6,7 +6,9 @@
 #include "BaconAna/DataFormats/interface/TSusyGen.hh"
 #include "BaconAna/DataFormats/interface/TTrigger.hh"
 #include "BaconAna/DataFormats/interface/TGenEventInfo.hh"
+#include "BaconAna/DataFormats/interface/TGenWeight.hh"
 #include "BaconAna/DataFormats/interface/TGenParticle.hh"
+#include "BaconAna/DataFormats/interface/TGenJet.hh"
 #include "BaconAna/DataFormats/interface/TElectron.hh"
 #include "BaconAna/DataFormats/interface/TMuon.hh"
 #include "BaconAna/DataFormats/interface/TTau.hh"
@@ -26,6 +28,7 @@
 #include "BaconProd/Ntupler/interface/FillerPhoton.hh"
 #include "BaconProd/Ntupler/interface/FillerTau.hh"
 #include "BaconProd/Ntupler/interface/FillerJet.hh"
+#include "BaconProd/Ntupler/interface/FillerGenJets.hh"
 #include "BaconProd/Ntupler/interface/FillerPF.hh"
 #include "BaconProd/Ntupler/interface/FillerRH.hh"
 
@@ -39,9 +42,11 @@
 
 // data format classes
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/Run.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 
 // ROOT classes
 #include <TFile.h>
@@ -54,15 +59,18 @@
 
 //--------------------------------------------------------------------------------------------------
 NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
+  fUseTrigger        (iConfig.getUntrackedParameter<bool>("useTrigger",true)),
   fSkipOnHLTFail     (iConfig.getUntrackedParameter<bool>("skipOnHLTFail",false)),
   fHLTTag            ("TriggerResults","","HLT"),
   fHLTObjTag         ("hltTriggerSummaryAOD","","HLT"),
   fHLTFile           (iConfig.getUntrackedParameter<std::string>("TriggerFile","HLT")),
   fPVName            (iConfig.getUntrackedParameter<std::string>("edmPVName","offlinePrimaryVertices")),
   fPFCandName        (iConfig.getUntrackedParameter<std::string>("edmPFCandName","particleFlow")),
+  fGenRunInfoName    (iConfig.getUntrackedParameter<std::string>("edmGenRunInfoName","generator")),
   fComputeFullJetInfo(false),
   fFillerEvtInfo     (0),
   fFillerGenInfo     (0),
+  fFillerGenJet      (0),
   fFillerPV          (0),
   fFillerEle         (0),
   fFillerMuon        (0),
@@ -74,6 +82,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fTrigger           (0),
   fIsActiveEvtInfo   (false),
   fIsActiveGenInfo   (false),
+  fIsActiveGenJet    (false),
   fIsActivePV        (false),
   fIsActiveEle       (false),
   fIsActiveMuon      (false),
@@ -87,8 +96,11 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fTotalEvents       (0),
   fEventTree         (0),
   fEvtInfo           (0),
+  fSusyGen           (0),
   fGenEvtInfo        (0),
+  fGenWeight         (0),
   fGenParArr         (0),
+  fGenJetArr         (0),
   fEleArr            (0),
   fMuonArr           (0),
   fTauArr            (0),
@@ -98,13 +110,16 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fAddJetArr         (0),
   fTopJetArr         (0),
   fPFParArr          (0),
-  fRHParArr          (0)
+  fRHParArr          (0),
+  fXS                (0)
 {
   // Don't write TObject part of the objects
   baconhep::TEventInfo::Class()->IgnoreTObjectStreamer();
   baconhep::TSusyGen::Class()->IgnoreTObjectStreamer();
   baconhep::TGenEventInfo::Class()->IgnoreTObjectStreamer();
+  baconhep::TGenWeight::Class()->IgnoreTObjectStreamer();
   baconhep::TGenParticle::Class()->IgnoreTObjectStreamer();
+  baconhep::TGenJet::Class()->IgnoreTObjectStreamer();
   baconhep::TMuon::Class()->IgnoreTObjectStreamer();
   baconhep::TElectron::Class()->IgnoreTObjectStreamer();
   baconhep::TTau::Class()->IgnoreTObjectStreamer();
@@ -126,7 +141,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
     if(fIsActiveEvtInfo) {
       fEvtInfo       = new baconhep::TEventInfo();                        assert(fEvtInfo);
       fFillerEvtInfo = new baconhep::FillerEventInfo(cfg);                assert(fFillerEvtInfo);
-      if(fAddSusyGen)  fSusyGen       = new baconhep::TSusyGen();         assert(fSusyGen);
+      if(fAddSusyGen)  {fSusyGen       = new baconhep::TSusyGen();         assert(fSusyGen);}
     }
   }
   
@@ -135,8 +150,18 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
     fIsActiveGenInfo = cfg.getUntrackedParameter<bool>("isActive");
     if(fIsActiveGenInfo) {
       fGenEvtInfo    = new baconhep::TGenEventInfo();                   assert(fGenEvtInfo);
+      fGenWeight     = new baconhep::TGenWeight();                      assert(fGenWeight);
       fGenParArr     = new TClonesArray("baconhep::TGenParticle",5000); assert(fGenParArr);
       fFillerGenInfo = new baconhep::FillerGenInfo(cfg);                assert(fFillerGenInfo);
+    }
+  }
+ 
+  if(iConfig.existsAs<edm::ParameterSet>("GenJet",false)) {
+    edm::ParameterSet cfg(iConfig.getUntrackedParameter<edm::ParameterSet>("GenJet"));
+    fIsActiveGenJet  = cfg.getUntrackedParameter<bool>("isActive");
+    if(fIsActiveGenJet) {
+      fGenJetArr     = new TClonesArray("baconhep::TGenJet");           assert(fGenJetArr);
+      fFillerGenJet  = new baconhep::FillerGenJets(cfg);                assert(fFillerGenJet);
     }
   }
 
@@ -264,7 +289,9 @@ NtuplerMod::~NtuplerMod()
   delete fSusyGen;
   delete fEvtInfo;
   delete fGenEvtInfo;
+  delete fGenWeight;
   delete fGenParArr;
+  delete fGenJetArr;
   delete fEleArr;
   delete fMuonArr;
   delete fTauArr;
@@ -297,14 +324,16 @@ void NtuplerMod::beginJob()
   fOutputFile  = new TFile(fOutputName.c_str(), "RECREATE");
   fTotalEvents = new TH1D("TotalEvents","TotalEvents",1,-10,10);
   fEventTree   = new TTree("Events","Events");
-  
+
   if(fIsActiveEvtInfo) { 
     fEventTree->Branch("Info",fEvtInfo); 
     if(fAddSusyGen)     fEventTree->Branch("SusyGen",fSusyGen); 
   }
   if(fIsActiveGenInfo) {
-    fEventTree->Branch("GenEvtInfo",fGenEvtInfo);
+    fEventTree->Branch("GenEvtInfo" ,fGenEvtInfo);
+    fEventTree->Branch("GenWeight"  ,fGenWeight);
     fEventTree->Branch("GenParticle",&fGenParArr);
+    fEventTree->Branch("GenJet"     ,&fGenJetArr);
   }
   if(fIsActiveEle)    { fEventTree->Branch("Electron", &fEleArr); }
   if(fIsActiveMuon)   { fEventTree->Branch("Muon",     &fMuonArr); }
@@ -355,49 +384,56 @@ void NtuplerMod::setTriggers()
 void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   fTotalEvents->Fill(1);
-  
-  edm::Handle<edm::TriggerResults> hTrgRes;
-  iEvent.getByLabel(fHLTTag,hTrgRes);
-  assert(hTrgRes.isValid());  
-  const edm::TriggerNames &triggerNames = iEvent.triggerNames(*hTrgRes);
-  Bool_t config_changed = false;
-  if(fTriggerNamesID != triggerNames.parameterSetID()) {
-    fTriggerNamesID = triggerNames.parameterSetID();
-    config_changed  = true;
-  }
-  if(config_changed) {
-    initHLT(*hTrgRes, triggerNames);
-  }
-  
-  TriggerBits triggerBits;
-  for(unsigned int irec=0; irec<fTrigger->fRecords.size(); irec++) {
-    if(fTrigger->fRecords[irec].hltPathIndex == (unsigned int)-1) continue;
-    if(hTrgRes->accept(fTrigger->fRecords[irec].hltPathIndex)) {
-      triggerBits [fTrigger->fRecords[irec].baconTrigBit] = 1;
-    }
-  }
-  if(fSkipOnHLTFail && triggerBits == 0) return;  
 
+  TriggerBits triggerBits;
+  if(fUseTrigger) { 
+    edm::Handle<edm::TriggerResults> hTrgRes;
+    iEvent.getByLabel(fHLTTag,hTrgRes);
+    assert(hTrgRes.isValid());  
+    const edm::TriggerNames &triggerNames = iEvent.triggerNames(*hTrgRes);
+    Bool_t config_changed = false;
+    if(fTriggerNamesID != triggerNames.parameterSetID()) {
+      fTriggerNamesID = triggerNames.parameterSetID();
+      config_changed  = true;
+    }
+    if(config_changed) {
+      initHLT(*hTrgRes, triggerNames);
+    }
+    
+    for(unsigned int irec=0; irec<fTrigger->fRecords.size(); irec++) {
+      if(fTrigger->fRecords[irec].hltPathIndex == (unsigned int)-1) continue;
+      if(hTrgRes->accept(fTrigger->fRecords[irec].hltPathIndex)) {
+	triggerBits [fTrigger->fRecords[irec].baconTrigBit] = 1;
+      }
+    }
+    if(fSkipOnHLTFail && triggerBits == 0) return;  
+  }
 
   if(fIsActiveGenInfo) {
     fGenParArr->Clear();
-    fFillerGenInfo->fill(fGenEvtInfo, fGenParArr, iEvent);
+    fFillerGenInfo->fill(fGenEvtInfo, fGenWeight, fGenParArr, iEvent, fXS);
   }
-    
-  fPVArr->Clear();
+  if(fIsActiveGenJet) {
+    fGenJetArr->Clear();
+    fFillerGenJet->fill(fGenJetArr, iEvent);
+  }
+
   int nvertices = 0;
-  const reco::Vertex *pv = fFillerPV->fill(fPVArr, nvertices, iEvent);
-  assert(pv);
-  
-  separatePileUp(iEvent, *pv);
-  
+  const reco::Vertex *pv = 0;
+  if(fIsActiveEvtInfo) { 
+    fPVArr->Clear();
+    pv = fFillerPV->fill(fPVArr, nvertices, iEvent);
+    assert(pv);
+    separatePileUp(iEvent, *pv);
+  }
   if(fIsActiveEvtInfo) {
     fFillerEvtInfo->fill(fEvtInfo, iEvent, *pv, (nvertices>0), triggerBits,fSusyGen);
   }
   
   edm::Handle<trigger::TriggerEvent> hTrgEvt;
-  iEvent.getByLabel(fHLTObjTag,hTrgEvt);
-  
+  if(fUseTrigger) { 
+    iEvent.getByLabel(fHLTObjTag,hTrgEvt);
+  }
   if(fIsActiveEle) {
     fEleArr->Clear();
     fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, nvertices, fPFNoPU, fTrigger->fRecords, *hTrgEvt);
@@ -537,7 +573,14 @@ void NtuplerMod::fillDescriptions(edm::ConfigurationDescriptions& descriptions) 
   desc.setUnknown();
   descriptions.addDefault(desc);
 }
-void NtuplerMod::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup){}
+void NtuplerMod::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup){
+  // Get generator event information
+  edm::Handle<GenRunInfoProduct> hGenRunInfoProduct;
+  iRun.getByLabel(fGenRunInfoName,hGenRunInfoProduct);
+  assert(hGenRunInfoProduct.isValid());
+  std::cout << "=== XS : " << hGenRunInfoProduct->crossSection() << std::endl;
+  fXS = float(hGenRunInfoProduct->crossSection());
+}
 void NtuplerMod::endRun  (const edm::Run& iRun, const edm::EventSetup& iSetup){}
 void NtuplerMod::beginLuminosityBlock(const edm::LuminosityBlock& iLumi, const edm::EventSetup& iSetup){}
 void NtuplerMod::endLuminosityBlock  (const edm::LuminosityBlock& iLumi, const edm::EventSetup& iSetup){}

@@ -5,6 +5,7 @@
 #include "BaconAna/DataFormats/interface/TTrigger.hh"
 #include "BaconAna/DataFormats/interface/TEventInfo.hh"
 #include "BaconAna/DataFormats/interface/TGenEventInfo.hh"
+#include "BaconAna/DataFormats/interface/TGenWeight.hh"
 #include "BaconAna/DataFormats/interface/TGenParticle.hh"
 #include "BaconAna/DataFormats/interface/TPFPart.hh"
 
@@ -57,6 +58,7 @@ ExpertMod::ExpertMod(const edm::ParameterSet &iConfig):
   fEventTree      (0),
   fEvtInfo        (0),
   fGenEvtInfo     (0),
+  fGenWeight      (0),
   fGenParArr      (0),
   fPFParArr       (0),
   fPVArr          (0)
@@ -64,6 +66,7 @@ ExpertMod::ExpertMod(const edm::ParameterSet &iConfig):
   // Don't write TObject part of the objects
   baconhep::TEventInfo::Class()->IgnoreTObjectStreamer();
   baconhep::TGenEventInfo::Class()->IgnoreTObjectStreamer();
+  baconhep::TGenWeight::Class()->IgnoreTObjectStreamer();
   baconhep::TGenParticle::Class()->IgnoreTObjectStreamer();
   baconhep::TPFPart::Class()->IgnoreTObjectStreamer();
   
@@ -84,6 +87,7 @@ ExpertMod::ExpertMod(const edm::ParameterSet &iConfig):
     fIsActiveGenInfo = cfg.getUntrackedParameter<bool>("isActive");
     if(fIsActiveGenInfo) {
       fGenEvtInfo    = new baconhep::TGenEventInfo();                   assert(fGenEvtInfo);
+      fGenWeight     = new baconhep::TGenWeight();                      assert(fGenWeight);
       fGenParArr     = new TClonesArray("baconhep::TGenParticle",5000); assert(fGenParArr);
       fFillerGenInfo = new baconhep::FillerGenInfo(cfg);                assert(fFillerGenInfo);
     }
@@ -120,6 +124,7 @@ ExpertMod::~ExpertMod()
 
   delete fEvtInfo;
   delete fGenEvtInfo;
+  delete fGenWeight;
   delete fGenParArr;
   delete fPFParArr;
   delete fPVArr;
@@ -137,7 +142,8 @@ void ExpertMod::beginJob()
   
   if(fIsActiveEvtInfo) { fEventTree->Branch("Info",fEvtInfo); }
   if(fIsActiveGenInfo) {
-    fEventTree->Branch("GenEvtInfo",fGenEvtInfo);
+    fEventTree->Branch("GenEvtInfo" ,fGenEvtInfo);
+    fEventTree->Branch("GenWeight"  ,fGenWeight);
     fEventTree->Branch("GenParticle",&fGenParArr);
   }
   if(fIsActivePF) { fEventTree->Branch("PFPart",&fPFParArr); }
@@ -197,7 +203,8 @@ void ExpertMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   if(fIsActiveGenInfo) {
     fGenParArr->Clear();
-    fFillerGenInfo->fill(fGenEvtInfo, fGenParArr, iEvent);
+    float lTmp = 1.;
+    fFillerGenInfo->fill(fGenEvtInfo, fGenWeight, fGenParArr, iEvent,lTmp);
   }
   fPVArr->Clear();
   int nvertices = 0;

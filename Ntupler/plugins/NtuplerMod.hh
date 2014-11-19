@@ -20,9 +20,11 @@ namespace baconhep {
   class TEventInfo;
   class TSusyGen;
   class TGenEventInfo;
+  class TGenWeight;
   class TTrigger;
   class FillerEventInfo;
   class FillerGenInfo;
+  class FillerGenJets;
   class FillerVertex;
   class FillerElectron;
   class FillerMuon;
@@ -64,6 +66,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     //--------------------------------------------------------------------------------------------------
     //  data members
     //==================================================================================================   
+    bool fUseTrigger;
     bool fSkipOnHLTFail;
     
     // variables to handle triggers
@@ -78,6 +81,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     // AOD collection names
     std::string fPVName;
     std::string fPFCandName;
+    std::string fGenRunInfoName;
     bool fAddSusyGen;
 
     std::vector<std::string> fJetPostFix;
@@ -87,6 +91,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     // bacon fillers
     baconhep::FillerEventInfo *fFillerEvtInfo;
     baconhep::FillerGenInfo   *fFillerGenInfo;
+    baconhep::FillerGenJets   *fFillerGenJet;
     baconhep::FillerVertex    *fFillerPV;
     baconhep::FillerElectron  *fFillerEle;
     baconhep::FillerMuon      *fFillerMuon;
@@ -100,6 +105,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     
     bool fIsActiveEvtInfo;
     bool fIsActiveGenInfo;
+    bool fIsActiveGenJet;
     bool fIsActivePV;
     bool fIsActiveEle;
     bool fIsActiveMuon;
@@ -117,7 +123,9 @@ class NtuplerMod : public edm::EDAnalyzer {
     baconhep::TEventInfo    *fEvtInfo;
     baconhep::TSusyGen      *fSusyGen;
     baconhep::TGenEventInfo *fGenEvtInfo;
+    baconhep::TGenWeight    *fGenWeight;
     TClonesArray            *fGenParArr;
+    TClonesArray            *fGenJetArr;
     TClonesArray	    *fEleArr;
     TClonesArray	    *fMuonArr;
     TClonesArray	    *fTauArr;
@@ -128,4 +136,5 @@ class NtuplerMod : public edm::EDAnalyzer {
     TClonesArray	    **fTopJetArr;
     TClonesArray	    *fPFParArr;
     TClonesArray	    *fRHParArr;
+    float fXS;
 };

@@ -17,6 +17,7 @@ namespace edm {
 namespace baconhep {
   class TEventInfo;
   class TGenEventInfo;
+  class TGenWeight;
   class TTrigger;
   class FillerEventInfo;
   class FillerGenInfo;
@@ -80,6 +81,7 @@ class ExpertMod : public edm::EDAnalyzer {
     TTree                   *fEventTree;
     baconhep::TEventInfo    *fEvtInfo;
     baconhep::TGenEventInfo *fGenEvtInfo;
+    baconhep::TGenWeight    *fGenWeight;
     TClonesArray            *fGenParArr;
     TClonesArray            *fPFParArr;
     TClonesArray	    *fPVArr;

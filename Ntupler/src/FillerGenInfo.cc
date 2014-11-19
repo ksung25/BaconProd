@@ -1,11 +1,13 @@
 #include "BaconProd/Ntupler/interface/FillerGenInfo.hh"
 #include "BaconAna/DataFormats/interface/TGenEventInfo.hh"
+#include "BaconAna/DataFormats/interface/TGenWeight.hh"
 #include "BaconAna/DataFormats/interface/TGenParticle.hh"
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "DataFormats/Common/interface/RefToPtr.h"
 #include <TClonesArray.h>
 
@@ -14,6 +16,7 @@ using namespace baconhep;
 //--------------------------------------------------------------------------------------------------
 FillerGenInfo::FillerGenInfo(const edm::ParameterSet &iConfig):
   fGenEvtInfoName(iConfig.getUntrackedParameter<std::string>("edmGenEventInfoName","generator")),
+  fLHEEvtName    (iConfig.getUntrackedParameter<std::string>("edmLHEEventName"    ,"generator")),
   fGenParName    (iConfig.getUntrackedParameter<std::string>("edmGenParticlesName","genParticles")),
   fFillAll       (iConfig.getUntrackedParameter<bool>("fillAllGen",true))
 {}
@@ -22,12 +25,10 @@ FillerGenInfo::FillerGenInfo(const edm::ParameterSet &iConfig):
 FillerGenInfo::~FillerGenInfo(){}
 
 //--------------------------------------------------------------------------------------------------
-void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,      
-                         const edm::Event &iEvent)
+void FillerGenInfo::fill(TGenEventInfo *genEvtInfo,TGenWeight *genWeight, TClonesArray *array,      
+                         const edm::Event &iEvent,float &iXS)
 {
   assert(array);
-  
-  // Get generator event information
   edm::Handle<GenEventInfoProduct> hGenEvtInfoProduct;
   iEvent.getByLabel(fGenEvtInfoName,hGenEvtInfoProduct);
   assert(hGenEvtInfoProduct.isValid());
@@ -38,13 +39,31 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
   genEvtInfo->x_1      = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->x.first     : 0;
   genEvtInfo->x_2      = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->x.second    : 0;
   genEvtInfo->scalePDF = hGenEvtInfoProduct->qScale();
-  
-  
+  genEvtInfo->weight   = float(hGenEvtInfoProduct->weight());
+  genEvtInfo->xs       = iXS;
+
+  // Get LHE
+  edm::Handle<LHEEventProduct> hLHEEvtProduct;
+  iEvent.getByLabel(fLHEEvtName,hLHEEvtProduct);
+  assert(hLHEEvtProduct.isValid());
+  double baseWeight = (hLHEEvtProduct->weights()[0]).wgt;
+  genWeight->scale11 = float(((hLHEEvtProduct->weights()[0]).wgt)/baseWeight);
+  genWeight->scale12 = float(((hLHEEvtProduct->weights()[1]).wgt)/baseWeight);
+  genWeight->scale10 = float(((hLHEEvtProduct->weights()[2]).wgt)/baseWeight);
+  genWeight->scale21 = float(((hLHEEvtProduct->weights()[3]).wgt)/baseWeight);
+  genWeight->scale22 = float(((hLHEEvtProduct->weights()[4]).wgt)/baseWeight);
+  genWeight->scale20 = float(((hLHEEvtProduct->weights()[5]).wgt)/baseWeight);
+  genWeight->scale01 = float(((hLHEEvtProduct->weights()[6]).wgt)/baseWeight);
+  genWeight->scale02 = float(((hLHEEvtProduct->weights()[7]).wgt)/baseWeight);
+  genWeight->scale00 = float(((hLHEEvtProduct->weights()[8]).wgt)/baseWeight);
+  for(int i0 = 0; i0 < 100; i0++) genWeight->pdf[i0] = float(((hLHEEvtProduct->weights()[i0+9]).wgt)/baseWeight);
+
   // Get generator particles collection
   edm::Handle<reco::GenParticleCollection> hGenParProduct;
   iEvent.getByLabel(fGenParName,hGenParProduct);
   assert(hGenParProduct.isValid());  
   const reco::GenParticleCollection genParticles = *(hGenParProduct.product());  
+
   // loop over GEN particles
   std::vector<edm::Ptr<reco::GenParticle>> lMothers;
   TClonesArray &rArray = *array;
