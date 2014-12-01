@@ -109,11 +109,11 @@ baconhep::TauIsoRings TauIsoMVACalculator::computeIsoRings(const reco::PFTau &ta
   std::vector< std::vector<float> > shapes  (3, std::vector<float>(5));
   std::vector<float>                isoPtSum(3);
   
-  for(std::vector<reco::PFCandidatePtr>::const_iterator itPF = tau.isolationPFCands().begin(); 
+  for(reco::PFCandidateRefVector::const_iterator itPF = tau.isolationPFCands().begin(); 
       itPF!=tau.isolationPFCands().end(); 
       ++itPF)
   {
-    reco::PFCandidatePtr pfcand = *itPF;
+    reco::PFCandidateRef pfcand = *itPF;
     
     float dEta = tau.eta() - pfcand->eta();
     float dPhi = reco::deltaPhi(tau.phi(), pfcand->phi());
