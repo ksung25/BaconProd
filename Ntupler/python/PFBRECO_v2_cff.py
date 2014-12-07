@@ -17,6 +17,7 @@ from CommonTools.ParticleFlow.TopProjectors.pfNoJet_cfi import *
 from CommonTools.ParticleFlow.genForPF2PAT_cff import *
 
 # plugging PF2PAT on the collection of PFCandidates from RECO:
+pfPileUp.checkClosestZVertex = cms.bool(False)
 pfPileUp.PFCandidates = 'particleFlow'
 pfNoPileUp.bottomCollection = 'particleFlow'
 pfPileUpIso.PFCandidates = 'particleFlow' 

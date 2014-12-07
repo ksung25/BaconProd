@@ -489,14 +489,14 @@ void FillerJet::addJet(baconhep::TAddJet *pPFJet,const reco::PFJet &itJet,double
   pPFJet->mass_t2     = pT2Jet.m()*pCorr;
   pPFJet->area_t2     = pT2Jet.area();
   
-  //fastjet::PseudoJet pT3Jet = (*fTrimmer3)( iJet);
-  //pCorr               = correction(pT3Jet,iRho);
-  //pPFJet->pt_t3       = pT3Jet.pt()*pCorr;
-  //pPFJet->ptraw_t3    = pT3Jet.pt();
-  //pPFJet->eta_t3      = pT3Jet.eta();
-  //pPFJet->phi_t3      = pT3Jet.phi();
-  //pPFJet->mass_t3     = pT3Jet.m()*pCorr;
-  //pPFJet->area_t3     = pT3Jet.area();
+  fastjet::PseudoJet pT3Jet = (*fTrimmer3)( iJet);
+  pCorr               = correction(pT3Jet,iRho);
+  pPFJet->pt_t3       = pT3Jet.pt()*pCorr;
+  pPFJet->ptraw_t3    = pT3Jet.pt();
+  pPFJet->eta_t3      = pT3Jet.eta();
+  pPFJet->phi_t3      = pT3Jet.phi();
+  pPFJet->mass_t3     = pT3Jet.m()*pCorr;
+  pPFJet->area_t3     = pT3Jet.area();
   
   fastjet::PseudoJet pT4Jet = (*fTrimmer4)( iJet);
   pCorr               = correction(pT4Jet,iRho);
@@ -557,11 +557,11 @@ void FillerJet::addJet(baconhep::TAddJet *pPFJet,const reco::PFJet &itJet,double
   fastjet::JetDefinition lCJet_def    (fastjet::cambridge_algorithm, 2.0);
   fastjet::ClusterSequence lCClust_seq(lClusterParticles, lCJet_def);
   std::vector<fastjet::PseudoJet> inclusive_jets = lCClust_seq.inclusive_jets(0);
-  fastjet::EnergyCorrelatorRatio C2beta0 (2,0. ,fastjet::EnergyCorrelator::pt_R);
-  fastjet::EnergyCorrelatorRatio C2beta02(2,0.2,fastjet::EnergyCorrelator::pt_R);
-  fastjet::EnergyCorrelatorRatio C2beta05(2,0.5,fastjet::EnergyCorrelator::pt_R);
-  fastjet::EnergyCorrelatorRatio C2beta10(2,1.0,fastjet::EnergyCorrelator::pt_R);
-  fastjet::EnergyCorrelatorRatio C2beta20(2,2.0,fastjet::EnergyCorrelator::pt_R);
+  fastjet::EnergyCorrelatorDoubleRatio C2beta0 (2,0. ,fastjet::EnergyCorrelator::pt_R);
+  fastjet::EnergyCorrelatorDoubleRatio C2beta02(2,0.2,fastjet::EnergyCorrelator::pt_R);
+  fastjet::EnergyCorrelatorDoubleRatio C2beta05(2,0.5,fastjet::EnergyCorrelator::pt_R);
+  fastjet::EnergyCorrelatorDoubleRatio C2beta10(2,1.0,fastjet::EnergyCorrelator::pt_R);
+  fastjet::EnergyCorrelatorDoubleRatio C2beta20(2,2.0,fastjet::EnergyCorrelator::pt_R);
   pPFJet->c2_0    = C2beta0 (inclusive_jets[0]);
   pPFJet->c2_0P2  = C2beta02(inclusive_jets[0]);
   pPFJet->c2_0P5  = C2beta05(inclusive_jets[0]);
