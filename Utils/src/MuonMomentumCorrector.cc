@@ -23,7 +23,7 @@ void MuonMomentumCorrector::initialize(const MuCorrType type, const char *corrDa
   fDoRand = doRand;
   fType   = type;
   
-  char fname[100];
+  char fname[200];
   if(type == kMuScleFall11_START42) {
     sprintf(fname,"%s/MuScleFit_2011_MC_42X.txt",corrDataDir);
     fMuScleFitCorr = new MuScleFitCorrector(fname);
@@ -35,7 +35,7 @@ void MuonMomentumCorrector::initialize(const MuCorrType type, const char *corrDa
   } else if(type == kMuScleSummer12_DR53X_smearReReco) {
     sprintf(fname,"%s/MuScleFit_2012_MC_53X_smearReReco.txt",corrDataDir);
     fMuScleFitCorr = new MuScleFitCorrector(fname);
-  
+
   } else if(type == kMuScleData53X_ReReco) {
     sprintf(fname,"%s/MuScleFit_2012ABC_DATA_ReReco_53X.txt",corrDataDir);
     fMuScleFitCorr = new MuScleFitCorrector(fname);

@@ -87,6 +87,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fTotalEvents       (0),
   fEventTree         (0),
   fEvtInfo           (0),
+  fSusyGen           (0),
   fGenEvtInfo        (0),
   fGenParArr         (0),
   fEleArr            (0),
@@ -124,9 +125,9 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
     fAddSusyGen      = cfg.getUntrackedParameter<bool>("addSusyGen",false);
 
     if(fIsActiveEvtInfo) {
-      fEvtInfo       = new baconhep::TEventInfo();                        assert(fEvtInfo);
-      fFillerEvtInfo = new baconhep::FillerEventInfo(cfg);                assert(fFillerEvtInfo);
-      if(fAddSusyGen)  fSusyGen       = new baconhep::TSusyGen();         assert(fSusyGen);
+      fEvtInfo       = new baconhep::TEventInfo();            assert(fEvtInfo);
+      fFillerEvtInfo = new baconhep::FillerEventInfo(cfg);    assert(fFillerEvtInfo);
+      if(fAddSusyGen)  { fSusyGen = new baconhep::TSusyGen(); assert(fSusyGen); }
     }
   }
   
