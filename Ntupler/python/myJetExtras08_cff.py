@@ -29,7 +29,8 @@ partons  = cms.EDProducer("PartonSelector",
                           )
 
 AK8GenJets = ak5GenJets.clone(
-    rParam = cms.double(0.8)
+    rParam = cms.double(0.8),
+    jetAlgorithm = cms.string("CambridgeAachen")
     )
 
 # Flavour byValue PhysDef
@@ -116,8 +117,8 @@ recojetsequence = cms.Sequence(
 )
 
 AK8genjetsequence = cms.Sequence(
-    AK8GenJets                     * 
-    AK8jetFlavor                   
+    AK8GenJets                      
+    #AK8jetFlavor                   
 )
 AK8jetsequence = cms.Sequence(
     AK8PFJets                      *

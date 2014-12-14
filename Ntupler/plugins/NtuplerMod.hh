@@ -106,6 +106,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     bool fIsActiveEvtInfo;
     bool fIsActiveGenInfo;
     bool fIsActiveGenJet;
+    bool fIsActiveGenFatJet;
     bool fIsActivePV;
     bool fIsActiveEle;
     bool fIsActiveMuon;
@@ -126,6 +127,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     baconhep::TGenWeight    *fGenWeight;
     TClonesArray            *fGenParArr;
     TClonesArray            *fGenJetArr;
+    TClonesArray            *fGenFatJetArr;
     TClonesArray	    *fEleArr;
     TClonesArray	    *fMuonArr;
     TClonesArray	    *fTauArr;

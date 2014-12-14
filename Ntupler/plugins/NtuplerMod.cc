@@ -83,6 +83,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fIsActiveEvtInfo   (false),
   fIsActiveGenInfo   (false),
   fIsActiveGenJet    (false),
+  fIsActiveGenFatJet (false),
   fIsActivePV        (false),
   fIsActiveEle       (false),
   fIsActiveMuon      (false),
@@ -101,6 +102,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fGenWeight         (0),
   fGenParArr         (0),
   fGenJetArr         (0),
+  fGenFatJetArr      (0),
   fEleArr            (0),
   fMuonArr           (0),
   fTauArr            (0),
@@ -158,10 +160,14 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
  
   if(iConfig.existsAs<edm::ParameterSet>("GenJet",false)) {
     edm::ParameterSet cfg(iConfig.getUntrackedParameter<edm::ParameterSet>("GenJet"));
-    fIsActiveGenJet  = cfg.getUntrackedParameter<bool>("isActive");
+    fIsActiveGenJet     = cfg.getUntrackedParameter<bool>("isActive");
+    fIsActiveGenFatJet  = cfg.getUntrackedParameter<bool>("isActiveFatJet");
     if(fIsActiveGenJet) {
       fGenJetArr     = new TClonesArray("baconhep::TGenJet");           assert(fGenJetArr);
       fFillerGenJet  = new baconhep::FillerGenJets(cfg);                assert(fFillerGenJet);
+    }
+    if(fIsActiveGenFatJet) {
+      fGenFatJetArr  = new TClonesArray("baconhep::TGenJet");           assert(fGenFatJetArr);
     }
   }
 
@@ -292,6 +298,7 @@ NtuplerMod::~NtuplerMod()
   delete fGenWeight;
   delete fGenParArr;
   delete fGenJetArr;
+  delete fGenFatJetArr;
   delete fEleArr;
   delete fMuonArr;
   delete fTauArr;
@@ -334,6 +341,7 @@ void NtuplerMod::beginJob()
     fEventTree->Branch("GenWeight"  ,fGenWeight);
     fEventTree->Branch("GenParticle",&fGenParArr);
     fEventTree->Branch("GenJet"     ,&fGenJetArr);
+    fEventTree->Branch("GenFatJet"  ,&fGenFatJetArr);
   }
   if(fIsActiveEle)    { fEventTree->Branch("Electron", &fEleArr); }
   if(fIsActiveMuon)   { fEventTree->Branch("Muon",     &fMuonArr); }
@@ -415,7 +423,8 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   }
   if(fIsActiveGenJet) {
     fGenJetArr->Clear();
-    fFillerGenJet->fill(fGenJetArr, iEvent);
+    if(fGenFatJetArr != 0) fGenFatJetArr->Clear();
+    fFillerGenJet->fill(fGenJetArr, fGenFatJetArr, iEvent);
   }
 
   int nvertices = 0;

@@ -105,19 +105,19 @@ AK4Njettiness.src                                 =  cms.InputTag('AK4PFJets')
 genjetsequence = cms.Sequence(
     genParticlesForJets            *
     genParticlesForJetsNoNu        *
-    partons *
-    goodOfflinePrimaryVerticesQG   *
-    kt6PFJetsQG                    *
-    kt6PFJetsIsoQG                 *
     ak5GenJets)
 
 AK4genjetsequence = cms.Sequence(
-    AK4GenJets                     * 
-    AK4jetFlavor                   
-)
+    AK4GenJets                      
+    )
 AK4jetsequence = cms.Sequence(
+    goodOfflinePrimaryVerticesQG   *
+    kt6PFJetsQG                    *
+    kt6PFJetsIsoQG                 *
+    partons                        *
     AK4PFJets                      *
     AK4caPFJetsPruned              *
+    AK4jetFlavor                   *
     AK4jetTracksAssociatorAtVertex    *
     AK4jetImpactParameterTagInfos     *
     AK4jetSecondaryVertexTagInfos     *

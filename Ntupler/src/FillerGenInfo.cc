@@ -43,6 +43,7 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo,TGenWeight *genWeight, TClone
   genEvtInfo->xs       = iXS;
 
   // Get LHE
+  /*
   edm::Handle<LHEEventProduct> hLHEEvtProduct;
   iEvent.getByLabel(fLHEEvtName,hLHEEvtProduct);
   assert(hLHEEvtProduct.isValid());
@@ -57,6 +58,7 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo,TGenWeight *genWeight, TClone
   genWeight->scale02 = float(((hLHEEvtProduct->weights()[7]).wgt)/baseWeight);
   genWeight->scale00 = float(((hLHEEvtProduct->weights()[8]).wgt)/baseWeight);
   for(int i0 = 0; i0 < 100; i0++) genWeight->pdf[i0] = float(((hLHEEvtProduct->weights()[i0+9]).wgt)/baseWeight);
+  */
 
   // Get generator particles collection
   edm::Handle<reco::GenParticleCollection> hGenParProduct;
