@@ -4,7 +4,7 @@
 #include "BaconAna/DataFormats/interface/BaconAnaDefs.hh"
 #include "BaconAna/DataFormats/interface/TEventInfo.hh"
 #include "BaconAna/DataFormats/interface/TSusyGen.hh"
-#include "BaconAna/DataFormats/interface/TTrigger.hh"
+#include "BaconAna/Utils/interface/TTrigger.hh"
 #include "BaconAna/DataFormats/interface/TGenEventInfo.hh"
 #include "BaconAna/DataFormats/interface/TGenParticle.hh"
 #include "BaconAna/DataFormats/interface/TElectron.hh"
