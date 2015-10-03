@@ -1,4 +1,5 @@
 <use name="BaconAna/DataFormats"/>
+<use name="BaconAna/Utils"/>
 <use name="BaconProd/Utils"/>
 <use name="TrackingTools/IPTools"/>
 <use name="FWCore/Framework"/>

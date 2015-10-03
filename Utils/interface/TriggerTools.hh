@@ -2,7 +2,7 @@
 #define BACONPROD_UTILS_TRIGGERTOOLS_HH
 
 #include "BaconAna/DataFormats/interface/BaconAnaDefs.hh"
-#include "BaconAna/DataFormats/interface/TriggerRecord.hh"
+#include "BaconAna/Utils/interface/TriggerRecord.hh"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include <vector>
 

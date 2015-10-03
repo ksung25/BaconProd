@@ -49,12 +49,33 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
   std::vector<edm::Ptr<reco::GenParticle>> lMothers;
   TClonesArray &rArray = *array;
   for (reco::GenParticleCollection::const_iterator itGenP = genParticles.begin(); itGenP!=genParticles.end(); ++itGenP) {
-    if((itGenP->status() == 1     || itGenP->status()      == 99)    &&   //Remove all Status 1 and 99 particles
-       (fabs(itGenP->pdgId()) < 11 || fabs(itGenP->pdgId()) > 17)    &&   //Keep Letpons 
-       !fFillAll) continue; //Require to not fill all particles
-    if(!fFillAll && (itGenP->status() == 2 && itGenP->pdgId() == 21)) continue;
-    if(!fFillAll && (itGenP->status() == 2 && itGenP->pdgId() == 22)) continue;
-    if(!fFillAll && fabs(itGenP->pdgId()) > 50) continue;
+
+    // if not storing all gen particles, then do selective storing
+    if(!fFillAll) {
+      bool skip=true;
+    
+      if(itGenP->status() == 3)                                { skip = false; }  // keep particles from hard scatter process
+      if(abs(itGenP->pdgId())>= 5 && abs(itGenP->pdgId())<= 8) { skip = false; }  // keep b, t, b', t'
+      if(abs(itGenP->pdgId())>=11 && abs(itGenP->pdgId())<=18) { skip = false; }  // keep leptons
+      if(abs(itGenP->pdgId())>=23 && abs(itGenP->pdgId())<=39) { skip = false; }  // keep bosons except photons and gluons
+      if(abs(itGenP->pdgId())>10000)                           { skip = false; }  // keep exotic particles
+    
+      // photons (e.g. for FSR/ISR) and u,d,c,s-quarks (e.g. hadronic boson decays) coming from a previously stored particle
+      if(itGenP->pdgId()==22 || (abs(itGenP->pdgId())>0 && abs(itGenP->pdgId())<5)) {
+        if(itGenP->numberOfMothers() > 0) {
+          edm::Ptr<reco::GenParticle> lMomPtr = edm::refToPtr(itGenP->motherRef());
+          for(unsigned int im=0; im < lMothers.size(); ++im) {
+            if(lMothers[im] == lMomPtr) {
+              skip = false;
+              break;
+            }
+          }
+        }
+      }
+    
+      if(skip) continue;
+    }
+
     // construct object and place in array
     assert(rArray.GetEntries() < rArray.GetSize());
     const int index = rArray.GetEntries();
@@ -67,6 +88,7 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
     pGenPart->phi    = itGenP->phi();
     pGenPart->y      = itGenP->rapidity();
     pGenPart->mass   = itGenP->mass();
+
     if(itGenP->numberOfMothers() >  0 ) {
       int lId = -2;
       edm::Ptr<reco::GenParticle> lMomPtr = edm::refToPtr(itGenP->motherRef()); 

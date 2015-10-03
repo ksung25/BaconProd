@@ -1,5 +1,4 @@
 import FWCore.ParameterSet.Config as cms
-#from RecoJets.Configuration.GenJetParticles_cff import *
 from RecoJets.Configuration.RecoGenJets_cff     import ak5GenJets
 from RecoJets.JetProducers.ak5PFJets_cfi        import ak5PFJets
 from RecoJets.JetProducers.ak5PFJetsPruned_cfi  import ak5PFJetsPruned
@@ -50,7 +49,7 @@ AK5byValAlgo = cms.EDProducer("JetFlavourIdentifier",
                               physicsDefinition = cms.bool(False),
                               leptonInfo = cms.bool(True))
 
-AK5jetFlavor    = cms.Sequence(AK5byRef*AK5byValPhys*AK5byValAlgo)
+AK5jetFlavor = cms.Sequence(AK5byRef*AK5byValPhys*AK5byValAlgo)
 
 #for each jet collection run Pruning, subjet b-tagging, quark gluon discrimination,n-subjettiness and subjet quark gluon discrimination
 AK5PFJets = ak5PFJets.clone(
@@ -59,47 +58,47 @@ AK5PFJets = ak5PFJets.clone(
     )
 
 AK5caPFJetsPruned = ak5PFJetsPruned.clone(
-    jetAlgorithm = cms.string("CambridgeAachen"),
-    rParam = cms.double(0.5),
-    doAreaFastjet = cms.bool(False),
-    writeCompound = cms.bool(True),
-    jetCollInstanceName=cms.string("SubJets"),
-    jetPtMin = cms.double(20)
+    jetAlgorithm        = cms.string("CambridgeAachen"),
+    rParam              = cms.double(0.5),
+    doAreaFastjet       = cms.bool(False),
+    writeCompound       = cms.bool(True),
+    jetCollInstanceName = cms.string("SubJets"),
+    jetPtMin            = cms.double(20)
     )
 
 from RecoJets.JetAssociationProducers.ic5JetTracksAssociatorAtVertex_cfi import ic5JetTracksAssociatorAtVertex
-AK5jetTracksAssociatorAtVertex          = ic5JetTracksAssociatorAtVertex.clone()
-AK5jetTracksAssociatorAtVertex  .jets   = cms.InputTag('AK5PFJets')
-AK5jetTracksAssociatorAtVertex  .tracks = "generalTracks"
+AK5jetTracksAssociatorAtVertex        = ic5JetTracksAssociatorAtVertex.clone()
+AK5jetTracksAssociatorAtVertex.jets   = cms.InputTag('AK5PFJets')
+AK5jetTracksAssociatorAtVertex.tracks = "generalTracks"
 
 AK5jetTracksAssociatorAtVertexSJ        = ic5JetTracksAssociatorAtVertex.clone()
 AK5jetTracksAssociatorAtVertexSJ.jets   = cms.InputTag('AK5caPFJetsPruned','SubJets')
 AK5jetTracksAssociatorAtVertexSJ.tracks = "generalTracks"
 
 from RecoBTag.Configuration.RecoBTag_cff import *
-AK5jetImpactParameterTagInfos                      = impactParameterTagInfos.clone()
-AK5jetImpactParameterTagInfos.jetTracks            = "AK5jetTracksAssociatorAtVertex"
-AK5jetSecondaryVertexTagInfos                      = secondaryVertexTagInfos.clone()
-AK5jetSecondaryVertexTagInfos.trackIPTagInfos      = "AK5jetImpactParameterTagInfos"
-AK5jetCombinedSecondaryVertexBJetTags           = combinedSecondaryVertexBJetTags.clone()
+AK5jetImpactParameterTagInfos                  = impactParameterTagInfos.clone()
+AK5jetImpactParameterTagInfos.jetTracks        = "AK5jetTracksAssociatorAtVertex"
+AK5jetSecondaryVertexTagInfos                  = secondaryVertexTagInfos.clone()
+AK5jetSecondaryVertexTagInfos.trackIPTagInfos  = "AK5jetImpactParameterTagInfos"
+AK5jetCombinedSecondaryVertexBJetTags          = combinedSecondaryVertexBJetTags.clone()
 AK5jetCombinedSecondaryVertexBJetTags.tagInfos = cms.VInputTag( cms.InputTag("AK5jetImpactParameterTagInfos"), cms.InputTag("AK5jetSecondaryVertexTagInfos") )
 
-AK5jetImpactParameterTagInfosSJ                   = impactParameterTagInfos.clone()
-AK5jetImpactParameterTagInfosSJ.jetTracks         = "AK5jetTracksAssociatorAtVertexSJ"
-AK5jetSecondaryVertexTagInfosSJ                   = secondaryVertexTagInfos.clone()
-AK5jetSecondaryVertexTagInfosSJ.trackIPTagInfos     = "AK5jetImpactParameterTagInfosSJ"
+AK5jetImpactParameterTagInfosSJ                  = impactParameterTagInfos.clone()
+AK5jetImpactParameterTagInfosSJ.jetTracks        = "AK5jetTracksAssociatorAtVertexSJ"
+AK5jetSecondaryVertexTagInfosSJ                  = secondaryVertexTagInfos.clone()
+AK5jetSecondaryVertexTagInfosSJ.trackIPTagInfos  = "AK5jetImpactParameterTagInfosSJ"
 AK5jetCombinedSecondaryVertexBJetTagsSJ          = combinedSecondaryVertexBJetTags.clone()
 AK5jetCombinedSecondaryVertexBJetTagsSJ.tagInfos = cms.VInputTag( cms.InputTag("AK5jetImpactParameterTagInfosSJ"), cms.InputTag("AK5jetSecondaryVertexTagInfosSJ") )
 
 from JetTools.AnalyzerToolbox.QGTagger_RecoJets_cff import *
-AK5QGTagger                                       = QGTagger.clone()
-AK5QGTagger.srcJets                               = cms.InputTag('AK5PFJets')
-AK5QGTaggerSubJets                                = AK5QGTagger.clone()
-AK5QGTaggerSubJets.srcJets                        = cms.InputTag('AK5caPFJetsPruned','SubJets')
+AK5QGTagger                = QGTagger.clone()
+AK5QGTagger.srcJets        = cms.InputTag('AK5PFJets')
+AK5QGTaggerSubJets         = AK5QGTagger.clone()
+AK5QGTaggerSubJets.srcJets = cms.InputTag('AK5caPFJetsPruned','SubJets')
 
 from JetTools.AnalyzerToolbox.njettinessadder_cfi import *
-AK5Njettiness                                     = Njettiness.clone()       
-AK5Njettiness.src                                 =  cms.InputTag('AK5PFJets')
+AK5Njettiness     = Njettiness.clone()       
+AK5Njettiness.src =  cms.InputTag('AK5PFJets')
 
 
 genjetsequence = cms.Sequence(

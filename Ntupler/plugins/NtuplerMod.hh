@@ -33,7 +33,7 @@ namespace baconhep {
   class FillerRH;
 }
 
-//
+
 class NtuplerMod : public edm::EDAnalyzer {
   public:
     explicit NtuplerMod(const edm::ParameterSet &iConfig);
@@ -80,9 +80,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     std::string fPFCandName;
     bool fAddSusyGen;
 
-    std::vector<std::string> fJetPostFix;
-    std::vector<double>      fConeSizes;
-    bool fComputeFullJetInfo;
+    bool fComputeFullJetInfo, fComputeFullFatJetInfo, fComputeFullFatterJetInfo;
       
     // bacon fillers
     baconhep::FillerEventInfo *fFillerEvtInfo;
@@ -92,7 +90,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     baconhep::FillerMuon      *fFillerMuon;
     baconhep::FillerPhoton    *fFillerPhoton;
     baconhep::FillerTau       *fFillerTau;
-    baconhep::FillerJet       **fFillerJet;
+    baconhep::FillerJet       *fFillerJet, *fFillerFatJet, *fFillerFatterJet;
     baconhep::FillerPF        *fFillerPF;    
     baconhep::FillerRH        *fFillerRH;    
     
@@ -105,7 +103,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     bool fIsActiveMuon;
     bool fIsActivePhoton;
     bool fIsActiveTau;
-    bool fIsActiveJet;
+    bool fIsActiveJet, fIsActiveFatJet, fIsActiveFatterJet;
     bool fIsActivePF;
     bool fIsActiveRH;
     
@@ -121,11 +119,10 @@ class NtuplerMod : public edm::EDAnalyzer {
     TClonesArray	    *fEleArr;
     TClonesArray	    *fMuonArr;
     TClonesArray	    *fTauArr;
-    TClonesArray	    **fJetArr;
+    TClonesArray	    *fJetArr, *fFatJetArr, *fFatterJetArr;
     TClonesArray	    *fPhotonArr;
     TClonesArray	    *fPVArr;
-    TClonesArray	    **fAddJetArr;
-    TClonesArray	    **fTopJetArr;
+    TClonesArray	    *fAddJetArr, *fAddFatJetArr, *fAddFatterJetArr;
     TClonesArray	    *fPFParArr;
     TClonesArray	    *fRHParArr;
 };

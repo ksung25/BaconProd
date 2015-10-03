@@ -5,7 +5,7 @@ process = cms.Process('MakingBacon')
 
 is_data_flag  = False                                    # flag for if process data
 do_hlt_filter = False                                    # flag to skip events that fail relevant triggers
-hlt_filename  = "BaconAna/DataFormats/data/HLTFile_v1"   # list of relevant triggers
+hlt_filename  = "BaconAna/DataFormats/data/HLTFile_v2"   # list of relevant triggers
 
 cmssw_base = os.environ['CMSSW_BASE']
 
@@ -23,34 +23,15 @@ process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
 process.GlobalTag.globaltag = 'START53_V27::All'
 
 process.load('BaconProd/Ntupler/PFBRECO_v2_cff')
-#process.load('Dummy/Puppi/Puppi_cff')
 process.load("RecoTauTag/Configuration/RecoPFTauTag_cff")
 
 #--------------------------------------------------------------------------------
 # Import custom configurations
 #================================================================================
-process.load('BaconProd/Ntupler/myJetExtras04_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras05_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras06_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras07_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras08_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras09_cff')    # include gen jets and b-tagging
 
-process.load('BaconProd/Ntupler/myJetExtras04CHS_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras05CHS_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras06CHS_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras07CHS_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras05_cff')       # include gen jets and b-tagging
 process.load('BaconProd/Ntupler/myJetExtras08CHS_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras09CHS_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras12CHS_cff')    # include gen jets and b-tagging
-
-process.load('BaconProd/Ntupler/myJetExtras04Puppi_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras05Puppi_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras06Puppi_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras07Puppi_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras08Puppi_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras09Puppi_cff')    # include gen jets and b-tagging
-process.load('BaconProd/Ntupler/myJetExtras12Puppi_cff')    # include gen jets and b-tagging
+process.load('BaconProd/Ntupler/myJetExtras15CHS_cff')    # include gen jets and b-tagging
 
 process.load('BaconProd/Ntupler/myMETFilters_cff')        # apply MET filters set to tagging mode
 process.load('BaconProd/Ntupler/myMVAMet_cff')            # MVA MET
@@ -65,7 +46,10 @@ else:
 #================================================================================
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
-  fileNames  = cms.untracked.vstring('/store/cmst3/group/cmgtools/CMG/QCD_Pt-15to3000_TuneEE3C_Flat_8TeV_herwigpp/Summer12_DR53X-PU_S10_START53_V7A-v1/AODSIM/V5_B/PFAOD_99.root'),
+  fileNames  = cms.untracked.vstring('file:/afs/cern.ch/work/k/ksung/private/HZZ4lAna/temp/GluGluToHToZZTo4L_M-125_8TeV-powheg-pythia6_PU_S10_START53_V7A_FEEEEFFF-7FFB-E111-8FE2-002618943810.root')
+#  fileNames  = cms.untracked.vstring('/store/mc/Summer12_DR53X/TTJets_SemiLeptMGDecays_8TeV-madgraph-tauola/AODSIM/PU_S10_START53_V7C-v1/20000/00277FF2-7B84-E211-9475-782BCB27B958.root')
+#  fileNames  = cms.untracked.vstring('/store/mc/Summer12_DR53X/W2JetsToLNu_TuneZ2Star_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/00065798-2704-E211-B308-0025901D4C44.root')
+#  fileNames  = cms.untracked.vstring('/store/mc/Summer12_DR53X/DYJetsToLL_PtZ-100_TuneZ2star_8TeV_ext-madgraph-tarball/AODSIM/PU_S10_START53_V7C-v1/00000/001B91CE-7639-E211-B7D1-00261894385A.root')
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -191,7 +175,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   
   Tau = cms.untracked.PSet(
     isActive = cms.untracked.bool(True),
-    minPt    = cms.untracked.double(15),
+    minPt    = cms.untracked.double(10),
     edmName  = cms.untracked.string('hpsPFTauProducer'),
     ringIsoFile      = cms.untracked.string('BaconProd/Utils/data/gbrfTauIso_apr29a.root'),
     ringIso2File     = cms.untracked.string('BaconProd/Utils/data/gbrfTauIso_v2.root'),
@@ -201,7 +185,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   AK5 = cms.untracked.PSet(
     isActive             = cms.untracked.bool(True),
     minPt                = cms.untracked.double(20),
+    coneSize             = cms.untracked.double(0.5),
     doComputeFullJetInfo = cms.untracked.bool(False),
+    topTagType           = cms.untracked.string('none'),
     doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
 
     # ORDERED lists of jet energy correction input files
@@ -250,7 +236,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   CA8CHS = cms.untracked.PSet(
     isActive             = cms.untracked.bool(True),
     minPt                = cms.untracked.double(150),
-    doComputeFullJetInfo = cms.untracked.bool(False),
+    coneSize             = cms.untracked.double(0.8),
+    doComputeFullJetInfo = cms.untracked.bool(True),
+    topTagType           = cms.untracked.string('CMS'),
     doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
 
     # ORDERED lists of jet energy correction input files
@@ -280,7 +268,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
 
     # ORDERD list of pileup jet ID input files
     jetPUIDFiles = cms.untracked.vstring('',
-                                         'RecoJets/JetProducers/data/TMVAClassificationCategory_JetID_53X_Dec2012.weights.xml'),
+                                         'RecoJets/JetProducers/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
 
     # names of various jet-related collections
     jetName            = cms.untracked.string('CA8PFJetsCHS'),
@@ -299,7 +287,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   CA15CHS = cms.untracked.PSet(
     isActive             = cms.untracked.bool(True),
     minPt                = cms.untracked.double(150),
-    doComputeFullJetInfo = cms.untracked.bool(False),
+    coneSize             = cms.untracked.double(1.5),
+    doComputeFullJetInfo = cms.untracked.bool(True),
+    topTagType           = cms.untracked.string('HEP'),
     doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
 
     # ORDERED lists of jet energy correction input files
@@ -329,7 +319,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
 
     # ORDERD list of pileup jet ID input files
     jetPUIDFiles = cms.untracked.vstring('',
-                                         'RecoJets/JetProducers/data/TMVAClassificationCategory_JetID_53X_Dec2012.weights.xml'),
+                                         'RecoJets/JetProducers/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
 
     # names of various jet-related collections
     jetName            = cms.untracked.string('CA15PFJetsCHS'),
@@ -354,18 +344,16 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
 )
 
 process.baconSequence = cms.Sequence(process.PFBRECO*
-                                     #process.puppi*
                                      process.metFilters*
                                      process.producePFMETCorrections*
-                                     process.kt6PFJets*
                                      process.recojetsequence*
                                      process.genjetsequence*
                                      process.AK5jetsequence*
                                      process.AK5genjetsequence*
                                      process.CA8jetsequenceCHS*
-                                     process.CA8genjetsequence*
+                                     process.CA8genjetsequenceCHS*
                                      process.CA15jetsequenceCHS*
-                                     process.CA15genjetsequence*
+                                     process.CA15genjetsequenceCHS*
                                      process.PFTau*   ### must come after antiktGenJets otherwise conflict on RecoJets/JetProducers/plugins
 				     process.MVAMetSeq*
 				     process.ntupler)
@@ -394,7 +382,9 @@ if is_data_flag:
   assert process.ntupler.GenInfo.isActive == cms.untracked.bool(False)
   assert process.ntupler.Electron.isData  == cms.untracked.bool(True)
   assert process.ntupler.Muon.isData      == cms.untracked.bool(True)
-  assert process.ntupler.Jet.doGenJet     == cms.untracked.bool(False)
+  assert process.ntupler.AK5.doGenJet     == cms.untracked.bool(False)
+  assert process.ntupler.CA8CHS.doGenJet  == cms.untracked.bool(False)
+  assert process.ntupler.CA15CHS.doGenJet == cms.untracked.bool(False)
 else:
   assert process.ntupler.Electron.isData == cms.untracked.bool(False)
   assert process.ntupler.Muon.isData     == cms.untracked.bool(False)

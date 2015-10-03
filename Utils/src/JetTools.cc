@@ -289,7 +289,6 @@ double JetTools::jetCharge(const reco::PFJet &jet, const double kappa)
 //--------------------------------------------------------------------------------------------------
 double* JetTools::subJetBTag(const reco::PFJet &jet,reco::JetTagCollection &subJetVal,double iConeSize )
 {
-  // Following CMS convention first two daughters are leading subjets
   double* vals = new double[2];
   double pt[2]; 
   int subjetIndex[2];
