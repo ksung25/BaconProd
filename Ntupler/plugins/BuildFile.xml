@@ -3,6 +3,7 @@
 <use name="FWCore/ParameterSet"/>
 <use name="DataFormats/CLHEP"/>
 <use name="BaconAna/DataFormats"/>
+<use name="BaconAna/Utils"/>
 <use name="BaconProd/Ntupler"/>
 <flags CXXFLAGS="-g -Wall"/>
 <library file="*.cc" name="BaconProdNtuplerPlugins">

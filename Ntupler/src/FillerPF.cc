@@ -157,6 +157,42 @@ void FillerPF::fill(TClonesArray *array,TClonesArray *iVtxCol,
     pPF->vtxId = lId;
   } 
 }
+void FillerPF::fillMiniAOD(TClonesArray *array,TClonesArray *iVtxCol,
+			   const edm::Event &iEvent) 
+		   
+{
+  assert(array);
+  // Get PF collection
+  edm::Handle<pat::PackedCandidateCollection> hPFProduct;
+  iEvent.getByLabel(fPFName,hPFProduct);
+  assert(hPFProduct.isValid());
+  const pat::PackedCandidateCollection *PFCol = hPFProduct.product();
+
+  TClonesArray &rArray = *array;
+  int pId = 0; 
+  for(pat::PackedCandidateCollection::const_iterator itPF = PFCol->begin(); itPF!=PFCol->end(); itPF++) {
+    pId++;
+    // construct object and place in array
+    assert(rArray.GetEntries() < rArray.GetSize());
+    const int index = rArray.GetEntries();
+    new(rArray[index]) baconhep::TPFPart();
+    baconhep::TPFPart *pPF = (baconhep::TPFPart*)rArray[index];
+
+    //
+    // Kinematics
+    //==============================    
+    pPF->pt      = itPF->pt();
+    pPF->eta     = itPF->eta();
+    pPF->phi     = itPF->phi();
+    pPF->m       = itPF->mass();
+    pPF->e       = itPF->energy();
+    pPF->q       = itPF->charge();
+    pPF->pfType  = itPF->pdgId();
+    pPF->vtxChi2 = itPF->vertexChi2();
+    pPF->dz      = itPF->dz();
+    pPF->d0      = itPF->dxy();
+  } 
+}
 float FillerPF::depthDeltaR(const reco::PFCandidate *iPF,const reco::PFRecHitCollection &iPFCol,double iDR) { 
    //Get Calo Depth of PF Clusters in a cylinder using deltar R
   float lEta     = iPF->positionAtECALEntrance().eta();

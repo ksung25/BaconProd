@@ -6,7 +6,6 @@
 #include <string>                                        // string class
 
 // forward class declarations
-#include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 class TFile;
 class TH1D;
@@ -18,7 +17,6 @@ namespace edm {
 }
 namespace baconhep {
   class TEventInfo;
-  class TSusyGen;
   class TGenEventInfo;
   class TTrigger;
   class FillerEventInfo;
@@ -28,6 +26,7 @@ namespace baconhep {
   class FillerMuon;
   class FillerPhoton;
   class FillerTau;
+  class FillerCaloJet;
   class FillerJet;
   class FillerPF;
   class FillerRH;
@@ -57,14 +56,12 @@ class NtuplerMod : public edm::EDAnalyzer {
     // initialization from HLT menu; needs to be called on every change in HLT menu
     void initHLT(const edm::TriggerResults&, const edm::TriggerNames&);
     
-    //
-    void separatePileUp(const edm::Event &iEvent, const reco::Vertex &pv);
-
 
     //--------------------------------------------------------------------------------------------------
     //  data members
     //==================================================================================================   
     bool fSkipOnHLTFail;
+    bool fUseAOD;
     
     // variables to handle triggers
     edm::ParameterSetID fTriggerNamesID;
@@ -72,16 +69,17 @@ class NtuplerMod : public edm::EDAnalyzer {
     edm::InputTag       fHLTObjTag;
     std::string         fHLTFile;
 
-    std::vector<const reco::PFCandidate*> fPFNoPU;
-    std::vector<const reco::PFCandidate*> fPFPU;
-    
-    // AOD collection names
+    // Collection names
     std::string fPVName;
-    std::string fPFCandName;
-    bool fAddSusyGen;
+    std::string fGenRunInfoName;
 
-    bool fComputeFullJetInfo, fComputeFullFatJetInfo, fComputeFullFatterJetInfo;
-      
+    bool fFillLHEWgt;
+    bool fUseAODJet,      fUseAODFatJet,      fUseAODFatterJet;
+    bool fUseAODPuppiJet, fUseAODFatPuppiJet, fUseAODFatterPuppiJet;
+
+    bool fComputeFullJetInfo,      fComputeFullFatJetInfo,      fComputeFullFatterJetInfo;
+    bool fComputeFullPuppiJetInfo, fComputeFullFatPuppiJetInfo, fComputeFullFatterPuppiJetInfo;
+ 
     // bacon fillers
     baconhep::FillerEventInfo *fFillerEvtInfo;
     baconhep::FillerGenInfo   *fFillerGenInfo;
@@ -90,7 +88,9 @@ class NtuplerMod : public edm::EDAnalyzer {
     baconhep::FillerMuon      *fFillerMuon;
     baconhep::FillerPhoton    *fFillerPhoton;
     baconhep::FillerTau       *fFillerTau;
+    baconhep::FillerCaloJet   *fFillerCaloJet;
     baconhep::FillerJet       *fFillerJet, *fFillerFatJet, *fFillerFatterJet;
+    baconhep::FillerJet       *fFillerPuppiJet, *fFillerFatPuppiJet, *fFillerFatterPuppiJet;
     baconhep::FillerPF        *fFillerPF;    
     baconhep::FillerRH        *fFillerRH;    
     
@@ -103,7 +103,9 @@ class NtuplerMod : public edm::EDAnalyzer {
     bool fIsActiveMuon;
     bool fIsActivePhoton;
     bool fIsActiveTau;
+    bool fIsActiveCaloJet;
     bool fIsActiveJet, fIsActiveFatJet, fIsActiveFatterJet;
+    bool fIsActivePuppiJet, fIsActiveFatPuppiJet, fIsActiveFatterPuppiJet;
     bool fIsActivePF;
     bool fIsActiveRH;
     
@@ -111,18 +113,22 @@ class NtuplerMod : public edm::EDAnalyzer {
     std::string              fOutputName;
     TFile                   *fOutputFile;
     TH1D                    *fTotalEvents;
+    float                    fXS;
     TTree                   *fEventTree;
     baconhep::TEventInfo    *fEvtInfo;
-    baconhep::TSusyGen      *fSusyGen;
     baconhep::TGenEventInfo *fGenEvtInfo;
+    TClonesArray            *fLHEWgtArr;
     TClonesArray            *fGenParArr;
     TClonesArray	    *fEleArr;
     TClonesArray	    *fMuonArr;
     TClonesArray	    *fTauArr;
+    TClonesArray	    *fCaloJetArr;
     TClonesArray	    *fJetArr, *fFatJetArr, *fFatterJetArr;
+    TClonesArray	    *fPuppiJetArr, *fFatPuppiJetArr, *fFatterPuppiJetArr;
     TClonesArray	    *fPhotonArr;
     TClonesArray	    *fPVArr;
     TClonesArray	    *fAddJetArr, *fAddFatJetArr, *fAddFatterJetArr;
+    TClonesArray	    *fAddPuppiJetArr, *fAddFatPuppiJetArr, *fAddFatterPuppiJetArr;
     TClonesArray	    *fPFParArr;
     TClonesArray	    *fRHParArr;
 };

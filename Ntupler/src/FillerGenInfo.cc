@@ -1,11 +1,12 @@
 #include "BaconProd/Ntupler/interface/FillerGenInfo.hh"
 #include "BaconAna/DataFormats/interface/TGenEventInfo.hh"
+#include "BaconAna/DataFormats/interface/TLHEWeight.hh"
 #include "BaconAna/DataFormats/interface/TGenParticle.hh"
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include "DataFormats/Math/interface/deltaR.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "DataFormats/Common/interface/RefToPtr.h"
 #include <TClonesArray.h>
 
@@ -14,52 +15,79 @@ using namespace baconhep;
 //--------------------------------------------------------------------------------------------------
 FillerGenInfo::FillerGenInfo(const edm::ParameterSet &iConfig):
   fGenEvtInfoName(iConfig.getUntrackedParameter<std::string>("edmGenEventInfoName","generator")),
+  fLHEEvtInfoName(iConfig.getUntrackedParameter<std::string>("edmLHEEventInfoName","externalLHEProducer")),
   fGenParName    (iConfig.getUntrackedParameter<std::string>("edmGenParticlesName","genParticles")),
-  fFillAll       (iConfig.getUntrackedParameter<bool>("fillAllGen",true))
+  fFillAll       (iConfig.getUntrackedParameter<bool>("fillAllGen",false)),
+  fFillLHEWeights(iConfig.getUntrackedParameter<bool>("fillLHEWeights",false))
 {}
 
 //--------------------------------------------------------------------------------------------------
 FillerGenInfo::~FillerGenInfo(){}
 
 //--------------------------------------------------------------------------------------------------
-void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,      
-                         const edm::Event &iEvent)
+void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, TClonesArray *weightsArr,
+                         const edm::Event &iEvent, const float iXS)
 {
-  assert(array);
-  
+  assert(particlesArr);
+  assert(!fFillLHEWeights || weightsArr);
+
   // Get generator event information
   edm::Handle<GenEventInfoProduct> hGenEvtInfoProduct;
   iEvent.getByLabel(fGenEvtInfoName,hGenEvtInfoProduct);
   assert(hGenEvtInfoProduct.isValid());
 
   const gen::PdfInfo *pdfInfo = (hGenEvtInfoProduct->hasPDF()) ? hGenEvtInfoProduct->pdf() : 0;
-  genEvtInfo->id_1     = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->id.first    : 0;
-  genEvtInfo->id_2     = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->id.second   : 0;
-  genEvtInfo->x_1      = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->x.first     : 0;
-  genEvtInfo->x_2      = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->x.second    : 0;
+  genEvtInfo->id_1     = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->id.first  : 0;
+  genEvtInfo->id_2     = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->id.second : 0;
+  genEvtInfo->x_1      = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->x.first   : 0;
+  genEvtInfo->x_2      = (hGenEvtInfoProduct->hasPDF()) ? pdfInfo->x.second  : 0;
   genEvtInfo->scalePDF = hGenEvtInfoProduct->qScale();
-  
-  
+  genEvtInfo->xs       = iXS;
+  genEvtInfo->weight   = hGenEvtInfoProduct->weight();
+
+  // Get LHE event information
+  if(fFillLHEWeights) {
+    edm::Handle<LHEEventProduct> hLHEEvtInfoProduct;
+    iEvent.getByLabel(fLHEEvtInfoName,hLHEEvtInfoProduct);
+    assert(hLHEEvtInfoProduct.isValid());
+
+    TClonesArray &rWeightsArray = *weightsArr;
+    for(unsigned int iw=0; iw<hLHEEvtInfoProduct->weights().size(); iw++) {
+
+      // construct object and place in array
+      assert(rWeightsArray.GetEntries() < rWeightsArray.GetSize());
+      const int index = rWeightsArray.GetEntries();
+      new(rWeightsArray[index]) baconhep::TGenParticle();
+      baconhep::TLHEWeight *pWeight = (baconhep::TLHEWeight*)rWeightsArray[index];
+
+      pWeight->id     = hLHEEvtInfoProduct->weights().at(iw).id;
+      pWeight->weight = hLHEEvtInfoProduct->weights().at(iw).wgt;
+    }
+  }
+
   // Get generator particles collection
   edm::Handle<reco::GenParticleCollection> hGenParProduct;
   iEvent.getByLabel(fGenParName,hGenParProduct);
   assert(hGenParProduct.isValid());  
   const reco::GenParticleCollection genParticles = *(hGenParProduct.product());  
+
   // loop over GEN particles
   std::vector<edm::Ptr<reco::GenParticle>> lMothers;
-  TClonesArray &rArray = *array;
+  TClonesArray &rGenParArray = *particlesArr;
   for (reco::GenParticleCollection::const_iterator itGenP = genParticles.begin(); itGenP!=genParticles.end(); ++itGenP) {
 
     // if not storing all gen particles, then do selective storing
+    // Note: assuming Pythia8 status codes
+    // Reference: http://home.thep.lu.se/~torbjorn/pythia81html/ParticleProperties.html
     if(!fFillAll) {
       bool skip=true;
-    
-      if(itGenP->status() == 3)                                { skip = false; }  // keep particles from hard scatter process
+
+      if(itGenP->status()>20 && itGenP->status()<30)           { skip = false; }  // keep particles from hard scatter process
       if(abs(itGenP->pdgId())>= 5 && abs(itGenP->pdgId())<= 8) { skip = false; }  // keep b, t, b', t'
       if(abs(itGenP->pdgId())>=11 && abs(itGenP->pdgId())<=18) { skip = false; }  // keep leptons
       if(abs(itGenP->pdgId())>=23 && abs(itGenP->pdgId())<=39) { skip = false; }  // keep bosons except photons and gluons
       if(abs(itGenP->pdgId())>10000)                           { skip = false; }  // keep exotic particles
-    
+
       // photons (e.g. for FSR/ISR) and u,d,c,s-quarks (e.g. hadronic boson decays) coming from a previously stored particle
       if(itGenP->pdgId()==22 || (abs(itGenP->pdgId())>0 && abs(itGenP->pdgId())<5)) {
         if(itGenP->numberOfMothers() > 0) {
@@ -72,15 +100,15 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
           }
         }
       }
-    
+
       if(skip) continue;
     }
 
     // construct object and place in array
-    assert(rArray.GetEntries() < rArray.GetSize());
-    const int index = rArray.GetEntries();
-    new(rArray[index]) baconhep::TGenParticle();
-    baconhep::TGenParticle *pGenPart = (baconhep::TGenParticle*)rArray[index];
+    assert(rGenParArray.GetEntries() < rGenParArray.GetSize());
+    const int index = rGenParArray.GetEntries();
+    new(rGenParArray[index]) baconhep::TGenParticle();
+    baconhep::TGenParticle *pGenPart = (baconhep::TGenParticle*)rGenParArray[index];
     pGenPart->pdgId  = itGenP->pdgId();
     pGenPart->status = itGenP->status();
     pGenPart->pt     = itGenP->pt();
@@ -88,7 +116,6 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
     pGenPart->phi    = itGenP->phi();
     pGenPart->y      = itGenP->rapidity();
     pGenPart->mass   = itGenP->mass();
-
     if(itGenP->numberOfMothers() >  0 ) {
       int lId = -2;
       edm::Ptr<reco::GenParticle> lMomPtr = edm::refToPtr(itGenP->motherRef()); 
@@ -100,7 +127,7 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *array,
       }
       pGenPart->parent = lId;
     }
-    if(itGenP->numberOfMothers() == 0 ) pGenPart->parent = -1;
+    if(itGenP->numberOfMothers() == 0) { pGenPart->parent = -1; }
     edm::Ptr<reco::GenParticle> thePtr(hGenParProduct, itGenP - genParticles.begin());
     lMothers.push_back(thePtr);
   }

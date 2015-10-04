@@ -21,14 +21,18 @@ namespace baconhep
       
       void fill(TGenEventInfo    *genEvtInfo,     // output object to be filled
                 TClonesArray     *particlesArr,   // output array of particles to be filled
-		const edm::Event &iEvent);        // EDM event info
-  
-    protected:  
-      
+                TClonesArray     *weightsArr,     // output array of LHE weights to be filled
+		const edm::Event &iEvent,         // EDM event info
+                const float       iXS);           // LHE cross section
+
+    protected:        
       // EDM object collection names
       std::string fGenEvtInfoName;
+      std::string fLHEEvtInfoName;
       std::string fGenParName;
-      bool        fFillAll;
+
+      bool fFillAll;
+      bool fFillLHEWeights;
   };
 }
 #endif

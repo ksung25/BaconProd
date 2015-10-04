@@ -37,3 +37,28 @@ TriggerObjects TriggerTools::matchHLT(const double eta, const double phi,
   
   return matchBits;
 }
+
+TriggerObjects TriggerTools::matchHLT(const double eta, const double phi,  
+                                      const std::vector<TriggerRecord> &triggerRecords,
+                                      const pat::TriggerObjectStandAloneCollection &triggerObjects)
+{
+  const double dRMax = 0.2;
+
+  TriggerObjects matchBits;
+  for(unsigned int irec=0; irec<triggerRecords.size(); irec++) {     
+    for(unsigned int iobj=0; iobj<triggerRecords[irec].objectMap.size(); iobj++) {
+      const std::string   filterName = triggerRecords[irec].objectMap[iobj].first;
+      const unsigned int  filterBit  = triggerRecords[irec].objectMap[iobj].second;
+
+      for(pat::TriggerObjectStandAlone tobj : triggerObjects) {
+        if(tobj.hasFilterLabel(filterName)) {
+          if(reco::deltaR(eta,phi,tobj.eta(),tobj.phi()) < dRMax) {
+            matchBits[filterBit] = 1; 
+          }
+        }
+      }
+    }
+  }
+
+  return matchBits;
+}

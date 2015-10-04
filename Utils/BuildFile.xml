@@ -1,9 +1,9 @@
 <use name="RecoEcal/EgammaCoreTools"/>
 <use name="RecoEgamma/EgammaTools"/>
-<use name="MuScleFit/Calibration"/>
+<use name="DataFormats/JetReco"/>
+<use name="DataFormats/PatCandidates"/>
 <use name="root"/>
 <use name="roottmva"/>
-<use name="rootcintex"/>
 <use name="fastjet"/>
 <flags CXXFLAGS="-g -Wall"/>
 <export>

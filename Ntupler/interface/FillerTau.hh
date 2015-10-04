@@ -39,17 +39,29 @@ namespace baconhep
   class FillerTau
   {
     public:
-      FillerTau(const edm::ParameterSet &iConfig);
+      FillerTau(const edm::ParameterSet &iConfig, const bool useAOD);
       ~FillerTau();
-            
-      void fill(TClonesArray                     *array,           // output array to be filled
-                const edm::Event                 &iEvent,          // event info
-		const edm::EventSetup            &iSetup,          // event setup info
-		const reco::Vertex               &pv,              // event primary vertex
-		const std::vector<TriggerRecord> &triggerRecords,  // list of trigger names and objects
-		const trigger::TriggerEvent      &triggerEvent);   // event trigger objects
-      
-      
+
+      // === filler for AOD ===            
+      void fill(TClonesArray                     *array,                        // output array to be filled
+                const edm::Event                 &iEvent,                       // event info
+		const edm::EventSetup            &iSetup,                       // event setup info
+		const reco::Vertex               &pv,                           // event primary vertex
+		const std::vector<TriggerRecord> &triggerRecords,               // list of trigger names and objects
+		const trigger::TriggerEvent      &triggerEvent);                // event trigger objects
+
+      // === filler for MINIAOD ===
+      void fill(TClonesArray                                 *array,            // output array to be filled
+                const edm::Event                             &iEvent,           // event info
+                const edm::EventSetup                        &iSetup,           // event setup info
+                const reco::Vertex                           &pv,               // event primary vertex
+                const std::vector<TriggerRecord>             &triggerRecords,   // list of trigger names and objects
+                const pat::TriggerObjectStandAloneCollection &triggerObjects);  // event trigger objects
+
+  protected:  
+    void computeIso(double &iEta,double &iPhi,const std::vector<reco::PFCandidatePtr>& iCands, const double extRadius,
+		    const reco::PFCandidateCollection    &puppi,
+		    float &out_chHadIso, float &out_gammaIso, float &out_neuHadIso) const;
       // Tau cuts
       double fMinPt;
             
@@ -61,8 +73,12 @@ namespace baconhep
       //TauIsoMVACalculator fRingIso;
       //TauIsoMVACalculator fRingIso2;
   
-    protected:
       std::vector<MyTauDiscHandle*> fMyTauDiscHandles;
+      // Puppi
+      std::string fPuppiName; 
+      std::string fPuppiNoLepName; 
+      bool fUsePuppi;
+      bool fUseAOD;
   };
 }
 #endif

@@ -8,12 +8,13 @@
 using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
-FillerVertex::FillerVertex(const edm::ParameterSet &iConfig):
+FillerVertex::FillerVertex(const edm::ParameterSet &iConfig, const bool useAOD):
   fPVName       (iConfig.getUntrackedParameter<std::string>("edmName","offlinePrimaryVertices")),
   fMinNTracksFit(0),
   fMinNdof      (4),
   fMaxAbsZ      (24),
-  fMaxRho       (2)
+  fMaxRho       (2),
+  fUseAOD       (useAOD)
 {}
 
 //--------------------------------------------------------------------------------------------------
@@ -34,7 +35,11 @@ const reco::Vertex* FillerVertex::fill(TClonesArray *array, int &nvtx, const edm
   nvtx = 0;
     
   for(reco::VertexCollection::const_iterator itVtx = pvCol->begin(); itVtx!=pvCol->end(); ++itVtx) {    
-    if(itVtx->isFake())                          continue;
+    if(fUseAOD) {
+      if(itVtx->isFake())                        continue;
+    } else {
+      if(itVtx->chi2()==0 && itVtx->ndof()==0)   continue;  //(!) substitute for Vertex::isFake() because track collection not in MINIAOD
+    }
     if(itVtx->tracksSize()     < fMinNTracksFit) continue;
     if(itVtx->ndof()           < fMinNdof)       continue;
     if(fabs(itVtx->z())        > fMaxAbsZ)       continue;

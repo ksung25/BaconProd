@@ -6,9 +6,10 @@ import FWCore.ParameterSet.Config as cms
 
 ## The iso-based HBHE noise filter ___________________________________________||
 from CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi import *
+HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
 
 ## The CSC beam halo tight filter ____________________________________________||
-#from RecoMET.METAnalyzers.CSCHaloFilter_cfi import * <-- filter not applied, save BeamHaloSummary info instead
+from RecoMET.METFilters.CSCTightHaloFilter_cfi import * 
 
 ## The HCAL laser filter _____________________________________________________||
 from RecoMET.METFilters.hcalLaserEventFilter_cfi import *
@@ -52,7 +53,7 @@ logErrorTooManyClusters.forcedValue = cms.untracked.bool(False)
 
 metFilters = cms.Sequence(
    HBHENoiseFilterResultProducer *
-   #CSCTightHaloFilter * <-- filter not applied, save BeamHaloSummary info instead
+   CSCTightHaloFilter * #<-- filter not applied, save BeamHaloSummary info instead
    hcalLaserEventFilter *
    EcalDeadCellTriggerPrimitiveFilter *
    goodVertices * trackingFailureFilter *

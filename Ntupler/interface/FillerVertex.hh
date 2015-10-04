@@ -15,12 +15,12 @@ namespace baconhep
   class FillerVertex
   {
     public:
-      FillerVertex(const edm::ParameterSet &iConfig);
+      FillerVertex(const edm::ParameterSet &iConfig, const bool useAOD);
       ~FillerVertex();
       
-      const reco::Vertex* fill(TClonesArray       *array,    // output array to be filled
-		               int                &nvtx,     // output number of primary vertices
-		               const edm::Event   &iEvent);  // event info
+      const reco::Vertex* fill(TClonesArray     *array,    // output array to be filled
+		               int              &nvtx,     // output number of primary vertices
+		               const edm::Event &iEvent);  // event info
 
       
       // EDM object collection names
@@ -31,6 +31,8 @@ namespace baconhep
       double       fMinNdof;
       double       fMaxAbsZ;
       double       fMaxRho;
+
+      bool fUseAOD;
   };
 }
 #endif

@@ -7,6 +7,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/ParticleFlowReco/interface/PFRecHitFwd.h"
 
@@ -24,6 +25,10 @@ namespace baconhep
        void fill(TClonesArray       *array,    // output array to be filled
 		 TClonesArray       *iVtxCol,
 		 const edm::Event   &iEvent);  // event info
+
+       void fillMiniAOD(TClonesArray       *array,    // output array to be filled
+			TClonesArray       *iVtxCol,
+			const edm::Event   &iEvent);  // event info
    
     protected:
       //Useful tools
