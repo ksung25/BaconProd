@@ -91,6 +91,7 @@ CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS = pfCombinedInclusiveSecon
 # q/g discriminator
 # Note: need to provide JECs (or corrected jet collection) to QGL calculator
 from JetMETCorrections.Configuration.JetCorrectorsAllAlgos_cff import *
+from BaconProd.Ntupler.myCHSCorrections_cff          import *
 ca15PFCHSL1FastL2L3Corrector = cms.EDProducer('ChainedJetCorrectorProducer',
     correctors = cms.VInputTag('ak8PFCHSL1FastjetCorrector','ak8PFCHSL2RelativeCorrector','ak8PFCHSL3AbsoluteCorrector')
   )
@@ -162,7 +163,8 @@ CA15jetsequenceCHSData = cms.Sequence(
     CA15PFImpactParameterTagInfosSJCHS*
     CA15PFInclusiveSecondaryVertexFinderTagInfosSJCHS*
     CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS*
-    ca15PFCHSL1FastL2L3ResidualCorrectorChain*
+    #ca15PFCHSL1FastL2L3ResidualCorrectorChain*
+    ca15chsL1FastL2L3ResidualChain*
     CA15QGTaggerCHS*
     CA15QGTaggerSubJetsCHS*
     CA15NjettinessCHS

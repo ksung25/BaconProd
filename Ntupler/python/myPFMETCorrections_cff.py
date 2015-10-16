@@ -4,15 +4,18 @@ import FWCore.ParameterSet.Config as cms
 # Use producePFMETCorrections(MC/Data) accordingly in the top level config file
 
 # load jet energy correctors
-from JetMETCorrections.Configuration.JetCorrectors_cff  import *
+#from JetMETCorrections.Configuration.JetCorrectors_cff  import *
+from BaconProd.Ntupler.myCorrections_cff                import *
 from BaconProd.Ntupler.myPUPPICorrections_cff           import *
 
 #--------------------------------------------------------------------------------
 # produce Type 1 MET corrections for PFJets
 pfJetMETcorr = cms.EDProducer("PFJetMETcorrInputProducer",
     src = cms.InputTag('ak4PFJets'),
-    offsetCorrLabel = cms.InputTag("ak4PFL1FastjetCorrector"),
-    jetCorrLabel = cms.InputTag("ak4PFL1FastL2L3Corrector"), # NOTE: use "ak4PFL1FastL2L3Corrector" for MC / "ak4PFL1FastL2L3ResidualCorrector" for Data
+    #offsetCorrLabel = cms.InputTag("ak4PFL1FastjetCorrector"),
+    #jetCorrLabel = cms.InputTag("ak4PFL1FastL2L3Corrector"), # NOTE: use "ak4PFL1FastL2L3Corrector" for MC / "ak4PFL1FastL2L3ResidualCorrector" for Data
+    offsetCorrLabel = cms.InputTag("ak4L1FastjetCorrector"),
+    jetCorrLabel = cms.InputTag("ak4L1FastL2L3Corrector"), # NOTE: use "ak4PFL1FastL2L3Corrector" for MC / "ak4PFL1FastL2L3ResidualCorrector" for Data
     jetCorrEtaMax = cms.double(9.9),
     type1JetPtThreshold = cms.double(10.0),
     skipEM = cms.bool(True),
@@ -38,13 +41,15 @@ pfType1CorrectedMet = cms.EDProducer("CorrectedPFMETProducer",
 #--------------------------------------------------------------------------------
 # define sequence to run all modules
 producePFMETCorrectionsMC = cms.Sequence(
-  ak4PFL1FastL2L3CorrectorChain +
+  #ak4PFL1FastL2L3CorrectorChain +
+  ak4L1FastL2L3Chain +
   pfJetMETcorr +
   pfType1CorrectedMet
 )
 
 producePFMETCorrectionsData = cms.Sequence(
-  ak4PFL1FastL2L3ResidualCorrectorChain +
+  #ak4PFL1FastL2L3ResidualCorrectorChain +
+  ak4L1FastL2L3ResidualChain +
   pfJetMETcorr +
   pfType1CorrectedMet
 )

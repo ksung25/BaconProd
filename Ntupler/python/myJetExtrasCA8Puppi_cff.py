@@ -148,8 +148,8 @@ CA8jetsequencePuppiData = cms.Sequence(
     CA8PFImpactParameterTagInfosSJPuppi*
     CA8PFInclusiveSecondaryVertexFinderTagInfosSJPuppi*
     CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi*
-    #ak8PuppiL1FastL2L3ResidualChain*
-    ak8PuppiL1FastL2L3Chain*
+    ak8PuppiL1FastL2L3ResidualChain*
+    #ak8PuppiL1FastL2L3Chain*
     CA8QGTaggerPuppi*
     CA8QGTaggerSubJetsPuppi*                
     CA8NjettinessPuppi

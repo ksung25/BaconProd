@@ -90,6 +90,7 @@ AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS = pfCombinedInclusiveSecond
 # q/g discriminator
 # Note: need to provide JECs (or corrected jet collection) to QGL calculator
 from JetMETCorrections.Configuration.JetCorrectors_cff import *
+from BaconProd.Ntupler.myCHSCorrections_cff          import *
 from RecoJets.JetProducers.QGTagger_cfi import *
 AK4QGTaggerCHS           = QGTagger.clone()
 AK4QGTaggerCHS.srcJets   = cms.InputTag('ak4PFJetsCHS')
@@ -146,7 +147,8 @@ AK4jetsequenceCHSData = cms.Sequence(
 #    AK4PFImpactParameterTagInfosSJCHS*
 #    AK4PFInclusiveSecondaryVertexFinderTagInfosSJCHS*
 #    AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS*
-    ak4PFCHSL1FastL2L3ResidualCorrectorChain*
+#    ak4PFCHSL1FastL2L3ResidualCorrectorChain*
+    ak4chsL1FastL2L3ResidualChain* 
     AK4QGTaggerCHS#*
 #    AK4QGTaggerSubJetsCHS*                
 #    AK4NjettinessCHS

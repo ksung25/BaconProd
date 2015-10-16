@@ -147,8 +147,8 @@ AK4jetsequencePuppiData = cms.Sequence(
     AK4PFImpactParameterTagInfosSJPuppi*
     AK4PFInclusiveSecondaryVertexFinderTagInfosSJPuppi*
     AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi*
-    #ak4PuppiL1FastL2L3ResidualChain* #   => using type 1 Met
-    ak4PuppiL1FastL2L3Chain* #   => using type 1 Met
+    ak4PuppiL1FastL2L3ResidualChain* #   => using type 1 Met
+    #ak4PuppiL1FastL2L3Chain* #   => using type 1 Met
     AK4QGTaggerPuppi*
     AK4QGTaggerSubJetsPuppi*                
     AK4NjettinessPuppi

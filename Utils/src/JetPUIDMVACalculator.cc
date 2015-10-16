@@ -15,10 +15,10 @@ JetPUIDMVACalculator::JetPUIDMVACalculator():
 {}
 
 //--------------------------------------------------------------------------------------------------
-JetPUIDMVACalculator::~JetPUIDMVACalculator()
-{
+JetPUIDMVACalculator::~JetPUIDMVACalculator() {
   delete fLowPtReader;
   delete fHighPtReader;
+  fIsInitialized = false;
 }
 
 //--------------------------------------------------------------------------------------------------

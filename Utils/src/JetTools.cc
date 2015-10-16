@@ -244,8 +244,9 @@ double JetTools::dR2Mean(const reco::PFJet &jet, const int pfType)
   for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
     const reco::Candidate* cand = jet.getJetConstituentsQuick ()[ipf];
     const pat::PackedCandidate *packCand = dynamic_cast<const pat::PackedCandidate *>(cand);
-    if(packCand != 0) { 
+    if(packCand != 0) {
       if(pfType!=-1 && packCand->pdgId() != pdgid) continue;
+      sumpt2 += packCand->pt() * packCand->pt();
       double dr = reco::deltaR(jet.eta(),jet.phi(),packCand->eta(),packCand->phi());    
       dr2mean += dr*dr*(packCand->pt())/(jet.pt());
     } else { 
@@ -257,7 +258,7 @@ double JetTools::dR2Mean(const reco::PFJet &jet, const int pfType)
     }
   }
   dr2mean/=sumpt2;
-  
+
   return dr2mean;
 }
 
@@ -286,7 +287,6 @@ double JetTools::dR2Mean(const pat::Jet &jet, const int pfType)
     }
   }
   std::sort(constituents.begin(), constituents.end(), [] (reco::Candidate const * ida, reco::Candidate const * jda) { return ida->pt() > jda->pt(); } );
-
   double dr2mean=0;
   double sumpt2=0;
   const unsigned int nPFCands = constituents.size();

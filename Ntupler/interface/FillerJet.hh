@@ -51,11 +51,12 @@ namespace baconhep
                 const reco::Vertex                           &pv,               // event primary vertex
                 const std::vector<TriggerRecord>             &triggerRecords,   // list of trigger names and objects
                 const pat::TriggerObjectStandAloneCollection &triggerObjects);  // event trigger objects
+     void  initPUJetId();
 
     protected:
       void initJetCorr(const std::vector<std::string> &jecFiles, 
                        const std::vector<std::string> &jecUncFiles);
-      
+    
       void  addJet(TAddJet *pAddJet, const edm::Event &iEvent, const reco::PFJet &itJet, const reco::JetBaseRef &jetBaseRef);
       void  addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent, const pat::Jet &itJet);
 
@@ -87,6 +88,8 @@ namespace baconhep
       std::string fQGLikelihood;
       std::string fQGLikelihoodSubJets;
       std::string fTopTaggerName;
+      std::string fLowPtWeightFile;
+      std::string fHighPtWeightFile;
       double      fConeSize;
       bool        fComputeFullJetInfo;
       

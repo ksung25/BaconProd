@@ -49,7 +49,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     virtual void endRun  (const edm::Run &iRun, const edm::EventSetup &iSetup);
     virtual void beginLuminosityBlock(const edm::LuminosityBlock &iLumi, const edm::EventSetup &iSetup);
     virtual void endLuminosityBlock  (const edm::LuminosityBlock &iLumi, const edm::EventSetup &iSetup);
-
+    virtual void respondToOpenInputFile(edm::FileBlock const& fb);
     // specify trigger paths of interest
     void setTriggers();
     

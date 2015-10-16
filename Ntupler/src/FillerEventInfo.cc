@@ -453,17 +453,26 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 
   } else {  // === MINIAOD ===
 
-    edm::Handle<pat::METCollection> hMETProduct;
-    iEvent.getByLabel(fMETName,hMETProduct);
-    assert(hMETProduct.isValid());
-    const pat::MET &inMET = hMETProduct->front();
+    //edm::Handle<pat::METCollection> hMETProduct;
+    //iEvent.getByLabel(fMETName,hMETProduct);
+    //assert(hMETProduct.isValid());
+    //const pat::MET &inMET = hMETProduct->front();
     // Raw PF MET
-    evtInfo->pfMET      = inMET.pt();//shiftedPt (pat::MET::NoShift, pat::MET::Raw);
-    evtInfo->pfMETphi   = inMET.phi();//shiftedPhi(pat::MET::NoShift, pat::MET::Raw);
+    //evtInfo->pfMET      = inMET.pt();//shiftedPt (pat::MET::NoShift, pat::MET::Raw);
+    //evtInfo->pfMETphi   = inMET.phi();//shiftedPhi(pat::MET::NoShift, pat::MET::Raw);
     //evtInfo->pfMETCov00 = inPFMET.getSignificanceMatrix()(0,0);
     //evtInfo->pfMETCov01 = inPFMET.getSignificanceMatrix()(0,1);
     //evtInfo->pfMETCov11 = inPFMET.getSignificanceMatrix()(1,1);
-    
+   
+    edm::Handle<reco::PFMETCollection> hPFMETProduct;
+    iEvent.getByLabel(fPFMETName,hPFMETProduct);
+    assert(hPFMETProduct.isValid());
+    const reco::PFMET &inPFMET = hPFMETProduct.product()->front();
+    evtInfo->pfMET      = inPFMET.pt();
+    evtInfo->pfMETphi   = inPFMET.phi();
+    evtInfo->pfMETCov00 = inPFMET.getSignificanceMatrix()(0,0);
+    evtInfo->pfMETCov01 = inPFMET.getSignificanceMatrix()(0,1);
+    evtInfo->pfMETCov11 = inPFMET.getSignificanceMatrix()(1,1);
     // Corrected PF MET
     edm::Handle<reco::PFMETCollection> hPFMETCProduct;
     iEvent.getByLabel(fPFMETCName,hPFMETCProduct);
@@ -529,7 +538,6 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     //evtInfo->puppETCCov00 = inPuppETC.getSignificanceMatrix()(0,0);
     //evtInfo->puppETCCov01 = inPuppETC.getSignificanceMatrix()(0,1);
     //evtInfo->puppETCCov11 = inPuppETC.getSignificanceMatrix()(1,1);
-
     // Corrected PF MET
     if(fPFMET30Name.size() > 0) { 
       edm::Handle<reco::PFMETCollection> hPFMET30Product;

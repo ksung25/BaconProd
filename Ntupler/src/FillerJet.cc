@@ -59,16 +59,13 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD):
     std::string cmssw_base_src = getenv("CMSSW_BASE");
     cmssw_base_src += "/src/";
 
-
-  if(fUseAOD) {
-    std::vector<std::string> puIDFiles = iConfig.getUntrackedParameter< std::vector<std::string> >("jetPUIDFiles",empty_vstring);
-    assert(puIDFiles.size()==2);
-    std::string lowPtWeightFile  = (puIDFiles[0].length()>0) ? (cmssw_base_src + puIDFiles[0]) : "";
-    std::string highPtWeightFile = (puIDFiles[1].length()>0) ? (cmssw_base_src + puIDFiles[1]) : "";
-    fJetPUIDMVACalc.initialize(baconhep::JetPUIDMVACalculator::k53,
-                               "BDT",lowPtWeightFile,
-                               "BDT",highPtWeightFile);
-  }
+    if(fUseAOD) {
+      std::vector<std::string> puIDFiles = iConfig.getUntrackedParameter< std::vector<std::string> >("jetPUIDFiles",empty_vstring);
+      assert(puIDFiles.size()==2);
+      fLowPtWeightFile  = (puIDFiles[0].length()>0) ? (cmssw_base_src + puIDFiles[0]) : "";
+      fHighPtWeightFile = (puIDFiles[1].length()>0) ? (cmssw_base_src + puIDFiles[1]) : "";
+      initPUJetId();
+    }
 
   fRand = new TRandom2();
 }
@@ -79,7 +76,13 @@ FillerJet::~FillerJet()
   delete fJetCorr;
   delete fJetUnc;
 }
-
+void FillerJet::initPUJetId() { 
+  if(!fUseAOD) return;
+  fJetPUIDMVACalc.initialize(baconhep::JetPUIDMVACalculator::k53,
+			     "BDT",fLowPtWeightFile,
+			     "BDT",fHighPtWeightFile);
+  
+}
 //--------------------------------------------------------------------------------------------------
 void FillerJet::initJetCorr(const std::vector<std::string> &jecFiles,
                             const std::vector<std::string> &jecUncFiles)

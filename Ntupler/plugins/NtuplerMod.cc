@@ -383,7 +383,17 @@ NtuplerMod::~NtuplerMod()
   delete fPFParArr;
   delete fRHParArr;
 }
-
+//--------------------------------------------------------------------------------------------------
+void NtuplerMod::respondToOpenInputFile(edm::FileBlock const&) 
+{  
+  std::cout << "====> New file" << std::endl;
+  if(fFillerJet            != 0) fFillerJet           ->initPUJetId();
+  if(fFillerFatJet         != 0) fFillerFatJet        ->initPUJetId();
+  if(fFillerFatterJet      != 0) fFillerFatterJet     ->initPUJetId();
+  if(fFillerPuppiJet       != 0) fFillerPuppiJet      ->initPUJetId();
+  if(fFillerFatPuppiJet    != 0) fFillerFatPuppiJet   ->initPUJetId();
+  if(fFillerFatterPuppiJet != 0) fFillerFatterPuppiJet->initPUJetId();
+}
 //--------------------------------------------------------------------------------------------------
 void NtuplerMod::beginJob()
 {  
