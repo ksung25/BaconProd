@@ -472,6 +472,7 @@ void NtuplerMod::setTriggers()
 //--------------------------------------------------------------------------------------------------
 void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+
   fTotalEvents->Fill(1);
   edm::Handle<edm::TriggerResults> hTrgRes;
   iEvent.getByLabel(fHLTTag,hTrgRes);
@@ -493,7 +494,6 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     }
   }
   if(fSkipOnHLTFail && triggerBits == 0) return;  
-
   if(fIsActiveGenInfo) {
     fGenParArr->Clear();
     if(fFillLHEWgt) {
@@ -503,12 +503,10 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       fFillerGenInfo->fill(fGenEvtInfo, fGenParArr,          0, iEvent, fXS);
     }
   }
-   
   fPVArr->Clear();
   int nvertices = 0;
   const reco::Vertex *pv = fFillerPV->fill(fPVArr, nvertices, iEvent);
   assert(pv);
-
   if(fIsActiveEvtInfo) {
     fFillerEvtInfo->fill(fEvtInfo, iEvent, *pv, (nvertices>0), triggerBits);//,fSusyGen);
   }
@@ -525,19 +523,16 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if(fUseAOD) { fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);  }
     else        { fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
   }
-
   if(fIsActiveMuon) {
     fMuonArr->Clear();  
     if(fUseAOD) { fFillerMuon->fill(fMuonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);  }
     else        { fFillerMuon->fill(fMuonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
   }
-
   if(fIsActivePhoton) {
     fPhotonArr->Clear();
     if(fUseAOD) { fFillerPhoton->fill(fPhotonArr, iEvent, iSetup, fTrigger->fRecords, *hTrgEvt);  }
     else        { fFillerPhoton->fill(fPhotonArr, iEvent, iSetup, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
   }
-
   if(fIsActiveTau) {
     fTauArr->Clear();
     if(fUseAOD) { fFillerTau->fill(fTauArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);  }

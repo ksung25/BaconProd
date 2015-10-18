@@ -562,9 +562,15 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
     //pCorr = correction(pP1Jet,*hRho);
     pAddJet->mass_sd0  = matchJet->mass()*pCorr;
   }
-
-/*
+  /*
   // Jet Shape Correlation observables
+  std::vector<reco::PFCandidatePtr> pfConstituents = itJet.getPFConstituents(); 
+  std::vector<fastjet::PseudoJet>  lClusterParticles;
+  for(unsigned int ic=0; ic<pfConstituents.size(); ic++) {
+    reco::PFCandidatePtr pfcand = pfConstituents[ic];
+    fastjet::PseudoJet   pPart(pfcand->px(),pfcand->py(),pfcand->pz(),pfcand->energy());
+    lClusterParticles.push_back(pPart);
+  }
   fastjet::JetDefinition lCJet_def(fastjet::cambridge_algorithm, 2.0);
   fastjet::ClusterSequence lCClust_seq(lClusterParticles, lCJet_def);
   std::vector<fastjet::PseudoJet> inclusive_jets = lCClust_seq.inclusive_jets(0);
@@ -582,11 +588,10 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   // Q-Jets
   pAddJet->qjet = 0;
   if(itJet.pt() > 100) pAddJet->qjet = JetTools::qJetVolatility(lClusterParticles,25.,fRand->Rndm());  // (!) why pT > 100 cut? computation time?
-*/
   //
   // Subjets
   //
-
+  */
   // find/sort up to 4 hardest subjets
   const reco::PFJet *subjet1=0, *subjet2=0, *subjet3=0, *subjet4=0;
   double csv1=-2, csv2=-2, csv3=-2, csv4=-2;

@@ -76,7 +76,6 @@ process.load("BaconProd/Ntupler/myPFMETCorrections_cff")
 process.pfJetMETcorr.jetCorrLabel = cms.InputTag("ak4L1FastL2L3Corrector")
 process.producePFMETCorrections = cms.Sequence(process.producePFMETCorrectionsMC)
 if is_data_flag:
-  process.pfJetMETcorr.jetCorrLabel = cms.InputTag("ak4L1FastL2L3ResidualCorrector")
   process.producePFMETCorrections = cms.Sequence(process.producePFMETCorrectionsData)
   process.AK4QGTaggerCHS.jec  = cms.InputTag("ak4chsL1FastL2L3ResidualCorrector")
   process.CA8QGTaggerCHS.jec  = cms.InputTag("ca8chsL1FastL2L3ResidualCorrector")
@@ -107,7 +106,6 @@ process.pfMetPuppi.calculateSignificance = False
 process.pfJetMETcorrPuppi.jetCorrLabel = cms.InputTag("ak4PuppiL1FastL2L3Corrector")
 process.producePFMETCorrectionsPuppi = cms.Sequence(process.producePFMETCorrectionsPuppiMC)
 if is_data_flag:
-  process.pfJetMETcorrPuppi.jetCorrLabel = cms.InputTag("ak4PuppiL1FastL2L3ResidualCorrector")
   process.producePFMETCorrectionsPuppi   = cms.Sequence(process.producePFMETCorrectionsPuppiData)
   process.AK4QGTaggerPuppi.jec           = cms.InputTag("ak4PuppiL1FastL2L3ResidualCorrector")
   process.CA8QGTaggerPuppi.jec           = cms.InputTag("ak8PuppiL1FastL2L3ResidualCorrector")
@@ -487,8 +485,10 @@ process.baconSequence = cms.Sequence(process.photonIDValueMapProducer *
                                      process.pfMet                    *
                                      process.producePFMETCorrections  * 
                                      process.ak4PFJets30              *
-                                     process.egmGsfElectronIDSequence * 
-                                     process.egmPhotonIDSequence      * 
+                                     #process.egmGsfElectronIDSequence * 
+                                     process.electronMVAValueMapProducer *
+                                     process.egmGsfElectronIDs        *
+                                     process.egmPhotonIDSequence      *
                                      process.slimmedMuonsTight        * 
                                      process.slimmedTausLoose         * 
                                      process.slimmedElectronsTight    * 

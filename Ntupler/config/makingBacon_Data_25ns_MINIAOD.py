@@ -490,7 +490,9 @@ process.baconSequence = cms.Sequence(process.photonIDValueMapProducer *
                                      process.pfMet                    * 
                                      process.producePFMETCorrections  *
                                      process.ak4PFJets30              *
-                                     process.egmGsfElectronIDSequence * 
+                                     #process.egmGsfElectronIDSequence * 
+                                     process.electronMVAValueMapProducer *
+                                     process.egmGsfElectronIDs        *
                                      process.egmPhotonIDSequence      * 
                                      process.slimmedMuonsTight        * 
                                      process.slimmedTausLoose         * 
