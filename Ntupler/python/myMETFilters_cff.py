@@ -7,9 +7,18 @@ import FWCore.ParameterSet.Config as cms
 ## The iso-based HBHE noise filter ___________________________________________||
 from CommonTools.RecoAlgos.HBHENoiseFilterResultProducer_cfi import *
 HBHENoiseFilterResultProducer.minZeros = cms.int32(99999)
+HBHENoiseFilterResultProducer.IgnoreTS4TS5ifJetInLowBVRegion=cms.bool(False) 
+HBHENoiseFilterResultProducer.defaultDecision = cms.string("HBHENoiseFilterResultRun2Loose")
 
 ## The CSC beam halo tight filter ____________________________________________||
-from RecoMET.METFilters.CSCTightHaloFilter_cfi import * 
+#from RecoMET.METFilters.CSCTightHaloFilter_cfi import * 
+from RecoMET.METProducers.CSCHaloData_cfi import *
+from RecoMET.METProducers.EcalHaloData_cfi import *
+from RecoMET.METProducers.HcalHaloData_cfi import *
+from RecoMET.METProducers.GlobalHaloData_cfi import *
+from RecoMET.METProducers.BeamHaloSummary_cfi import *
+from RecoMET.METFilters.CSCTightHalo2015Filter_cfi
+CSCTightHalo2015Filter.taggingMode = cms.bool(True)
 
 ## The HCAL laser filter _____________________________________________________||
 from RecoMET.METFilters.hcalLaserEventFilter_cfi import *
@@ -53,11 +62,12 @@ logErrorTooManyClusters.forcedValue = cms.untracked.bool(False)
 
 metFilters = cms.Sequence(
    HBHENoiseFilterResultProducer *
-   CSCTightHaloFilter * #<-- filter not applied, save BeamHaloSummary info instead
    hcalLaserEventFilter *
    EcalDeadCellTriggerPrimitiveFilter *
    goodVertices * trackingFailureFilter *
    eeBadScFilter *
    ecalLaserCorrFilter *
-   trkPOGFilters
+   trkPOGFilters *
+   CSCHaloData*EcalHaloData*HcalHaloData*GlobalHaloData*BeamHaloSummary*
+   CSCTightHalo2015Filter
 )
