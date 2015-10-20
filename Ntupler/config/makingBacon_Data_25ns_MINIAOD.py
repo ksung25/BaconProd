@@ -516,7 +516,7 @@ process.baconSequence = cms.Sequence(process.photonIDValueMapProducer *
                                      #process.AK4jetsequenceCHS        *
                                      process.AK4jetsequencePuppiData  *
                                      process.producePFMETCorrectionsPuppi*
-                                     #process.ak4PFL1FastL2L3ResidualCorrectorChain*
+                                     process.ak4L1FastL2L3ResidualCorrectorChain*
                                      process.AK8jetsequenceCHSData    *
                                      #process.CA8jetsequenceCHSData    *
                                      process.CA15jetsequenceCHSData   *
