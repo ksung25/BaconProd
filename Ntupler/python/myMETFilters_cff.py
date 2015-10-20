@@ -17,7 +17,7 @@ from RecoMET.METProducers.EcalHaloData_cfi import *
 from RecoMET.METProducers.HcalHaloData_cfi import *
 from RecoMET.METProducers.GlobalHaloData_cfi import *
 from RecoMET.METProducers.BeamHaloSummary_cfi import *
-from RecoMET.METFilters.CSCTightHalo2015Filter_cfi
+from RecoMET.METFilters.CSCTightHalo2015Filter_cfi import *
 CSCTightHalo2015Filter.taggingMode = cms.bool(True)
 
 ## The HCAL laser filter _____________________________________________________||
