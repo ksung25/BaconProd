@@ -179,7 +179,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       fGenEvtInfo = new baconhep::TGenEventInfo();              assert(fGenEvtInfo);
       fGenParArr  = new TClonesArray("baconhep::TGenParticle",5000); assert(fGenParArr);
       if(fFillLHEWgt) {
-        fLHEWgtArr = new TClonesArray("baconhep::TLHEWeight"); assert(fLHEWgtArr);
+        fLHEWgtArr = new TClonesArray("baconhep::TLHEWeight",5000); assert(fLHEWgtArr);
       }
       fFillerGenInfo = new baconhep::FillerGenInfo(cfg); assert(fFillerGenInfo);
     }
