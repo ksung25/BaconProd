@@ -30,6 +30,7 @@ void JetPUIDMVACalculator::initialize(const JetPUIDMVACalculator::JetIDType jetI
   fHighPtMethodTag = highPtMethodTag;
   
   if(lowPtWeightFile.length()>0) {
+    if(fLowPtReader !=0) delete fLowPtReader;
     fLowPtReader = new TMVA::Reader();
     fLowPtReader->AddVariable("nvtx", &_nvtx); 
     if(jetIDType != k53) fLowPtReader->AddVariable("jetPt",  &_jetPt);  
@@ -58,6 +59,7 @@ void JetPUIDMVACalculator::initialize(const JetPUIDMVACalculator::JetIDType jetI
   }
   
   if(highPtWeightFile.length()>0) {
+    if(fHighPtReader !=0) delete fHighPtReader;
     fHighPtReader = new TMVA::Reader();
     if(jetIDType == kBaseline) {
       fHighPtReader->AddVariable("nvtx",     &_nvtx);

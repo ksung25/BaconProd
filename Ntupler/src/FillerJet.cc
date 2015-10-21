@@ -78,6 +78,7 @@ FillerJet::~FillerJet()
 }
 void FillerJet::initPUJetId() { 
   if(!fUseAOD) return;
+  std::cout << "===> Re-initializing" << std::endl;
   fJetPUIDMVACalc.initialize(baconhep::JetPUIDMVACalculator::k53,
 			     "BDT",fLowPtWeightFile,
 			     "BDT",fHighPtWeightFile);

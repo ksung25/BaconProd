@@ -16,7 +16,7 @@ pfJetMETcorr = cms.EDProducer("PFJetMETcorrInputProducer",
     #jetCorrLabel = cms.InputTag("ak4PFL1FastL2L3Corrector"), # NOTE: use "ak4PFL1FastL2L3Corrector" for MC / "ak4PFL1FastL2L3ResidualCorrector" for Data
     offsetCorrLabel = cms.InputTag("ak4L1FastjetCorrector"),
     jetCorrLabel = cms.InputTag("ak4L1FastL2L3Corrector"), # NOTE: use "ak4PFL1FastL2L3Corrector" for MC / "ak4PFL1FastL2L3ResidualCorrector" for Data
-    jetCorrLabelRes = cms.InputTag("ak4L1FastL2L3ResdiualCorrector"),
+    jetCorrLabelRes = cms.InputTag("ak4L1FastL2L3ResidualCorrector"),
     jetCorrEtaMax = cms.double(9.9),
     type1JetPtThreshold = cms.double(10.0),
     skipEM = cms.bool(True),
@@ -62,7 +62,7 @@ pfJetMETcorrPuppi = pfJetMETcorr.clone(
     src = 'AK4PFJetsPuppi',
     jetCorrLabel = 'ak4PuppiL1FastL2L3Corrector',
     offsetCorrLabel = 'ak4PuppiL1FastjetCorrector',
-    jetCorrLabelRes = 'ak4PuppiL1FastL2L3ResdiualCorrector',
+    jetCorrLabelRes = 'ak4PuppiL1FastL2L3ResidualCorrector',
     type1JetPtThreshold = cms.double(20)
     )
 
