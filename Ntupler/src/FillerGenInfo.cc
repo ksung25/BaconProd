@@ -51,17 +51,20 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, 
     iEvent.getByLabel(fLHEEvtInfoName,hLHEEvtInfoProduct);
     assert(hLHEEvtInfoProduct.isValid());
     TClonesArray &rWeightsArray = *weightsArr;
-    for(unsigned int iw=0; iw<hLHEEvtInfoProduct->weights().size(); iw++) {
+    unsigned int lMax = hLHEEvtInfoProduct->weights().size();
+    if(lMax > 110) lMax = 110.;
+    for(unsigned int iw=0; iw< lMax; iw++) {
       // construct object and place in array
       assert(rWeightsArray.GetEntries() < rWeightsArray.GetSize());
       const int index = rWeightsArray.GetEntries();
-      new(rWeightsArray[index]) baconhep::TGenParticle();
+      new(rWeightsArray[index]) baconhep::TLHEWeight();
       baconhep::TLHEWeight *pWeight = (baconhep::TLHEWeight*)rWeightsArray[index];
       pWeight->weight = hLHEEvtInfoProduct->weights().at(iw).wgt;
       std::string pId = hLHEEvtInfoProduct->weights().at(iw).id;
       int id = -1;
       try {id = atoi(pId.c_str());} catch(int e) { std::cout << " ===> Error converting LHE to int" << std::endl;}
       pWeight->id     = id;
+      //std::cout << "===> " << iw << " -- " << pId << " -- " << pWeight->weight << std::endl;
     }
   }
 
