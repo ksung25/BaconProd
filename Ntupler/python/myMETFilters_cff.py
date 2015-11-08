@@ -40,7 +40,7 @@ ecalLaserCorrFilter.taggingMode = cms.bool(True)
 goodVertices = cms.EDFilter(
   "VertexSelector",
   filter = cms.bool(False),
-  src = cms.InputTag("offlinePrimaryVertices"),
+  src = cms.InputTag("offlineSlimmedPrimaryVertices"),
   cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.rho < 2")
 )
 
@@ -64,10 +64,10 @@ metFilters = cms.Sequence(
    HBHENoiseFilterResultProducer *
    hcalLaserEventFilter *
    EcalDeadCellTriggerPrimitiveFilter *
-   goodVertices * trackingFailureFilter *
-   eeBadScFilter *
-   ecalLaserCorrFilter *
-   trkPOGFilters *
+   goodVertices * #trackingFailureFilter *
+   #eeBadScFilter *
+   #ecalLaserCorrFilter *
+   #trkPOGFilters *
    CSCHaloData*EcalHaloData*HcalHaloData*GlobalHaloData*BeamHaloSummary*
    CSCTightHalo2015Filter
 )

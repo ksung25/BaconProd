@@ -6,27 +6,27 @@ jec =  cms.ESSource("PoolDBESSource",
                          timetype = cms.string('runnumber'),
                          toGet = cms.VPSet(
                           cms.PSet(record  = cms.string('JetCorrectionsRecord'),
-                                   tag     = cms.string('JetCorrectorParametersCollection_Summer15_25nsV5_DATA_AK4PFPuppi'),
+                                   tag     = cms.string('JetCorrectorParametersCollection_Summer15_25nsV6_DATA_AK4PFPuppi'),
                                    label   = cms.untracked.string('AK4Puppi')
                                    ),
                            cms.PSet(record  = cms.string('JetCorrectionsRecord'),
-                                    tag     = cms.string('JetCorrectorParametersCollection_Summer15_25nsV5_DATA_AK8PFPuppi'),
+                                    tag     = cms.string('JetCorrectorParametersCollection_Summer15_25nsV6_DATA_AK8PFPuppi'),
                                     label   = cms.untracked.string('AK8Puppi')
                                     ),
                           cms.PSet(record  = cms.string('JetCorrectionsRecord'),
-                                   tag     = cms.string('JetCorrectorParametersCollection_Summer15_25nsV5_DATA_AK4PFchs'),
+                                   tag     = cms.string('JetCorrectorParametersCollection_Summer15_25nsV6_DATA_AK4PFchs'),
                                    label   = cms.untracked.string('AK4chs')
                                    ),
                           cms.PSet(record  = cms.string('JetCorrectionsRecord'),
-                                   tag     = cms.string('JetCorrectorParametersCollection_Summer15_25nsV5_DATA_AK8PFchs'),
+                                   tag     = cms.string('JetCorrectorParametersCollection_Summer15_25nsV6_DATA_AK8PFchs'),
                                    label   = cms.untracked.string('AK8chs')
                                    ),
                           cms.PSet(record  = cms.string('JetCorrectionsRecord'),
-                                   tag     = cms.string('JetCorrectorParametersCollection_Summer15_25nsV5_DATA_AK4PF'),
+                                   tag     = cms.string('JetCorrectorParametersCollection_Summer15_25nsV6_DATA_AK4PF'),
                                    label   = cms.untracked.string('AK4')
                                    ),
                            cms.PSet(record  = cms.string('JetCorrectionsRecord'),
-                                    tag     = cms.string('JetCorrectorParametersCollection_Summer15_25nsV5_DATA_AK8PF'),
+                                    tag     = cms.string('JetCorrectorParametersCollection_Summer15_25nsV6_DATA_AK8PF'),
                                     label   = cms.untracked.string('AK8')
                                     )
                            ),

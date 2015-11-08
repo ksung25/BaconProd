@@ -33,11 +33,11 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig, const bool us
   fMVAMETName    (iConfig.getUntrackedParameter<std::string>("edmMVAMETName","pfMEtMVA")),
   fPUPPETName    (iConfig.getUntrackedParameter<std::string>("edmPuppETName","pfMetPuppi")),
   fPUPPETCName   (iConfig.getUntrackedParameter<std::string>("edmPuppETCorrName","pfType1CorrectedMetPuppi")),
-  fPFMET30Name   (iConfig.getUntrackedParameter<std::string>("edmPFMET30Name","pfMet30")),
-  fPFMETC30Name  (iConfig.getUntrackedParameter<std::string>("edmPFMET30CorrName","pfType1CorrectedMet30")),
-  fMVAMET30Name  (iConfig.getUntrackedParameter<std::string>("edmMVAMET30Name","pfMEtMVA30")),
-  fPUPPET30Name  (iConfig.getUntrackedParameter<std::string>("edmPuppET30Name","pfMetPuppi30")),
-  fPUPPETC30Name (iConfig.getUntrackedParameter<std::string>("edmPuppET30CorrName","pfType1CorrectedMetPuppi30")),
+  fPFMET30Name   (iConfig.getUntrackedParameter<std::string>("edmPFMET30Name","")),
+  fPFMETC30Name  (iConfig.getUntrackedParameter<std::string>("edmPFMET30CorrName","")),
+  fMVAMET30Name  (iConfig.getUntrackedParameter<std::string>("edmMVAMET30Name","")),
+  fPUPPET30Name  (iConfig.getUntrackedParameter<std::string>("edmPuppET30Name","")),
+  fPUPPETC30Name (iConfig.getUntrackedParameter<std::string>("edmPuppET30CorrName","")),
   fALPACAMETName (iConfig.getUntrackedParameter<std::string>("edmAlpacaMETName"    ,"pfMetAlpacaMC")),
   fPALPACAMETName(iConfig.getUntrackedParameter<std::string>("edmPupAlpacaMETName","pfMetPuppiAlpacaMC")),
   fRhoIsoName    (iConfig.getUntrackedParameter<std::string>("edmRhoForIsoName","fixedGridRhoFastjetAll")),
@@ -60,7 +60,6 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
   evtInfo->runNum  = iEvent.id().run();
   evtInfo->lumiSec = iEvent.luminosityBlock();
   evtInfo->evtNum  = iEvent.id().event();
-
   
   //
   // Pile-up info
@@ -152,7 +151,8 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       if(!(*hECALDeadCellTriggerPrimitiveFilter)) {  // if result is "false", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kECALDeadCellTriggerPrimitiveFilter;
       }
-      
+
+      /*
       // ECAL bad laser correction filter
       edm::Handle<bool> hECALLaserCorrFilter;
       iEvent.getByLabel("ecalLaserCorrFilter",hECALLaserCorrFilter);
@@ -160,7 +160,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       if(!(*hECALLaserCorrFilter)) {  // if result is "false", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kECALLaserCorrFilter;
       }
-      
+      */
       // tracking failure filter
       edm::Handle<bool> hTrackingFailureFilter;
       iEvent.getByLabel("trackingFailureFilter",hTrackingFailureFilter);
@@ -190,18 +190,52 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       if(*hTrkPOGFilter_logErrorTooManyClusters) {  // if result is "true", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kTrkPOGFilter_logErrorTooManyClusters;
       }
+
+
       
     } else {  // === MINIAOD ===
-
+      // beam halo filter using CSCs
+      edm::Handle<reco::BeamHaloSummary> hBeamHaloSummary;
+      iEvent.getByLabel("BeamHaloSummary",hBeamHaloSummary);
+      assert(hBeamHaloSummary.isValid());
+      const reco::BeamHaloSummary *beamHaloSummary = hBeamHaloSummary.product();
+      if(beamHaloSummary->CSCTightHaloId()) {  // if true, then event has identified beam halo
+	evtInfo->metFilterFailBits |= kCSCTightHaloFilter;
+      }
+      
+      // HB,HE anomalous noise filter
+      edm::Handle<bool> hHBHENoiseFilterResult;
+      iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",hHBHENoiseFilterResult);
+      assert(hHBHENoiseFilterResult.isValid());
+      if(!(*hHBHENoiseFilterResult)) {  // if result is "false", then event is flagged as bad
+	evtInfo->metFilterFailBits |= kHBHENoiseFilter;
+      }
+      
+      // HCAL laser filter
+      edm::Handle<bool> hHCALLaserEventFilter;
+      iEvent.getByLabel("hcalLaserEventFilter",hHCALLaserEventFilter);
+      assert(hHCALLaserEventFilter.isValid());
+      if(!(*hHCALLaserEventFilter)) {  // if result is "false", then event is flagged as bad
+	evtInfo->metFilterFailBits |= kHCALLaserEventFilter;
+      }
+      /*
+      // tracking failure filter
+      edm::Handle<bool> hTrackingFailureFilter;
+      iEvent.getByLabel("trackingFailureFilter",hTrackingFailureFilter);
+      assert(hTrackingFailureFilter.isValid());
+      if(!(*hTrackingFailureFilter)) {  // if result is "false", then event is flagged as bad
+	evtInfo->metFilterFailBits |= kTrackingFailureFilter;
+      }
+      */
       //edm::InputTag metFiltersTag("TriggerResults","","PAT");
-      edm::InputTag metFiltersTag("TriggerResults","","RECO");
+      edm::InputTag metFiltersTag("TriggerResults","","HLT");
       edm::Handle<edm::TriggerResults> hMETFilters;
       iEvent.getByLabel(metFiltersTag,hMETFilters);
       assert(hMETFilters.isValid());
       const edm::TriggerNames &metFilterNames = iEvent.triggerNames(*hMETFilters);
       
       unsigned int index;
-      
+      /*
       // beam halo filter using CSCs
       index = metFilterNames.triggerIndex("Flag_CSCTightHaloFilter");
       if(index < hMETFilters->size()) {  // check for valid index
@@ -225,7 +259,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 	  evtInfo->metFilterFailBits |= kHCALLaserEventFilter;
 	}
       }
-      
+      */
       // bad EE SuperCrystal filter
       index = metFilterNames.triggerIndex("Flag_eeBadScFilter");
       if(index < hMETFilters->size()) {  // check for valid index
@@ -241,7 +275,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 	  evtInfo->metFilterFailBits |= kECALDeadCellTriggerPrimitiveFilter;
 	}
       }
-      
+      /*
       // ECAL bad laser correction filter
       index = metFilterNames.triggerIndex("Flag_ecalLaserCorrFilter");
       if(index < hMETFilters->size()) {  // check for valid index
@@ -249,7 +283,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 	  evtInfo->metFilterFailBits |= kECALLaserCorrFilter;
 	}
       }
-      
+      */
       // tracking failure filter
       index = metFilterNames.triggerIndex("Flag_trackingFailureFilter");
       if(index < hMETFilters->size()) {  // check for valid index
@@ -386,7 +420,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       evtInfo->pfMET30phi   = inPFMET30.phi();
     }
     // Corrected PF MET
-    if(fPFMETC30Name.size() > 0) {
+    if(fPFMET30Name.size() > 0) {
       edm::Handle<reco::PFMETCollection> hPFMETC30Product;
       iEvent.getByLabel(fPFMETC30Name,hPFMETC30Product);
       assert(hPFMETC30Product.isValid());
