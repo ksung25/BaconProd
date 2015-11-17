@@ -103,7 +103,10 @@ process.puppi.vertexName     = cms.InputTag('offlineSlimmedPrimaryVertices')
 process.pfCandNoLep = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates"), cut = cms.string("abs(pdgId) != 13 && abs(pdgId) != 11 && abs(pdgId) != 15"))
 process.pfCandLep   = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates"), cut = cms.string("abs(pdgId) == 13 || abs(pdgId) == 11 || abs(pdgId) == 15"))
 process.puppinolep = process.puppi.clone()
-process.puppinolep.candName = 'pfCandNoLep'
+#process.puppinolep.candName = 'pfCandNoLep'
+process.puppi.useExistingWeights      = True
+process.puppinolep.useExistingWeights = True
+process.puppinolep.useWeightsNoLep    = True
 process.load('RecoMET.METProducers.PFMET_cfi')
 process.pfMet.src = cms.InputTag('packedPFCandidates')
 process.puppiForMET = cms.EDProducer("CandViewMerger",src = cms.VInputTag( 'puppinolep','pfCandLep'))     
@@ -123,7 +126,7 @@ if is_data_flag:
   process.CA15QGTaggerSubJetsPuppi.jec   = cms.InputTag("ca15PuppiL1FastL2L3ResidualCorrector")
 
 # ALPACA
-process.load('BaconProd/Ntupler/myAlpacaCorrections_cff')
+#process.load('BaconProd/Ntupler/myAlpacaCorrections_cff')
 alpacaMet = ''
 alpacaPuppiMet = ''
 if do_alpaca: 

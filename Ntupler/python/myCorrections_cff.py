@@ -19,7 +19,7 @@ from JetMETCorrections.Configuration.JetCorrectorsAllAlgos_cff  import *
 #                         )                                        
 
 # Sequence AK4
-label='PFchs'
+label='chs'
 ak4L1FastjetCorrector  = ak4PFCHSL1FastjetCorrector.clone (algorithm   = cms.string('AK4'+label))
 ak4L2RelativeCorrector = ak4PFCHSL2RelativeCorrector.clone(algorithm   = cms.string('AK4'+label))
 ak4L3AbsoluteCorrector = ak4PFCHSL3AbsoluteCorrector.clone(algorithm   = cms.string('AK4'+label))

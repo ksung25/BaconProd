@@ -102,6 +102,9 @@ process.pfCandNoLep = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packed
 process.pfCandLep   = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates"), cut = cms.string("abs(pdgId) == 13 || abs(pdgId) == 11 || abs(pdgId) == 15"))
 process.puppinolep = process.puppi.clone()
 process.puppinolep.candName = 'pfCandNoLep'
+process.puppi.useExistingWeights      = True
+process.puppinolep.useExistingWeights = True
+process.puppinolep.useWeightsNoLep    = True
 process.load('RecoMET.METProducers.PFMET_cfi')
 process.pfMet.src = cms.InputTag('packedPFCandidates')
 process.puppiForMET = cms.EDProducer("CandViewMerger",src = cms.VInputTag( 'puppinolep','pfCandLep'))     
@@ -120,7 +123,7 @@ if is_data_flag:
   process.CA15QGTaggerSubJetsPuppi.jec   = cms.InputTag("ca15PuppiL1FastL2L3ResidualCorrector")
 
 # ALPACA
-process.load('BaconProd/Ntupler/myAlpacaCorrections_cff')
+#process.load('BaconProd/Ntupler/myAlpacaCorrections_cff')
 alpacaMet = ''
 alpacaPuppiMet = ''
 if do_alpaca: 
@@ -168,8 +171,9 @@ ca15PUPPIUnc = ak4PUPPIUnc
 #================================================================================
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring('/store/mc/RunIISpring15DR74/DMV_NNPDF30_Vector_Mphi-500_Mchi-150_gSM-1p0_gDM-1p0_13TeV-powheg/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/60000/A6471F7E-E971-E511-B8D9-0025905A4964.root'),
-                            skipEvents = cms.untracked.uint32(23500)
+                            fileNames = cms.untracked.vstring('/store/mc/RunIISpring15MiniAODv2/TTbarDMJets_pseudoscalar_Mchi-1_Mphi-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/10000/1486FE25-A16D-E511-93F2-001EC9ADE672.root',
+                                                              '/store/mc/RunIISpring15MiniAODv2/TTbarDMJets_pseudoscalar_Mchi-1_Mphi-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/10000/B0DBDF7A-A16D-E511-AFCB-001EC9ADE690.root')
+
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
