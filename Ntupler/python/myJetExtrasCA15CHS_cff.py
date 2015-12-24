@@ -87,6 +87,10 @@ CA15PFInclusiveSecondaryVertexFinderTagInfosSJCHS = pfInclusiveSecondaryVertexFi
 CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
     tagInfos = cms.VInputTag( cms.InputTag("CA15PFImpactParameterTagInfosSJCHS"), cms.InputTag("CA15PFInclusiveSecondaryVertexFinderTagInfosSJCHS") )
   )
+#double b-tagging
+CA15PFBoostedDoubleSecondaryVertexBJetTagsCHS = pfBoostedDoubleSecondaryVertexCA15BJetTags.clone(
+     tagInfos = cms.VInputTag(cms.InputTag("CA15PFImpactParameterTagInfosCHS"), cms.InputTag("CA15PFInclusiveSecondaryVertexFinderTagInfosCHS") )
+)
 
 # q/g discriminator
 # Note: need to provide JECs (or corrected jet collection) to QGL calculator
@@ -144,6 +148,7 @@ CA15jetsequenceCHS = cms.Sequence(
     CA15PFImpactParameterTagInfosSJCHS*
     CA15PFInclusiveSecondaryVertexFinderTagInfosSJCHS*
     CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS*
+    CA15PFBoostedDoubleSecondaryVertexBJetTagsCHS*
     ca15PFCHSL1FastL2L3CorrectorChain*
     CA15QGTaggerCHS*
     CA15QGTaggerSubJetsCHS*                
@@ -163,6 +168,7 @@ CA15jetsequenceCHSData = cms.Sequence(
     CA15PFImpactParameterTagInfosSJCHS*
     CA15PFInclusiveSecondaryVertexFinderTagInfosSJCHS*
     CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS*
+    CA15PFBoostedDoubleSecondaryVertexBJetTagsCHS*
     #ca15PFCHSL1FastL2L3ResidualCorrectorChain*
     ca15chsL1FastL2L3ResidualChain*
     CA15QGTaggerCHS*

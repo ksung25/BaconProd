@@ -42,6 +42,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD):
   fSubJetName         (iConfig.getUntrackedParameter<std::string>("subJetName","AK4caPFJetsTrimmedCHS__SubJets")),
   fCSVbtagName        (iConfig.getUntrackedParameter<std::string>("csvBTagName","combinedInclusiveSecondaryVertexV2BJetTags")),
   fCSVbtagSubJetName  (iConfig.getUntrackedParameter<std::string>("csvBTagSubJetName","AK4CombinedInclusiveSecondaryVertexV2BJetTagsSJCHS")),
+  fCSVDoubleBtagName  (iConfig.getUntrackedParameter<std::string>("csvDoubleBTagName","AK4PFBoostedDoubleSecondaryVertexBJetTagsCHS")),
   fJettinessName      (iConfig.getUntrackedParameter<std::string>("jettiness","AK4NjettinessCHS")),
   fQGLikelihood       (iConfig.getUntrackedParameter<std::string>("qgLikelihood","QGLikelihood")),
   fQGLikelihoodSubJets(iConfig.getUntrackedParameter<std::string>("qgLikelihoodSubjet","QGLikelihood")),
@@ -357,7 +358,6 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     assert(hGenJetProduct.isValid());
     genJetCol = hGenJetProduct.product();
   }
-
   TClonesArray &rArray      = *array;
   TClonesArray &rExtraArray = *iExtraArray;
 
@@ -393,9 +393,11 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     // Kinematics
     //==============================
     pJet->pt    = itJet->pt();
+    if(fApplyJEC) pJet->pt    = ptRaw*jetcorr;
     pJet->eta   = itJet->eta();
     pJet->phi   = itJet->phi();
     pJet->mass  = itJet->mass();
+    //if(fApplyJEC) pJet->mass    = itJet->mass()*jetcorr;
     pJet->ptRaw = ptRaw;
     pJet->area  = itJet->jetArea();
     //    pJet->unc   = jetunc;
@@ -508,6 +510,11 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   iEvent.getByLabel(fCSVbtagSubJetName, hCSVbtagsSubJets);
   assert(hCSVbtagsSubJets.isValid());
 
+  // Get double b tag
+  edm::Handle<reco::JetTagCollection> hCSVDoubleBtag;
+  iEvent.getByLabel(fCSVDoubleBtagName, hCSVDoubleBtag);
+  assert(hCSVDoubleBtag.isValid());
+
   //Get Quark Gluon Likelihood on subjets
   edm::Handle<edm::ValueMap<float> > hQGLikelihoodSubJets;
   iEvent.getByLabel(fQGLikelihoodSubJets,"qgLikelihood",hQGLikelihoodSubJets);
@@ -539,6 +546,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   pAddJet->tau2 = (*(hTau2.product()))[jetBaseRef];
   pAddJet->tau3 = (*(hTau3.product()))[jetBaseRef];
   pAddJet->tau4 = (*(hTau4.product()))[jetBaseRef];
+  pAddJet->doublecsv = (*(hCSVDoubleBtag.product()))[jetBaseRef];
 
   double pCorr=1;
   const reco::BasicJet* matchJet = 0;
@@ -705,6 +713,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
 
     edm::Handle<reco::BasicJetCollection> hCMSTTJetProduct;
     iEvent.getByLabel("cmsTopTagPFJetsCHS",hCMSTTJetProduct);  // (!) hard-code
+    std::cout << "===> " << fTopTaggerName << " --> " << fCSVDoubleBtagName << std::endl;
     assert(hCMSTTJetProduct.isValid());
     const reco::BasicJetCollection *cmsttJetCol = hCMSTTJetProduct.product();
 

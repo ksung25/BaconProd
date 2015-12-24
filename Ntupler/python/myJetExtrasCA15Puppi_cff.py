@@ -87,6 +87,10 @@ CA15PFInclusiveSecondaryVertexFinderTagInfosSJPuppi = pfInclusiveSecondaryVertex
 CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
     tagInfos = cms.VInputTag( cms.InputTag("CA15PFImpactParameterTagInfosSJPuppi"), cms.InputTag("CA15PFInclusiveSecondaryVertexFinderTagInfosSJPuppi") )
   )
+#double b-tagging
+CA15PFBoostedDoubleSecondaryVertexBJetTagsPuppi = pfBoostedDoubleSecondaryVertexCA15BJetTags.clone(
+     tagInfos = cms.VInputTag(cms.InputTag("CA15PFImpactParameterTagInfosPuppi"), cms.InputTag("CA15PFInclusiveSecondaryVertexFinderTagInfosPuppi") )
+)
 
 # q/g discriminator
 # Note: need to provide JECs (or corrected jet collection) to QGL calculator
@@ -130,6 +134,7 @@ CA15jetsequencePuppi = cms.Sequence(
     CA15PFImpactParameterTagInfosSJPuppi*
     CA15PFInclusiveSecondaryVertexFinderTagInfosSJPuppi*
     CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi*
+    CA15PFBoostedDoubleSecondaryVertexBJetTagsPuppi*
     ca15PuppiL1FastL2L3Chain*
     CA15QGTaggerPuppi*
     CA15QGTaggerSubJetsPuppi*                
@@ -148,6 +153,7 @@ CA15jetsequencePuppiData = cms.Sequence(
     CA15PFImpactParameterTagInfosSJPuppi*
     CA15PFInclusiveSecondaryVertexFinderTagInfosSJPuppi*
     CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi*
+    CA15PFBoostedDoubleSecondaryVertexBJetTagsPuppi*
     ca15PuppiL1FastL2L3ResidualChain*
     #ca15PuppiL1FastL2L3Chain*
     CA15QGTaggerPuppi*

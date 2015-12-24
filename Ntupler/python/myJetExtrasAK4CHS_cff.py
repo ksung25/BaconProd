@@ -86,6 +86,10 @@ AK4PFInclusiveSecondaryVertexFinderTagInfosSJCHS = pfInclusiveSecondaryVertexFin
 AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
     tagInfos = cms.VInputTag( cms.InputTag("AK4PFImpactParameterTagInfosSJCHS"), cms.InputTag("AK4PFInclusiveSecondaryVertexFinderTagInfosSJCHS") )
   )
+#double b-tagging
+AK4PFBoostedDoubleSecondaryVertexBJetTagsCHS = pfBoostedDoubleSecondaryVertexAK8BJetTags.clone(
+     tagInfos = cms.VInputTag(cms.InputTag("AK4PFImpactParameterTagInfosCHS"), cms.InputTag("AK4PFInclusiveSecondaryVertexFinderTagInfosCHS") )
+)
 
 # q/g discriminator
 # Note: need to provide JECs (or corrected jet collection) to QGL calculator

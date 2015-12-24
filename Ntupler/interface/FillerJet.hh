@@ -84,6 +84,7 @@ namespace baconhep
       std::string fSubJetName;
       std::string fCSVbtagName;
       std::string fCSVbtagSubJetName;
+      std::string fCSVDoubleBtagName;
       std::string fJettinessName;
       std::string fQGLikelihood;
       std::string fQGLikelihoodSubJets;
