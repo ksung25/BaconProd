@@ -29,17 +29,19 @@ using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
 FillerElectron::FillerElectron(const edm::ParameterSet &iConfig, const bool useAOD):
-  fMinPt         (iConfig.getUntrackedParameter<double>("minPt",7)),
-  fEleName       (iConfig.getUntrackedParameter<std::string>("edmName","gedGsfElectrons")),
-  fBSName        (iConfig.getUntrackedParameter<std::string>("edmBeamspotName","offlineBeamSpot")),
-  fPFCandName    (iConfig.getUntrackedParameter<std::string>("edmPFCandName","particleFlow")),
-  fTrackName     (iConfig.getUntrackedParameter<std::string>("edmTrackName","generalTracks")),
-  fConvName      (iConfig.getUntrackedParameter<std::string>("edmConversionName","allConversions")),
-  fSCName        (iConfig.getUntrackedParameter<std::string>("edmSCName","particleFlowEGamma")),
-  fPuppiName     (iConfig.getUntrackedParameter<std::string>("edmPuppiName","puppi")),
-  fPuppiNoLepName(iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppinolep")),
-  fUsePuppi      (iConfig.getUntrackedParameter<bool>("usePuppi",true)),
-  fUseAOD        (useAOD)
+  fMinPt                 (iConfig.getUntrackedParameter<double>("minPt",7)),
+  fEleName               (iConfig.getUntrackedParameter<std::string>("edmName","gedGsfElectrons")),
+  fBSName                (iConfig.getUntrackedParameter<std::string>("edmBeamspotName","offlineBeamSpot")),
+  fPFCandName            (iConfig.getUntrackedParameter<std::string>("edmPFCandName","particleFlow")),
+  fTrackName             (iConfig.getUntrackedParameter<std::string>("edmTrackName","generalTracks")),
+  fConvName              (iConfig.getUntrackedParameter<std::string>("edmConversionName","allConversions")),
+  fSCName                (iConfig.getUntrackedParameter<std::string>("edmSCName","particleFlowEGamma")),
+  fPuppiName             (iConfig.getUntrackedParameter<std::string>("edmPuppiName","puppi")),
+  fPuppiNoLepName        (iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppinolep")),
+  fUsePuppi              (iConfig.getUntrackedParameter<bool>("usePuppi",true)),
+  fEcalPFClusterIsoMapTag(iConfig.getUntrackedParameter<edm::InputTag>("edmEcalPFClusterIsoMapTag")),
+  fHcalPFClusterIsoMapTag(iConfig.getUntrackedParameter<edm::InputTag>("edmHcalPFClusterIsoMapTag")),
+  fUseAOD                (useAOD)
 {}
 
 //--------------------------------------------------------------------------------------------------
@@ -110,11 +112,23 @@ void FillerElectron::fill(TClonesArray *array,
   iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",hTransientTrackBuilder);
   const TransientTrackBuilder *transientTrackBuilder = hTransientTrackBuilder.product();
 
+  // Get PF cluster isolation value maps (not in AOD)
+  edm::Handle<edm::ValueMap<float> > hEcalPFClusterIsoMap;
+  iEvent.getByLabel(fEcalPFClusterIsoMapTag, hEcalPFClusterIsoMap);
+  assert(hEcalPFClusterIsoMap.isValid());
+
+  edm::Handle<edm::ValueMap<float> > hHcalPFClusterIsoMap;
+  iEvent.getByLabel(fHcalPFClusterIsoMapTag, hHcalPFClusterIsoMap);
+  assert(hHcalPFClusterIsoMap.isValid());
+
 
   for(reco::GsfElectronCollection::const_iterator itEle = eleCol->begin(); itEle!=eleCol->end(); ++itEle) {
 
     const reco::GsfTrackRef gsfTrack = itEle->gsfTrack();
     const reco::SuperClusterRef sc   = itEle->superCluster();
+
+    // ref to access value maps
+    edm::RefToBase<reco::GsfElectron> eleBaseRef( edm::Ref<reco::GsfElectronCollection>(hEleProduct, itEle - eleCol->begin()) );
 
     // electron pT cut
     if(itEle->pt() < fMinPt) continue;
@@ -156,15 +170,18 @@ void FillerElectron::fill(TClonesArray *array,
     //
     // Isolation
     //==============================
-    pElectron->trkIso  = itEle->dr03TkSumPt();
-    pElectron->ecalIso = itEle->dr03EcalRecHitSumEt();
-    pElectron->hcalIso = itEle->dr03HcalTowerSumEt();
+    pElectron->trkIso        = itEle->dr03TkSumPt();
+    pElectron->ecalIso       = itEle->dr03EcalRecHitSumEt();
+    pElectron->hcalIso       = itEle->dr03HcalTowerSumEt();
     pElectron->hcalDepth1Iso = itEle->dr03HcalDepth1TowerSumEt();
 
     pElectron->chHadIso  = itEle->pfIsolationVariables().sumChargedHadronPt;
     pElectron->gammaIso  = itEle->pfIsolationVariables().sumPhotonEt;
     pElectron->neuHadIso = itEle->pfIsolationVariables().sumNeutralHadronEt;
     pElectron->puIso     = itEle->pfIsolationVariables().sumPUPt;
+
+    pElectron->ecalPFClusIso = (*hEcalPFClusterIsoMap)[eleBaseRef];
+    pElectron->hcalPFClusIso = (*hHcalPFClusterIsoMap)[eleBaseRef];
 
     if(fUsePuppi) { 
       double pEta = pElectron->pfEta;
@@ -360,6 +377,9 @@ void FillerElectron::fill(TClonesArray *array,
     pElectron->gammaIso  = itEle->pfIsolationVariables().sumPhotonEt;
     pElectron->neuHadIso = itEle->pfIsolationVariables().sumNeutralHadronEt;
     pElectron->puIso     = itEle->pfIsolationVariables().sumPUPt;
+
+    pElectron->ecalPFClusIso = itEle->ecalPFClusterIso();
+    pElectron->hcalPFClusIso = itEle->hcalPFClusterIso();
 
     if(fUsePuppi) { 
       double pEta = pElectron->pfEta;

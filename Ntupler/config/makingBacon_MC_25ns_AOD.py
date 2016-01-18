@@ -70,6 +70,9 @@ if is_data_flag:
 # produce photon isolation with proper footprint removal
 process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
 
+# produce PF cluster isolation for electrons
+process.load("RecoEgamma/EgammaIsolationAlgos/pfClusterIsolation_cfi.py")
+
 # PUPPI
 from RecoMET.METProducers.PFMET_cfi import pfMet
 process.load('CommonTools/PileupAlgos/Puppi_cff')
@@ -101,9 +104,9 @@ from BaconProd.Ntupler.myMET30_cff import setMet30
 setMet30(process,3.0,False)
 
 #JEC
-JECTag='Summer15_25nsV2_DATA'
+JECTag='Summer15_25nsV6_DATA'
 if not is_data_flag: 
-  JECTag='Summer15_25nsV2_MC'
+  JECTag='Summer15_25nsV6_MC'
 ak4CHSJEC = cms.untracked.vstring('BaconProd/Utils/data/'+JECTag+'_L1FastJet_AK4PFchs.txt',
                                   'BaconProd/Utils/data/'+JECTag+'_L2Relative_AK4PFchs.txt',
                                   'BaconProd/Utils/data/'+JECTag+'_L3Absolute_AK4PFchs.txt',
@@ -216,6 +219,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmTrackName              = cms.untracked.string('generalTracks'),
     edmConversionName         = cms.untracked.string('allConversions'),
     edmSuperClusterName       = cms.untracked.string('particleFlowEGamma'),
+    edmEcalPFClusterIsoMapTag = cms.untracked.string('electronEcalPFClusterIsolationProducer'),
+    edmHcalPFClusterIsoMapTag = cms.untracked.string('electronHcalPFClusterIsolationProducer'),
     edmPuppiName              = cms.untracked.string('puppi'),
     edmPuppiNoLepName         = cms.untracked.string('puppinolep'),
     usePuppi                  = cms.untracked.bool(True)
@@ -526,6 +531,7 @@ process.baconSequence = cms.Sequence(#process.puppi*
                                      process.CA15jetsequencePuppi*
                                      process.allMET30*         # 30
                                      process.photonIDValueMapProducer*
+                                     process.pfClusterIsolationSequence*
 				     process.ntupler)
 
 #--------------------------------------------------------------------------------
