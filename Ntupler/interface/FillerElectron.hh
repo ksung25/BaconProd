@@ -65,6 +65,11 @@ namespace baconhep
       std::string fPuppiName; 
       std::string fPuppiNoLepName; 
       bool fUsePuppi;
+
+      // PF cluster isolation info (not in AOD)
+      edm::InputTag fEcalPFClusterIsoMapTag;
+      edm::InputTag fHcalPFClusterIsoMapTag;
+
       bool fUseAOD;
   };
 }
