@@ -107,10 +107,13 @@ process.puppinolep = process.puppi.clone()
 process.puppi.useExistingWeights      = True
 process.puppinolep.useExistingWeights = True
 process.puppinolep.useWeightsNoLep    = True
+process.load('CommonTools/PileupAlgos/PhotonPuppi_cff')
+#process.puppiPhoton.candName    = 'pfCandNoLep'
+process.puppiPhoton.weightsName = 'puppinolep'
 process.load('RecoMET.METProducers.PFMET_cfi')
 process.pfMet.src = cms.InputTag('packedPFCandidates')
-process.puppiForMET = cms.EDProducer("CandViewMerger",src = cms.VInputTag( 'puppinolep','pfCandLep'))     
-process.pfMetPuppi = process.pfMet.clone();
+process.puppiForMET = cms.EDProducer("CandViewMerger",src = cms.VInputTag( 'puppiPhoton'))
+process.pfMetPuppi = process.pfMet.clone()
 process.pfMetPuppi.src = cms.InputTag('puppiForMET')
 process.pfMetPuppi.calculateSignificance = False
 process.pfJetMETcorrPuppi.jetCorrLabel = cms.InputTag("ak4PuppiL1FastL2L3Corrector")
@@ -174,9 +177,7 @@ ca15PUPPIUnc = ak4PUPPIUnc
 #================================================================================
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring('/store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v3/70000/5AE6F32E-6014-E511-B6CD-0025905964C2.root',
-                                                              '/store/mc/RunIISpring15DR74/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v3/70000/5AE6F32E-6014-E511-B6CD-002590596\
-4C2.root')
+                            fileNames  = cms.untracked.vstring('/store/data/Run2015D/SingleMuon/MINIAOD/05Oct2015-v1/60000/F0040E8B-756F-E511-B1B1-0026189438D5.root')
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -247,7 +248,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmName                   = cms.untracked.string('slimmedElectrons'),
     edmPuppiName              = cms.untracked.string('puppi'),
     edmPuppiNoLepName         = cms.untracked.string('puppinolep'),
-    usePuppi                  = cms.untracked.bool(True)
+    usePuppi                  = cms.untracked.bool(True),
+    edmEcalPFClusterIsoMapTag = cms.untracked.InputTag('electronEcalPFClusterIsolationProducer'),
+    edmHcalPFClusterIsoMapTag = cms.untracked.InputTag('electronHcalPFClusterIsolationProducer'),
   ),
   
   Muon = cms.untracked.PSet(
@@ -339,7 +342,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     coneSize             = cms.untracked.double(0.8),
     doComputeFullJetInfo = cms.untracked.bool(True),
     doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
-
+    showerDecoConf       = cms.untracked.string('BaconProd/Utils/data/input_card_8.dat'),
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
 
@@ -378,7 +381,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     jecFiles    = ak8CHSJEC,
     jecUncFiles = ak8CHSUnc,
     edmRhoName  = cms.untracked.string('fixedGridRhoFastjetAll'),
-
+    showerDecoConf       = cms.untracked.string('BaconProd/Utils/data/input_card_8.dat'),
     # names of various jet-related collections
     jetName              = cms.untracked.string('CA8PFJetsCHS'),
     genJetName           = cms.untracked.string('CA8GenJetsCHS'),
@@ -405,6 +408,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmPVName   = cms.untracked.string('offlineSlimmedPrimaryVertices'),
     jecFiles    = ak8PUPPIJEC,
     jecUncFiles = ak8PUPPIUnc,   
+    showerDecoConf       = cms.untracked.string('BaconProd/Utils/data/input_card_8.dat'),
     edmRhoName  = cms.untracked.string('fixedGridRhoFastjetAll'),
     
     # ORDERD list of pileup jet ID input files
@@ -443,6 +447,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     # ORDERD list of pileup jet ID input files
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
+    showerDecoConf     = cms.untracked.string('BaconProd/Utils/data/input_card_15.dat'),
     # names of various jet-related collections
     jetName            = cms.untracked.string('CA15PFJetsCHS'),
     genJetName         = cms.untracked.string('CA15GenJetsCHS'),
@@ -474,6 +479,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     # ORDERD list of pileup jet ID input files
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
+    showerDecoConf     = cms.untracked.string('BaconProd/Utils/data/input_card_15.dat'),
     # names of various jet-related collections
     jetName            = cms.untracked.string('CA15PFJetsPuppi'),
     genJetName         = cms.untracked.string('CA15GenJetsCHS'),
@@ -515,11 +521,13 @@ process.baconSequence = cms.Sequence(process.metFilters*
                                      process.slimmedMuonsTight        * 
                                      process.slimmedTausLoose         * 
                                      process.slimmedElectronsTight    * 
+                                     process.pfMVAMEtSequenceNoLep    *
                                      process.pfCandNoLep              *
                                      process.pfCandLep                *
                                      process.pfNoPileUpJME            *
                                      process.puppi                    *
                                      process.puppinolep               *
+                                     process.puppiPhoton              *
                                      #process.ak4PuppiL1FastL2L3ResidualChain*
                                      #process.alpacaSequenceData       * 
                                      process.puppiForMET              *

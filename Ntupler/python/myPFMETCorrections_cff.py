@@ -61,10 +61,10 @@ producePFMETCorrectionsData = cms.Sequence(
 #Puppi
 pfJetMETcorrPuppi = pfJetMETcorr.clone(
     src = 'AK4PFJetsPuppi',
-    jetCorrLabel = 'ak4PuppiL1FastL2L3Corrector',
+    jetCorrLabel   = 'ak4PuppiL1FastL2L3Corrector',
     offsetCorrLabel = 'ak4PuppiL1FastjetCorrector',
     jetCorrLabelRes = 'ak4PuppiL1FastL2L3ResidualCorrector',
-    type1JetPtThreshold = cms.double(20)
+    #type1JetPtThreshold = cms.double(20.0)
     )
 
 pfType1PuppiCorrectedMet = pfType1CorrectedMet.clone(

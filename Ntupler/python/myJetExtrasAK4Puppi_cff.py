@@ -22,10 +22,10 @@ AK4FlavorPuppi = cms.EDProducer("JetFlavourClustering",
 # take the default AK4 PFJet producer and modify accordingly for cone size and clustering algorithm
 from RecoJets.JetProducers.ak4PFJets_cfi import ak4PFJets
 AK4PFJetsPuppi = ak4PFJets.clone(
-    src          = cms.InputTag('puppinolep'),
+    src          = cms.InputTag('puppi'),
     jetAlgorithm = cms.string("AntiKt"),
     rParam       = cms.double(0.4),
-    jetPtMin     = cms.double(20)
+    jetPtMin     = cms.double(1)
   )
 
 # Pruned

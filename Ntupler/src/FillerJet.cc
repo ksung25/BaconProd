@@ -47,8 +47,10 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD):
   fQGLikelihood       (iConfig.getUntrackedParameter<std::string>("qgLikelihood","QGLikelihood")),
   fQGLikelihoodSubJets(iConfig.getUntrackedParameter<std::string>("qgLikelihoodSubjet","QGLikelihood")),
   fTopTaggerName      (iConfig.getUntrackedParameter<std::string>("topTaggerName","")),
+  fShowerDecoConf     (iConfig.getUntrackedParameter<std::string>("showerDecoConf","")),
   fConeSize           (iConfig.getUntrackedParameter<double>("coneSize",0.4)),
   fComputeFullJetInfo (iConfig.getUntrackedParameter<bool>("doComputeFullJetInfo",false)),  
+  fShowerDeco         (0),
   fJetCorr            (0),
   fJetUnc             (0),
   fUseAOD             (useAOD)
@@ -69,6 +71,9 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD):
     }
 
   fRand = new TRandom2();
+  if(fShowerDecoConf.size() > 0) { 
+    fShowerDeco = new ShowerDeco(cmssw_base_src+fShowerDecoConf);
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -547,6 +552,16 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   pAddJet->tau3 = (*(hTau3.product()))[jetBaseRef];
   pAddJet->tau4 = (*(hTau4.product()))[jetBaseRef];
   pAddJet->doublecsv = (*(hCSVDoubleBtag.product()))[jetBaseRef];
+  if(fShowerDeco != 0) { 
+    std::vector<reco::CandidatePtr> pfConstituents = itJet.getJetConstituents();                                                                                                                     
+    std::vector<fastjet::PseudoJet>   lClusterParticles;                                                                                                                                     
+    for(unsigned int ic=0; ic<pfConstituents.size(); ic++) {                                                                                                                                         
+      reco::CandidatePtr pfcand = pfConstituents[ic];                                                                                                                                  
+      fastjet::PseudoJet   pPart(pfcand->px(),pfcand->py(),pfcand->pz(),pfcand->energy());                                                                                                      
+      lClusterParticles.push_back(pPart);                                                                                                                                                       
+    }                                                                           
+    pAddJet->topchi2 = fShowerDeco->chi(itJet.pt(),lClusterParticles);
+  }
 
   double pCorr=1;
   const reco::BasicJet* matchJet = 0;
@@ -713,7 +728,6 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
 
     edm::Handle<reco::BasicJetCollection> hCMSTTJetProduct;
     iEvent.getByLabel("cmsTopTagPFJetsCHS",hCMSTTJetProduct);  // (!) hard-code
-    std::cout << "===> " << fTopTaggerName << " --> " << fCSVDoubleBtagName << std::endl;
     assert(hCMSTTJetProduct.isValid());
     const reco::BasicJetCollection *cmsttJetCol = hCMSTTJetProduct.product();
 

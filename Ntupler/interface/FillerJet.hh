@@ -3,6 +3,7 @@
 
 #include "BaconProd/Utils/interface/TriggerTools.hh"
 #include "BaconProd/Utils/interface/JetPUIDMVACalculator.hh"
+#include "BaconProd/Utils/interface/ShowerDeco.hh"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/BasicJet.h"
@@ -91,11 +92,13 @@ namespace baconhep
       std::string fTopTaggerName;
       std::string fLowPtWeightFile;
       std::string fHighPtWeightFile;
+      std::string fShowerDecoConf;
       double      fConeSize;
       bool        fComputeFullJetInfo;
       
       // Jet ID MVA
       JetPUIDMVACalculator fJetPUIDMVACalc;
+      ShowerDeco*          fShowerDeco;
 
       // Random number generator for Q-jet volatility
       TRandom2* fRand;
