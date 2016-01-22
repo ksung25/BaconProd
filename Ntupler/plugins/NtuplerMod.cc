@@ -1,3 +1,4 @@
+
 #include "NtuplerMod.hh"
 
 // bacon classes and constants
@@ -6,6 +7,7 @@
 #include "BaconAna/DataFormats/interface/TGenEventInfo.hh"
 #include "BaconAna/DataFormats/interface/TLHEWeight.hh"
 #include "BaconAna/DataFormats/interface/TGenParticle.hh"
+#include "BaconAna/DataFormats/interface/TGenJet.hh"
 #include "BaconAna/DataFormats/interface/TElectron.hh"
 #include "BaconAna/DataFormats/interface/TMuon.hh"
 #include "BaconAna/DataFormats/interface/TTau.hh"
@@ -27,6 +29,7 @@
 #include "BaconProd/Ntupler/interface/FillerTau.hh"
 #include "BaconProd/Ntupler/interface/FillerCaloJet.hh"
 #include "BaconProd/Ntupler/interface/FillerJet.hh"
+#include "BaconProd/Ntupler/interface/FillerGenJets.hh"
 #include "BaconProd/Ntupler/interface/FillerPF.hh"
 #include "BaconProd/Ntupler/interface/FillerRH.hh"
 
@@ -78,6 +81,8 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fComputeFullFatterPuppiJetInfo(false),
   fFillerEvtInfo     (0),
   fFillerGenInfo     (0),
+  fFillerGenJet      (0),
+  fFillerGenFatJet   (0),
   fFillerPV          (0),
   fFillerEle         (0),
   fFillerMuon        (0),
@@ -95,6 +100,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fTrigger           (0),
   fIsActiveEvtInfo   (false),
   fIsActiveGenInfo   (false),
+  fIsActiveGenJet    (false),
   fIsActivePV        (false),
   fIsActiveEle       (false),
   fIsActiveMuon      (false),
@@ -103,8 +109,12 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fIsActiveJet       (false),
   fIsActiveFatJet    (false),
   fIsActiveFatterJet (false),
+  fIsActivePuppiJet       (false),
+  fIsActiveFatPuppiJet    (false),
+  fIsActiveFatterPuppiJet (false),
   fIsActivePF        (false),
   fIsActiveRH        (false),
+  fUseTrigger        (false),
   fOutputName        (iConfig.getUntrackedParameter<std::string>("outputName", "ntuple.root")),
   fOutputFile        (0),
   fTotalEvents       (0),
@@ -114,6 +124,8 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fGenEvtInfo        (0),
   fLHEWgtArr         (0),
   fGenParArr         (0),
+  fGenJetArr         (0),
+  fGenFatJetArr      (0),
   fEleArr            (0),
   fMuonArr           (0),
   fTauArr            (0),
@@ -139,6 +151,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   baconhep::TGenEventInfo::Class()->IgnoreTObjectStreamer();
   baconhep::TLHEWeight::Class()->IgnoreTObjectStreamer();
   baconhep::TGenParticle::Class()->IgnoreTObjectStreamer();
+  baconhep::TGenJet::Class()->IgnoreTObjectStreamer();
   baconhep::TMuon::Class()->IgnoreTObjectStreamer();
   baconhep::TElectron::Class()->IgnoreTObjectStreamer();
   baconhep::TTau::Class()->IgnoreTObjectStreamer();
@@ -150,11 +163,14 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   baconhep::TRHPart::Class()->IgnoreTObjectStreamer();
 
   // trigger object information
-  if(fUseAOD) {
-    fHLTObjTag = edm::InputTag("hltTriggerSummaryAOD","","HLT");
-  } else {
-    //fHLTObjTag = edm::InputTag("selectedPatTrigger","","PAT");
-    fHLTObjTag = edm::InputTag("selectedPatTrigger");
+  if(iConfig.existsAs<edm::ParameterSet>("TriggerFile",false)) {
+    fUseTrigger = true;
+    if(fUseAOD) {
+      fHLTObjTag = edm::InputTag("hltTriggerSummaryAOD","","HLT");
+    } else {
+      //fHLTObjTag = edm::InputTag("selectedPatTrigger","","PAT");
+      fHLTObjTag = edm::InputTag("selectedPatTrigger");
+    }
   }
 
   //
@@ -339,7 +355,20 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       fRHParArr = new TClonesArray("baconhep::TRHPart",50000); assert(fRHParArr);
       fFillerRH = new baconhep::FillerRH(cfg);                 assert(fFillerRH);
     }
-  } 
+  }
+
+  if(iConfig.existsAs<edm::ParameterSet>("GenJet",false)) {
+    edm::ParameterSet cfg(iConfig.getUntrackedParameter<edm::ParameterSet>("GenJet"));
+    fIsActiveGenJet     = cfg.getUntrackedParameter<bool>("isActive");
+    fIsActiveGenFatJet  = cfg.getUntrackedParameter<bool>("isActiveFatJet");
+    if(fIsActiveGenJet) {
+      fGenJetArr     = new TClonesArray("baconhep::TGenJet");           assert(fGenJetArr);
+      fFillerGenJet  = new baconhep::FillerGenJets(cfg);                assert(fFillerGenJet);
+    }
+    if(fIsActiveGenFatJet) {
+      fGenFatJetArr  = new TClonesArray("baconhep::TGenJet");           assert(fGenFatJetArr);
+    }
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -368,6 +397,7 @@ NtuplerMod::~NtuplerMod()
   delete fGenEvtInfo;
   delete fLHEWgtArr;
   delete fGenParArr;
+  delete fGenJetArr;
   delete fEleArr;
   delete fMuonArr;
   delete fTauArr;
@@ -411,6 +441,8 @@ void NtuplerMod::beginJob()
     fEventTree->Branch("GenParticle",&fGenParArr);
     if(fFillLHEWgt) { fEventTree->Branch("LHEWeight",&fLHEWgtArr); }
   }
+  if(fIsActiveGenJet)    { fEventTree->Branch("GenJet"     ,&fGenJetArr);}
+  if(fIsActiveGenFatJet) { fEventTree->Branch("GenFatJet"  ,&fGenFatJetArr);}
   if(fIsActiveEle)    { fEventTree->Branch("Electron", &fEleArr); }
   if(fIsActiveMuon)   { fEventTree->Branch("Muon",     &fMuonArr); }
   if(fIsActiveTau)    { fEventTree->Branch("Tau",      &fTauArr); }
@@ -446,7 +478,7 @@ void NtuplerMod::beginJob()
   //
   // Triggers
   //
-  setTriggers();
+  if(fUseTrigger) setTriggers();
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -474,26 +506,28 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 {
 
   fTotalEvents->Fill(1);
-  edm::Handle<edm::TriggerResults> hTrgRes;
-  iEvent.getByLabel(fHLTTag,hTrgRes);
-  assert(hTrgRes.isValid());  
-  const edm::TriggerNames &triggerNames = iEvent.triggerNames(*hTrgRes);
-  Bool_t config_changed = false;
-  if(fTriggerNamesID != triggerNames.parameterSetID()) {
-    fTriggerNamesID = triggerNames.parameterSetID();
-    config_changed  = true;
-  }
-  if(config_changed) {
-    initHLT(*hTrgRes, triggerNames);
-  }
   TriggerBits triggerBits;
-  for(unsigned int irec=0; irec<fTrigger->fRecords.size(); irec++) {
-    if(fTrigger->fRecords[irec].hltPathIndex == (unsigned int)-1) continue;
-    if(hTrgRes->accept(fTrigger->fRecords[irec].hltPathIndex)) {
-      triggerBits [fTrigger->fRecords[irec].baconTrigBit] = 1;
+  if(fUseTrigger) { 
+    edm::Handle<edm::TriggerResults> hTrgRes;
+    iEvent.getByLabel(fHLTTag,hTrgRes);
+    assert(hTrgRes.isValid()); 
+    const edm::TriggerNames &triggerNames = iEvent.triggerNames(*hTrgRes);
+    Bool_t config_changed = false;
+    if(fTriggerNamesID != triggerNames.parameterSetID()) {
+      fTriggerNamesID = triggerNames.parameterSetID();
+      config_changed  = true;
     }
+    if(config_changed) {
+      initHLT(*hTrgRes, triggerNames);
+    }
+    for(unsigned int irec=0; irec<fTrigger->fRecords.size(); irec++) {
+      if(fTrigger->fRecords[irec].hltPathIndex == (unsigned int)-1) continue;
+      if(hTrgRes->accept(fTrigger->fRecords[irec].hltPathIndex)) {
+	triggerBits [fTrigger->fRecords[irec].baconTrigBit] = 1;
+      }
+    }
+    if(fSkipOnHLTFail && triggerBits == 0) return;  
   }
-  if(fSkipOnHLTFail && triggerBits == 0) return;  
   if(fIsActiveGenInfo) {
     fGenParArr->Clear();
     if(fFillLHEWgt) {
@@ -503,21 +537,31 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       fFillerGenInfo->fill(fGenEvtInfo, fGenParArr,          0, iEvent, fXS);
     }
   }
-  fPVArr->Clear();
+  if(fIsActiveGenJet) {
+    fGenJetArr->Clear();
+    if(fGenFatJetArr != 0) fGenFatJetArr->Clear();
+    fFillerGenJet->fill(fGenJetArr, fGenFatJetArr, iEvent);
+  }
+  const reco::Vertex *pv = 0;
   int nvertices = 0;
-  const reco::Vertex *pv = fFillerPV->fill(fPVArr, nvertices, iEvent);
-  assert(pv);
+  if(fIsActiveEvtInfo) {
+    fPVArr->Clear();
+    pv = fFillerPV->fill(fPVArr, nvertices, iEvent);
+    assert(pv);
+  }
   if(fIsActiveEvtInfo) {
     fFillerEvtInfo->fill(fEvtInfo, iEvent, *pv, (nvertices>0), triggerBits);//,fSusyGen);
   }
   edm::Handle<trigger::TriggerEvent> hTrgEvt;
-  iEvent.getByLabel(fHLTObjTag,hTrgEvt);
   edm::Handle<pat::TriggerObjectStandAloneCollection> hTrgObjs;
-  iEvent.getByLabel(fHLTObjTag,hTrgObjs);
   const trigger::TriggerEvent*                  hTrgEvtDummy      = 0; 
   const pat::TriggerObjectStandAloneCollection* hTrgObjsDummy     = 0; 
-  if(fUseAOD) {hTrgEvtDummy  = &(*hTrgEvt); }
-  else        {hTrgObjsDummy = &(*hTrgObjs); }
+  if(fUseTrigger) { 
+    iEvent.getByLabel(fHLTObjTag,hTrgEvt);
+    iEvent.getByLabel(fHLTObjTag,hTrgObjs);
+    if(fUseAOD) {hTrgEvtDummy  = &(*hTrgEvt); }
+    else        {hTrgObjsDummy = &(*hTrgObjs); }
+  }
   if(fIsActiveEle) {
     fEleArr->Clear();
     if(fUseAOD) { fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);  }

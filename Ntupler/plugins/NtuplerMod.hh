@@ -21,6 +21,7 @@ namespace baconhep {
   class TTrigger;
   class FillerEventInfo;
   class FillerGenInfo;
+  class FillerGenJets;
   class FillerVertex;
   class FillerElectron;
   class FillerMuon;
@@ -28,6 +29,7 @@ namespace baconhep {
   class FillerTau;
   class FillerCaloJet;
   class FillerJet;
+  class FillerGenJet;
   class FillerPF;
   class FillerRH;
 }
@@ -83,6 +85,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     // bacon fillers
     baconhep::FillerEventInfo *fFillerEvtInfo;
     baconhep::FillerGenInfo   *fFillerGenInfo;
+    baconhep::FillerGenJets   *fFillerGenJet,*fFillerGenFatJet;
     baconhep::FillerVertex    *fFillerPV;
     baconhep::FillerElectron  *fFillerEle;
     baconhep::FillerMuon      *fFillerMuon;
@@ -98,6 +101,8 @@ class NtuplerMod : public edm::EDAnalyzer {
     
     bool fIsActiveEvtInfo;
     bool fIsActiveGenInfo;
+    bool fIsActiveGenJet;
+    bool fIsActiveGenFatJet;
     bool fIsActivePV;
     bool fIsActiveEle;
     bool fIsActiveMuon;
@@ -108,7 +113,8 @@ class NtuplerMod : public edm::EDAnalyzer {
     bool fIsActivePuppiJet, fIsActiveFatPuppiJet, fIsActiveFatterPuppiJet;
     bool fIsActivePF;
     bool fIsActiveRH;
-    
+    bool fUseTrigger;
+  
     // Objects and arrays for output file
     std::string              fOutputName;
     TFile                   *fOutputFile;
@@ -119,6 +125,8 @@ class NtuplerMod : public edm::EDAnalyzer {
     baconhep::TGenEventInfo *fGenEvtInfo;
     TClonesArray            *fLHEWgtArr;
     TClonesArray            *fGenParArr;
+    TClonesArray            *fGenJetArr;
+    TClonesArray            *fGenFatJetArr;
     TClonesArray	    *fEleArr;
     TClonesArray	    *fMuonArr;
     TClonesArray	    *fTauArr;

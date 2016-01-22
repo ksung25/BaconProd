@@ -64,7 +64,6 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, 
       int id = -1;
       try {id = atoi(pId.c_str());} catch(int e) { std::cout << " ===> Error converting LHE to int" << std::endl;}
       pWeight->id     = id;
-      //std::cout << "===> " << iw << " -- " << pId << " -- " << pWeight->weight << std::endl;
     }
   }
 
