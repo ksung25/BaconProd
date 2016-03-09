@@ -11,6 +11,15 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/MuonReco/interface/MuonFwd.h"
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+
 class TClonesArray;
 namespace trigger {
   class TriggerEvent;
@@ -22,7 +31,7 @@ namespace baconhep
   class FillerMuon
   {
     public:
-      FillerMuon(const edm::ParameterSet &iConfig, const bool useAOD);
+       FillerMuon(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC);
       ~FillerMuon();
 
       // === filler for AOD ===
@@ -63,6 +72,12 @@ namespace baconhep
       std::string fPuppiNoLepName; 
       bool fUsePuppi;
       bool fUseAOD;
+      edm::EDGetTokenT<reco::MuonCollection>         fTokMuonName;
+      edm::EDGetTokenT<pat::MuonCollection>          fTokPatMuonName;
+      edm::EDGetTokenT<reco::PFCandidateCollection>  fTokPFCandName;
+      edm::EDGetTokenT<reco::PFCandidateCollection>  fTokPuppiName;
+      edm::EDGetTokenT<reco::PFCandidateCollection>  fTokPuppiNoLepName;
+      edm::EDGetTokenT<reco::TrackCollection>        fTokTrackName;
   };
 }
 #endif

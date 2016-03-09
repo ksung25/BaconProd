@@ -17,11 +17,21 @@
 using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
-FillerPF::FillerPF(const edm::ParameterSet &iConfig):
+FillerPF::FillerPF(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC):
   fPFName      (iConfig.getUntrackedParameter<std::string>("edmName","particleFlow")),
   fPVName      (iConfig.getUntrackedParameter<std::string>("edmPVName","offlinePrimaryVertices")),
   fAddDepthTime(iConfig.getUntrackedParameter<bool>("doAddDepthTime",false))
 {
+  fTokPFName   = iC.consumes<reco::PFCandidateCollection>(fPFName);
+  fTokPVName   = iC.consumes<reco::VertexCollection>     (fPVName);
+  if(fAddDepthTime) { 
+    std::string lTokPFRecHitECAL = "particleFlowRecHitECAL";
+    std::string lTokPFRecHitHCAL = "particleFlowRecHitHCAL";
+    std::string lTokPFRecHitHO   = "particleFlowRecHitHO";
+    fTokPFRecHitECAL = iC.consumes<reco::PFRecHitCollection>(lTokPFRecHitECAL);
+    fTokPFRecHitHCAL = iC.consumes<reco::PFRecHitCollection>(lTokPFRecHitHCAL);
+    fTokPFRecHitHO   = iC.consumes<reco::PFRecHitCollection>(lTokPFRecHitHO);
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -35,13 +45,13 @@ void FillerPF::fill(TClonesArray *array,TClonesArray *iVtxCol,
   assert(array);
   // Get PF collection
   edm::Handle<reco::PFCandidateCollection> hPFProduct;
-  iEvent.getByLabel(fPFName,hPFProduct);
+  iEvent.getByToken(fTokPFName,hPFProduct);
   assert(hPFProduct.isValid());
   const reco::PFCandidateCollection *PFCol = hPFProduct.product();
 
   // Get vertex collection
   edm::Handle<reco::VertexCollection> hVertexProduct;
-  iEvent.getByLabel(fPVName,hVertexProduct);
+  iEvent.getByToken(fTokPVName,hVertexProduct);
   assert(hVertexProduct.isValid());
   const reco::VertexCollection *pvCol = hVertexProduct.product();
 
@@ -52,17 +62,17 @@ void FillerPF::fill(TClonesArray *array,TClonesArray *iVtxCol,
   if(fAddDepthTime) { 
     //Load all of the stupid PF Rec Hits
     edm::Handle<reco::PFRecHitCollection> hPFRecHitECAL;
-    iEvent.getByLabel(edm::InputTag("particleFlowRecHitECAL"),hPFRecHitECAL);
+    iEvent.getByToken(fTokPFRecHitECAL,hPFRecHitECAL);
     assert(hPFRecHitECAL.isValid());
     pfRecHitECAL = hPFRecHitECAL.product();
     
     edm::Handle<reco::PFRecHitCollection> hPFRecHitHCAL;
-    iEvent.getByLabel(edm::InputTag("particleFlowRecHitHCAL"),hPFRecHitHCAL);
+    iEvent.getByToken(fTokPFRecHitHCAL,hPFRecHitHCAL);
     assert(hPFRecHitHCAL.isValid());
     pfRecHitHCAL = hPFRecHitHCAL.product();
     
     edm::Handle<reco::PFRecHitCollection> hPFRecHitHO;
-    iEvent.getByLabel(edm::InputTag("particleFlowRecHitHO"),hPFRecHitHO);
+    iEvent.getByToken(fTokPFRecHitHO,hPFRecHitHO);
     assert(hPFRecHitHO.isValid());
     pfRecHitHO = hPFRecHitHO.product();
    
@@ -72,12 +82,12 @@ void FillerPF::fill(TClonesArray *array,TClonesArray *iVtxCol,
   }
   /*
   edm::Handle<reco::PFRecHitCollection> hPFRecHitHFEM;
-  iEvent.getByLabel(edm::InputTag("particleFlowClusterHFEM"),hPFRecHitHFEM);
+  //iEvent.getByLabel(edm::InputTag("particleFlowClusterHFEM"),hPFRecHitHFEM);
   assert(hPFRecHitHFEM.isValid());
   const reco::PFRecHitCollection *pfRecHitHFEM = hPFRecHitHFEM.product();
 
   edm::Handle<reco::PFRecHitCollection> hPFRecHitHFHAD;
-  iEvent.getByLabel(edm::InputTag("particleFlowClusterHFHAD"),hPFRecHitHFHAD);
+  //iEvent.getByLabel(edm::InputTag("particleFlowClusterHFHAD"),hPFRecHitHFHAD);
   assert(hPFRecHitHFHAD.isValid());
   const reco::PFRecHitCollection *pfRecHitHFHAD = hPFRecHitHFHAD.product();
   */
@@ -164,7 +174,7 @@ void FillerPF::fillMiniAOD(TClonesArray *array,TClonesArray *iVtxCol,
   assert(array);
   // Get PF collection
   edm::Handle<pat::PackedCandidateCollection> hPFProduct;
-  iEvent.getByLabel(fPFName,hPFProduct);
+  iEvent.getByToken(fTokPFName,hPFProduct);
   assert(hPFProduct.isValid());
   const pat::PackedCandidateCollection *PFCol = hPFProduct.product();
 

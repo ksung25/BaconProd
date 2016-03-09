@@ -7,6 +7,7 @@
 #include "DataFormats/JetReco/interface/JetCollection.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/JetReco/interface/GenJetCollection.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "TRandom2.h"
 #include <vector>
 #include <string>
@@ -27,7 +28,7 @@ namespace baconhep
   class FillerCaloJet
   {
     public:
-       FillerCaloJet(const edm::ParameterSet &iConfig);
+       FillerCaloJet(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC);
       ~FillerCaloJet();
 
       // === filler for AOD ===
@@ -61,6 +62,9 @@ namespace baconhep
       // JEC corrector
       FactorizedJetCorrector   *fJetCorr;
       JetCorrectionUncertainty *fJetUnc;
+      edm::EDGetTokenT<reco::CaloJetCollection> fTokJetName;
+      edm::EDGetTokenT<reco::GenJetCollection>  fTokGenJetName;
+      edm::EDGetTokenT<double>                  fTokRhoTag;
   };
 }
 #endif

@@ -5,19 +5,10 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
-#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
-#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
-#include "DataFormats/PatCandidates/interface/Electron.h"
-#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
-#include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/TrackReco/interface/TrackFwd.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
-#include "DataFormats/EgammaCandidates/interface/Conversion.h"
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include <TClonesArray.h>
@@ -28,21 +19,33 @@
 using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
-FillerElectron::FillerElectron(const edm::ParameterSet &iConfig, const bool useAOD):
+FillerElectron::FillerElectron(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC):
   fMinPt                 (iConfig.getUntrackedParameter<double>("minPt",7)),
   fEleName               (iConfig.getUntrackedParameter<std::string>("edmName","gedGsfElectrons")),
   fBSName                (iConfig.getUntrackedParameter<std::string>("edmBeamspotName","offlineBeamSpot")),
   fPFCandName            (iConfig.getUntrackedParameter<std::string>("edmPFCandName","particleFlow")),
   fTrackName             (iConfig.getUntrackedParameter<std::string>("edmTrackName","generalTracks")),
   fConvName              (iConfig.getUntrackedParameter<std::string>("edmConversionName","allConversions")),
-  fSCName                (iConfig.getUntrackedParameter<std::string>("edmSCName","particleFlowEGamma")),
+  fSCName                (iConfig.getUntrackedParameter<edm::InputTag>("edmSCName")),
   fPuppiName             (iConfig.getUntrackedParameter<std::string>("edmPuppiName","puppi")),
   fPuppiNoLepName        (iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppinolep")),
   fUsePuppi              (iConfig.getUntrackedParameter<bool>("usePuppi",true)),
   fEcalPFClusterIsoMapTag(iConfig.getUntrackedParameter<edm::InputTag>("edmEcalPFClusterIsoMapTag")),
   fHcalPFClusterIsoMapTag(iConfig.getUntrackedParameter<edm::InputTag>("edmHcalPFClusterIsoMapTag")),
   fUseAOD                (useAOD)
-{}
+{
+  if(fUseAOD)  fTokEleName        = iC.consumes<reco::GsfElectronCollection>(fEleName);
+  if(!fUseAOD) fTokPatEleName     = iC.consumes<pat::ElectronCollection>(fEleName);
+  fTokSCName         = iC.consumes<reco::SuperClusterCollection>(fSCName);
+  fTokBSName         = iC.consumes<reco::BeamSpot>             (fBSName);
+  fTokPFCandName     = iC.consumes<reco::PFCandidateCollection>(fPFCandName);
+  fTokPuppiName      = iC.consumes<reco::PFCandidateCollection>(fPuppiName);
+  fTokPuppiNoLepName = iC.consumes<reco::PFCandidateCollection>(fPuppiNoLepName);
+  fTokTrackName      = iC.consumes<reco::TrackCollection>      (fTrackName);
+  fTokConvName       = iC.consumes<reco::ConversionCollection>(fConvName);
+  fTokEcalPFClusterIsoMap = iC.consumes<edm::ValueMap<float> >(fEcalPFClusterIsoMapTag);
+  fTokHcalPFClusterIsoMap = iC.consumes<edm::ValueMap<float> >(fHcalPFClusterIsoMapTag);
+}
 
 //--------------------------------------------------------------------------------------------------
 FillerElectron::~FillerElectron(){}
@@ -59,19 +62,19 @@ void FillerElectron::fill(TClonesArray *array,
   
   // Get electron collection
   edm::Handle<reco::GsfElectronCollection> hEleProduct;
-  iEvent.getByLabel(fEleName,hEleProduct);
+  iEvent.getByToken(fTokEleName,hEleProduct);
   assert(hEleProduct.isValid());
   const reco::GsfElectronCollection *eleCol = hEleProduct.product();
 
   // Get beamspot
   edm::Handle<reco::BeamSpot> hBeamSpotProduct;
-  iEvent.getByLabel(fBSName,hBeamSpotProduct);
+  iEvent.getByToken(fTokBSName,hBeamSpotProduct);
   assert(hBeamSpotProduct.isValid());
   const reco::BeamSpot *bs = hBeamSpotProduct.product();
 
   // Get PF-candidates collection
   edm::Handle<reco::PFCandidateCollection> hPFCandProduct;
-  iEvent.getByLabel(fPFCandName,hPFCandProduct);
+  iEvent.getByToken(fTokPFCandName,hPFCandProduct);
   assert(hPFCandProduct.isValid());
   const reco::PFCandidateCollection *pfCandCol = hPFCandProduct.product();
   
@@ -80,30 +83,30 @@ void FillerElectron::fill(TClonesArray *array,
   if(fUsePuppi) { 
     // Get Puppi-candidates collection woof woof
     edm::Handle<reco::PFCandidateCollection> hPuppiProduct;
-    iEvent.getByLabel(fPuppiName,hPuppiProduct);
+    iEvent.getByToken(fTokPuppiName,hPuppiProduct);
     assert(hPuppiProduct.isValid());
     pfPuppi = hPuppiProduct.product();
     
     // Get Puppi-no lep candidates collection arf arf
     edm::Handle<reco::PFCandidateCollection> hPuppiNoLepProduct;
-    iEvent.getByLabel(fPuppiNoLepName,hPuppiNoLepProduct);
+    iEvent.getByToken(fTokPuppiNoLepName,hPuppiNoLepProduct);
     assert(hPuppiNoLepProduct.isValid());
     pfPuppiNoLep = hPuppiNoLepProduct.product();
   }
   // Get track collection
   edm::Handle<reco::TrackCollection> hTrackProduct;
-  iEvent.getByLabel(fTrackName,hTrackProduct);
+  iEvent.getByToken(fTokTrackName,hTrackProduct);
   assert(hTrackProduct.isValid());
   const reco::TrackCollection *trackCol = hTrackProduct.product();
   
   // Get conversions collection
   edm::Handle<reco::ConversionCollection> hConvProduct;
-  iEvent.getByLabel(fConvName,hConvProduct);
+  iEvent.getByToken(fTokConvName,hConvProduct);
   assert(hConvProduct.isValid());
 
   // Get SuperCluster collection
   edm::Handle<reco::SuperClusterCollection> hSCProduct;
-  iEvent.getByLabel(fSCName,hSCProduct);
+  iEvent.getByToken(fTokSCName,hSCProduct);
   assert(hSCProduct.isValid());
   const reco::SuperClusterCollection *scCol = hSCProduct.product();
 
@@ -114,11 +117,11 @@ void FillerElectron::fill(TClonesArray *array,
 
   // Get PF cluster isolation value maps (not in AOD)
   edm::Handle<edm::ValueMap<float> > hEcalPFClusterIsoMap;
-  iEvent.getByLabel(fEcalPFClusterIsoMapTag, hEcalPFClusterIsoMap);
+  iEvent.getByToken(fTokEcalPFClusterIsoMap, hEcalPFClusterIsoMap);
   assert(hEcalPFClusterIsoMap.isValid());
 
   edm::Handle<edm::ValueMap<float> > hHcalPFClusterIsoMap;
-  iEvent.getByLabel(fHcalPFClusterIsoMapTag, hHcalPFClusterIsoMap);
+  iEvent.getByToken(fTokHcalPFClusterIsoMap, hHcalPFClusterIsoMap);
   assert(hHcalPFClusterIsoMap.isValid());
 
 
@@ -293,14 +296,13 @@ void FillerElectron::fill(TClonesArray *array,
 
   // Get electron collection
   edm::Handle<pat::ElectronCollection> hEleProduct;
-  iEvent.getByLabel(fEleName,hEleProduct);
+  iEvent.getByToken(fTokPatEleName,hEleProduct);
   assert(hEleProduct.isValid());
   const pat::ElectronCollection *eleCol = hEleProduct.product();
 
   // Get supercluster collection
   edm::Handle<reco::SuperClusterCollection> hSCProduct;
-  edm::InputTag scTag("reducedEgamma","reducedSuperClusters");
-  iEvent.getByLabel(scTag,hSCProduct);
+  iEvent.getByToken(fTokSCName,hSCProduct);
   assert(hSCProduct.isValid());
   const reco::SuperClusterCollection *scCol = hSCProduct.product();
 
@@ -309,13 +311,13 @@ void FillerElectron::fill(TClonesArray *array,
   if(fUsePuppi) { 
     // Get Puppi-candidates collection woof woof
     edm::Handle<reco::PFCandidateCollection> hPuppiProduct;
-    iEvent.getByLabel(fPuppiName,hPuppiProduct);
+    iEvent.getByToken(fTokPuppiName,hPuppiProduct);
     assert(hPuppiProduct.isValid());
     pfPuppi = hPuppiProduct.product();
     
     // Get Puppi-no lep candidates collection arf arf
     edm::Handle<reco::PFCandidateCollection> hPuppiNoLepProduct;
-    iEvent.getByLabel(fPuppiNoLepName,hPuppiNoLepProduct);
+    iEvent.getByToken(fTokPuppiNoLepName,hPuppiNoLepProduct);
     assert(hPuppiNoLepProduct.isValid());
     pfPuppiNoLep = hPuppiNoLepProduct.product();
   }

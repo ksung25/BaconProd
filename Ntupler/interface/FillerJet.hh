@@ -11,6 +11,10 @@
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/JetReco/interface/GenJetCollection.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
+#include "SimDataFormats/JetMatching/interface/JetFlavourInfoMatching.h"
 #include "TRandom2.h"
 #include <vector>
 #include <string>
@@ -31,7 +35,7 @@ namespace baconhep
   class FillerJet
   {
     public:
-       FillerJet(const edm::ParameterSet &iConfig, const bool useAOD);
+       FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC);
       ~FillerJet();
 
       // === filler for AOD ===
@@ -108,6 +112,30 @@ namespace baconhep
       JetCorrectionUncertainty *fJetUnc;
 
       bool fUseAOD;
+    edm::EDGetTokenT<reco::PFJetCollection>  fTokJetName;
+    edm::EDGetTokenT<pat::JetCollection>     fTokPatJetName;
+    edm::EDGetTokenT<reco::GenJetCollection> fTokGenJetName;
+    edm::EDGetTokenT<reco::JetFlavourInfoMatchingCollection> fTokJetFlavorName;
+    edm::EDGetTokenT<reco::VertexCollection> fTokPVName;
+    edm::EDGetTokenT<reco::JetTagCollection> fTokCSVbtagName;
+    edm::EDGetTokenT<reco::BasicJetCollection> fTokPrunedJetName;
+    edm::EDGetTokenT<reco::BasicJetCollection> fTokTrimmedJetName;
+    edm::EDGetTokenT<reco::BasicJetCollection> fTokSoftDropJetName;
+    edm::EDGetTokenT<reco::JetTagCollection>   fTokCSVbtagSubJetName;
+    edm::EDGetTokenT<reco::JetTagCollection>   fTokCSVDoubleBtagName;
+    edm::EDGetTokenT<edm::ValueMap<float> >    fTokQGLikelihood     ;
+    edm::EDGetTokenT<edm::ValueMap<float> >    fTokQGLAxis2         ;
+    edm::EDGetTokenT<edm::ValueMap<float> >    fTokQGLPtD           ;
+    edm::EDGetTokenT<edm::ValueMap<int> >      fTokQGLMult          ;
+    edm::EDGetTokenT<edm::ValueMap<float> >    fTokTau1Name        ;
+    edm::EDGetTokenT<edm::ValueMap<float> >    fTokTau2Name        ;
+    edm::EDGetTokenT<edm::ValueMap<float> >    fTokTau3Name        ;
+    edm::EDGetTokenT<edm::ValueMap<float> >    fTokTau4Name        ;
+    edm::EDGetTokenT<edm::ValueMap<float> >    fTokQGLSubJets      ;
+    edm::EDGetTokenT<reco::PFJetCollection>    fTokSubJets         ;
+    edm::EDGetTokenT<reco::BasicJetCollection> fTokCMSTTJetProduct ;
+    edm::EDGetTokenT<reco::PFJetCollection>    fTokCMSTTSubJetProduct;
+    edm::EDGetTokenT<double>                   fTokRhoTag;
   };
 }
 #endif

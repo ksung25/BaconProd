@@ -3,14 +3,13 @@
 #include "BaconAna/DataFormats/interface/TTau.hh"
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/TauReco/interface/PFTau.h"
-#include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include <TClonesArray.h>
 
 using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
-FillerTau::FillerTau(const edm::ParameterSet &iConfig, const bool useAOD):
+FillerTau::FillerTau(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC):
   fMinPt  (iConfig.getUntrackedParameter<double>("minPt",10)),
   fTauName(iConfig.getUntrackedParameter<std::string>("edmName","hpsPFTauProducer")),
   fPuppiName     (iConfig.getUntrackedParameter<std::string>("edmPuppiName","puppi")),
@@ -120,6 +119,33 @@ FillerTau::FillerTau(const edm::ParameterSet &iConfig, const bool useAOD):
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVTightIsolationMVA3newDMwLT",kByVTightIsolationMVA3newDMwLT));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVVTightIsolationMVA3newDMwLT",kByVVTightIsolationMVA3newDMwLT));
   }
+  if(fUseAOD)  fTokTauName      = iC.consumes<reco::PFTauCollection>(fTauName);
+  if(!fUseAOD) fTokPatTauName   = iC.consumes<pat::TauCollection>   (fTauName);
+  for(unsigned int idisc = 0; idisc < fTokTauHandles.size(); idisc++) { 
+    edm::EDGetTokenT<reco::PFTauDiscriminator>  lTokTauHandles = iC.consumes<reco::PFTauDiscriminator>(fMyTauDiscHandles[idisc]->name);
+    fTokTauHandles.push_back(lTokTauHandles);
+  }
+  // Get raw value and category of "MVA5" electron rejection discriminator
+  std::string lTokMVA5EleRejRaw              = "hpsPFTauDiscriminationByMVA5rawElectronRejection";
+  std::string lTokMVA5EleRejCat              = "hpsPFTauDiscriminationByMVA5rawElectronRejection:category";
+  std::string lTokMVAMuonRejRaw              = "hpsPFTauDiscriminationByMVArawMuonRejection";
+  std::string lTokCombIsoDBSumPtCorr3HitsRaw = "hpsPFTauDiscriminationByRawCombinedIsolationDBSumPtCorr3Hits";
+  std::string lTokIsoMVA3oldwRaw             = "hpsPFTauDiscriminationByIsolationMVA3oldDMwLTraw";
+  std::string lTokIsoMVA3newwoRaw            = "hpsPFTauDiscriminationByIsolationMVA3newDMwoLTraw";
+  std::string lTokIsoMVA3newwRaw             = "hpsPFTauDiscriminationByIsolationMVA3newDMwLTraw";
+
+  fTokMVA5EleRejRaw              = iC.consumes<reco::PFTauDiscriminator>(lTokMVA5EleRejRaw);
+  fTokMVA5EleRejCat              = iC.consumes<reco::PFTauDiscriminator>(lTokMVA5EleRejCat);
+  fTokMVAMuonRejRaw              = iC.consumes<reco::PFTauDiscriminator>(lTokMVAMuonRejRaw);
+  fTokCombIsoDBSumPtCorr3HitsRaw = iC.consumes<reco::PFTauDiscriminator>(lTokCombIsoDBSumPtCorr3HitsRaw);
+  fTokIsoMVA3oldwRaw             = iC.consumes<reco::PFTauDiscriminator>(lTokIsoMVA3oldwRaw);
+  fTokIsoMVA3newwoRaw            = iC.consumes<reco::PFTauDiscriminator>(lTokIsoMVA3newwoRaw);
+  fTokIsoMVA3newwRaw             = iC.consumes<reco::PFTauDiscriminator>(lTokIsoMVA3newwRaw);
+  fTokPuppiName                  = iC.consumes<reco::PFCandidateCollection>(fPuppiName);
+  fTokPuppiNoLepName             = iC.consumes<reco::PFCandidateCollection>(fPuppiNoLepName);
+
+  // event energy density for ring isolation
+  //edm::Handle<double> hRho;
 
   //std::string cmssw_base_src = getenv("CMSSW_BASE");
   //cmssw_base_src += "/src/";
@@ -142,36 +168,36 @@ void FillerTau::fill(TClonesArray *array,
 
   // Get tau collection
   edm::Handle<reco::PFTauCollection> hTauProduct;
-  iEvent.getByLabel(fTauName,hTauProduct);
+  iEvent.getByToken(fTokTauName,hTauProduct);
   assert(hTauProduct.isValid());
   const reco::PFTauCollection *tauCol = hTauProduct.product();
   
   // Get HPS tau discriminators
   for(unsigned int idisc=0; idisc<fMyTauDiscHandles.size(); idisc++) {
-    iEvent.getByLabel(fMyTauDiscHandles[idisc]->name, fMyTauDiscHandles[idisc]->handle);
+    iEvent.getByToken(fTokTauHandles[idisc], fMyTauDiscHandles[idisc]->handle);
   }
 
    // Get raw value and category of "MVA5" electron rejection discriminator
   edm::Handle<reco::PFTauDiscriminator> hMVA5EleRejRaw;
-  iEvent.getByLabel("hpsPFTauDiscriminationByMVA5rawElectronRejection",hMVA5EleRejRaw);
+  iEvent.getByToken(fTokMVA5EleRejRaw,hMVA5EleRejRaw);
   edm::Handle<reco::PFTauDiscriminator> hMVA5EleRejCat;
-  iEvent.getByLabel("hpsPFTauDiscriminationByMVA5rawElectronRejection:category",hMVA5EleRejCat);
+  iEvent.getByToken(fTokMVA5EleRejCat,hMVA5EleRejCat);
   
   // Get raw value of new mva anti-muon raw value
   edm::Handle<reco::PFTauDiscriminator> hMVAMuonRejRaw;
-  iEvent.getByLabel("hpsPFTauDiscriminationByMVArawMuonRejection",hMVAMuonRejRaw);
+  iEvent.getByToken(fTokMVAMuonRejRaw,hMVAMuonRejRaw);
 
   // Get raw value for isolation discriminators
   edm::Handle<reco::PFTauDiscriminator> hCombIsoDBSumPtCorr3HitsRaw;
-  iEvent.getByLabel("hpsPFTauDiscriminationByRawCombinedIsolationDBSumPtCorr3Hits",hCombIsoDBSumPtCorr3HitsRaw);
+  iEvent.getByToken(fTokCombIsoDBSumPtCorr3HitsRaw,hCombIsoDBSumPtCorr3HitsRaw);
   //edm::Handle<reco::PFTauDiscriminator> hIsoMVA3oldwoRaw;
   //iEvent.getByLabel("hpsPFTauDiscriminationByIsolationMVA3oldDMwoLTraw",hIsoMVA3oldwoRaw);
   edm::Handle<reco::PFTauDiscriminator> hIsoMVA3oldwRaw;
-  iEvent.getByLabel("hpsPFTauDiscriminationByIsolationMVA3oldDMwLTraw",hIsoMVA3oldwRaw);
+  iEvent.getByToken(fTokIsoMVA3oldwRaw,hIsoMVA3oldwRaw);
   edm::Handle<reco::PFTauDiscriminator> hIsoMVA3newwoRaw;
-  iEvent.getByLabel("hpsPFTauDiscriminationByIsolationMVA3newDMwoLTraw",hIsoMVA3newwoRaw);
+  iEvent.getByToken(fTokIsoMVA3newwoRaw,hIsoMVA3newwoRaw);
   edm::Handle<reco::PFTauDiscriminator> hIsoMVA3newwRaw;
-  iEvent.getByLabel("hpsPFTauDiscriminationByIsolationMVA3newDMwLTraw",hIsoMVA3newwRaw);
+  iEvent.getByToken(fTokIsoMVA3newwRaw,hIsoMVA3newwRaw);
 
   // event energy density for ring isolation
   //edm::Handle<double> hRho;
@@ -183,13 +209,13 @@ void FillerTau::fill(TClonesArray *array,
   if(fUsePuppi) { 
     // Get Puppi-candidates collection woof woof
     edm::Handle<reco::PFCandidateCollection> hPuppiProduct;
-    iEvent.getByLabel(fPuppiName,hPuppiProduct);
+    iEvent.getByToken(fTokPuppiName,hPuppiProduct);
     assert(hPuppiProduct.isValid());
     pfPuppi = hPuppiProduct.product();
     
     // Get Puppi-no lep candidates collection arf arf
     edm::Handle<reco::PFCandidateCollection> hPuppiNoLepProduct;
-    iEvent.getByLabel(fPuppiNoLepName,hPuppiNoLepProduct);
+    iEvent.getByToken(fTokPuppiNoLepName,hPuppiNoLepProduct);
     assert(hPuppiNoLepProduct.isValid());
     pfPuppiNoLep = hPuppiNoLepProduct.product();
   }
@@ -283,7 +309,7 @@ void FillerTau::fill(TClonesArray *array,
 
   // Get tau collection
   edm::Handle<pat::TauCollection> hTauProduct;
-  iEvent.getByLabel(fTauName,hTauProduct);
+  iEvent.getByToken(fTokPatTauName,hTauProduct);
   assert(hTauProduct.isValid());
   const pat::TauCollection *tauCol = hTauProduct.product();
 
@@ -292,13 +318,13 @@ void FillerTau::fill(TClonesArray *array,
   if(fUsePuppi) { 
     // Get Puppi-candidates collection woof woof
     edm::Handle<reco::PFCandidateCollection> hPuppiProduct;
-    iEvent.getByLabel(fPuppiName,hPuppiProduct);
+    iEvent.getByToken(fTokPuppiName,hPuppiProduct);
     assert(hPuppiProduct.isValid());
     pfPuppi = hPuppiProduct.product();
     
     // Get Puppi-no lep candidates collection arf arf
     edm::Handle<reco::PFCandidateCollection> hPuppiNoLepProduct;
-    iEvent.getByLabel(fPuppiNoLepName,hPuppiNoLepProduct);
+    iEvent.getByToken(fTokPuppiNoLepName,hPuppiNoLepProduct);
     assert(hPuppiNoLepProduct.isValid());
     pfPuppiNoLep = hPuppiNoLepProduct.product();
   }
@@ -376,7 +402,6 @@ void FillerTau::fill(TClonesArray *array,
     pTau->antiEleMVA5      = itTau->tauID("againstElectronMVA5raw");
     pTau->antiEleMVA5Cat   = itTau->tauID("againstElectronMVA5category");
     //pTau->rawMuonRejection = itTau->tauID("againstMuonMVAraw");
-
     pTau->hltMatchBits = TriggerTools::matchHLT(pTau->eta, pTau->phi, triggerRecords, triggerObjects);
   }
 }

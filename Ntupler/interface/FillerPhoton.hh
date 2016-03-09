@@ -12,6 +12,15 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
+#include "DataFormats/PatCandidates/interface/Photon.h"
+#include "DataFormats/EgammaCandidates/interface/Conversion.h"
+#include "DataFormats/EgammaReco/interface/SuperCluster.h"
+#include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 class TClonesArray;
 namespace trigger {
@@ -24,7 +33,7 @@ namespace baconhep
   class FillerPhoton
   {
     public:
-      FillerPhoton(const edm::ParameterSet &iConfig, const bool useAOD);
+      FillerPhoton(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC);
       ~FillerPhoton();
 
       // === filler for AOD ===
@@ -60,8 +69,19 @@ namespace baconhep
       std::string fBSName;
       std::string fEleName;
       std::string fConvName;
-      std::string fSCName;
+      edm::InputTag fSCName;
 
+      edm::EDGetTokenT<reco::PhotonCollection>       fTokPhotonName;
+      edm::EDGetTokenT<pat::PhotonCollection>        fTokPatPhotonName;
+      edm::EDGetTokenT<reco::PFCandidateCollection>  fTokPFCandName;
+      edm::EDGetTokenT<reco::BeamSpot>               fTokBSName;
+      edm::EDGetTokenT<reco::GsfElectronCollection>  fTokEleName;
+      edm::EDGetTokenT<reco::ConversionCollection>   fTokConvName;
+      edm::EDGetTokenT<reco::SuperClusterCollection> fTokSCName;
+      edm::EDGetTokenT<edm::ValueMap<float> >        fTokChHadIsoMapTag;
+      edm::EDGetTokenT<edm::ValueMap<float> >        fTokNeuHadIsoMapTag;
+      edm::EDGetTokenT<edm::ValueMap<float> >        fTokGammaIsoMapTag;
+      
       // isolation info (EGM recommendation currently not in AOD/MINIAOD)
       edm::InputTag fChHadIsoMapTag;
       edm::InputTag fNeuHadIsoMapTag;

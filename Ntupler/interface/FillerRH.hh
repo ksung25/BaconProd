@@ -11,6 +11,7 @@
 #include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/ParticleFlowReco/interface/PFRecHitFwd.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitFwd.h"
 
@@ -22,7 +23,7 @@ namespace baconhep
   class FillerRH
   {
     public:
-      FillerRH(const edm::ParameterSet &iConfig);
+       FillerRH(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC);
       ~FillerRH();
       
        void fill(TClonesArray       *array,    // output array to be filled
@@ -32,6 +33,7 @@ namespace baconhep
       // EDM object collection names
       edm::InputTag fRHName;
       const CaloSubdetectorGeometry *fHCAL;
+      edm::EDGetTokenT<HBHERecHitCollection> fTokRH;
   };
 }
 #endif

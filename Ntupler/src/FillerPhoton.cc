@@ -5,14 +5,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
-#include "DataFormats/EgammaCandidates/interface/Photon.h"
-#include "DataFormats/PatCandidates/interface/Photon.h"
-#include "DataFormats/EgammaReco/interface/SuperCluster.h"
-#include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 //#include "DataFormats/Math/interface/deltaR.h"
-#include "DataFormats/EgammaCandidates/interface/Conversion.h"
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 //#include "Geometry/Records/interface/CaloGeometryRecord.h"
 //#include "Geometry/CaloGeometry/interface/CaloGeometry.h" 
@@ -29,20 +23,30 @@
 using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
-FillerPhoton::FillerPhoton(const edm::ParameterSet &iConfig, const bool useAOD):
+FillerPhoton::FillerPhoton(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC):
   fMinPt             (iConfig.getUntrackedParameter<double>("minPt",10)),
   fPhotonName        (iConfig.getUntrackedParameter<std::string>("edmName","gedPhotons")),
   fPFCandName        (iConfig.getUntrackedParameter<std::string>("edmPFCandName","particleFlow")),
   fBSName            (iConfig.getUntrackedParameter<std::string>("edmBeamspotName","offlineBeamSpot")),
   fEleName           (iConfig.getUntrackedParameter<std::string>("edmElectronName","gedGsfElectrons")),
   fConvName          (iConfig.getUntrackedParameter<std::string>("edmConversionName","allConversions")),
-  fSCName            (iConfig.getUntrackedParameter<std::string>("edmSCName","particleFlowEGamma")),
+  fSCName            (iConfig.getUntrackedParameter<edm::InputTag>("edmSCName")),//,"particleFlowEGamma")),
   fChHadIsoMapTag    (iConfig.getUntrackedParameter<edm::InputTag>("edmChHadIsoMapTag")),
   fNeuHadIsoMapTag   (iConfig.getUntrackedParameter<edm::InputTag>("edmNeuHadIsoMapTag")),
   fGammaIsoMapTag    (iConfig.getUntrackedParameter<edm::InputTag>("edmGammaIsoMapTag")),
   fUseAOD            (useAOD)
 {
 //  fPhotonMVA = new PhotonMVACalculator();
+  if(fUseAOD)  fTokPhotonName    =  iC.consumes<reco::PhotonCollection>     (fPhotonName);
+  if(!fUseAOD) fTokPatPhotonName =  iC.consumes<pat::PhotonCollection>      (fPhotonName);
+  fTokPFCandName =  iC.consumes<reco::PFCandidateCollection>(fPFCandName);
+  fTokBSName     =  iC.consumes<reco::BeamSpot>             (fBSName);
+  fTokEleName    =  iC.consumes<reco::GsfElectronCollection>(fEleName);
+  fTokConvName   =  iC.consumes<reco::ConversionCollection>(fConvName);
+  fTokSCName     =  iC.consumes<reco::SuperClusterCollection>(fSCName);
+  fTokChHadIsoMapTag  =  iC.consumes<edm::ValueMap<float> >(fChHadIsoMapTag);
+  fTokNeuHadIsoMapTag =  iC.consumes<edm::ValueMap<float> >(fNeuHadIsoMapTag);
+  fTokGammaIsoMapTag  =  iC.consumes<edm::ValueMap<float> >(fGammaIsoMapTag);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -66,49 +70,49 @@ void FillerPhoton::fill(TClonesArray *array,
   
   // Get photon collection
   edm::Handle<reco::PhotonCollection> hPhotonProduct;
-  iEvent.getByLabel(fPhotonName,hPhotonProduct);
+  iEvent.getByToken(fTokPhotonName,hPhotonProduct);
   assert(hPhotonProduct.isValid());
   const reco::PhotonCollection *photonCol = hPhotonProduct.product();
 /*
   // Get PF-candidates collection
   edm::Handle<reco::PFCandidateCollection> hPFCandProduct;
-  iEvent.getByLabel(fPFCandName,hPFCandProduct);
+  //iEvent.getByLabel(fPFCandName,hPFCandProduct);
   assert(hPFCandProduct.isValid());
   const reco::PFCandidateCollection *pfCandCol = hPFCandProduct.product();
 */
   // Get beamspot
   edm::Handle<reco::BeamSpot> hBeamSpotProduct;
-  iEvent.getByLabel(fBSName,hBeamSpotProduct);
+  iEvent.getByToken(fTokBSName,hBeamSpotProduct);
   assert(hBeamSpotProduct.isValid());
   const reco::BeamSpot *bs = hBeamSpotProduct.product();
 
   // Get electron collection
   edm::Handle<reco::GsfElectronCollection> hEleProduct;
-  iEvent.getByLabel(fEleName,hEleProduct);
+  iEvent.getByToken(fTokEleName,hEleProduct);
   assert(hEleProduct.isValid());
   
   // Get conversions collection
   edm::Handle<reco::ConversionCollection> hConvProduct;
-  iEvent.getByLabel(fConvName,hConvProduct);
+  iEvent.getByToken(fTokConvName,hConvProduct);
   assert(hConvProduct.isValid());
 
   // Get SuperCluster collection
   edm::Handle<reco::SuperClusterCollection> hSCProduct;
-  iEvent.getByLabel(fSCName,hSCProduct);
+  iEvent.getByToken(fTokSCName,hSCProduct);
   assert(hSCProduct.isValid());
   const reco::SuperClusterCollection *scCol = hSCProduct.product();
 
   // Get isolation value maps (EGM recommendations currently not in AOD/MINIAOD)
   edm::Handle<edm::ValueMap<float> > hChHadIsoMap;
-  iEvent.getByLabel(fChHadIsoMapTag, hChHadIsoMap);
+  iEvent.getByToken(fTokChHadIsoMapTag, hChHadIsoMap);
   assert(hChHadIsoMap.isValid());
 
   edm::Handle<edm::ValueMap<float> > hNeuHadIsoMap;
-  iEvent.getByLabel(fNeuHadIsoMapTag, hNeuHadIsoMap);
+  iEvent.getByToken(fTokNeuHadIsoMapTag, hNeuHadIsoMap);
   assert(hNeuHadIsoMap.isValid());
 
   edm::Handle<edm::ValueMap<float> > hGammaIsoMap;
-  iEvent.getByLabel(fGammaIsoMapTag, hGammaIsoMap);
+  iEvent.getByToken(fTokGammaIsoMapTag, hGammaIsoMap);
   assert(hGammaIsoMap.isValid());
 
   for(reco::PhotonCollection::const_iterator itPho = photonCol->begin(); itPho!=photonCol->end(); ++itPho) {
@@ -213,28 +217,27 @@ void FillerPhoton::fill(TClonesArray *array,
 
   // Get photon collection
   edm::Handle<pat::PhotonCollection> hPhotonProduct;
-  iEvent.getByLabel(fPhotonName,hPhotonProduct);
+  iEvent.getByToken(fTokPatPhotonName,hPhotonProduct);
   assert(hPhotonProduct.isValid());
   const pat::PhotonCollection *photonCol = hPhotonProduct.product();
 
   // Get supercluster collection
   edm::Handle<reco::SuperClusterCollection> hSCProduct;
-  edm::InputTag scTag("reducedEgamma","reducedSuperClusters");
-  iEvent.getByLabel(scTag,hSCProduct);
+  iEvent.getByToken(fTokSCName,hSCProduct);
   assert(hSCProduct.isValid());
   const reco::SuperClusterCollection *scCol = hSCProduct.product();
 
   // (!) Get isolation value maps, fix for 7_2_0 MC
   edm::Handle<edm::ValueMap<float> > hChHadIsoMap;
-  iEvent.getByLabel(fChHadIsoMapTag, hChHadIsoMap);
+  iEvent.getByToken(fTokChHadIsoMapTag, hChHadIsoMap);
   assert(hChHadIsoMap.isValid());
 
   edm::Handle<edm::ValueMap<float> > hNeuHadIsoMap;
-  iEvent.getByLabel(fNeuHadIsoMapTag, hNeuHadIsoMap);
+  iEvent.getByToken(fTokNeuHadIsoMapTag, hNeuHadIsoMap);
   assert(hNeuHadIsoMap.isValid());
 
   edm::Handle<edm::ValueMap<float> > hGammaIsoMap;
-  iEvent.getByLabel(fGammaIsoMapTag, hGammaIsoMap);
+  iEvent.getByToken(fTokGammaIsoMapTag, hGammaIsoMap);
   assert(hGammaIsoMap.isValid());
 
   for(pat::PhotonCollection::const_iterator itPho = photonCol->begin(); itPho!=photonCol->end(); ++itPho) {

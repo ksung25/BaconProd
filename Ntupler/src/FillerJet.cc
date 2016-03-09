@@ -18,6 +18,7 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include <fastjet/JetDefinition.hh>
 #include <TClonesArray.h>
 #include <TLorentzVector.h>
 
@@ -27,7 +28,7 @@ using namespace baconhep;
 
 
 //--------------------------------------------------------------------------------------------------
-FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD):
+FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC):
   fMinPt              (iConfig.getUntrackedParameter<double>("minPt",20)),
   fUseGen             (iConfig.getUntrackedParameter<bool>("doGenJet",true)),
   fApplyJEC           (iConfig.getUntrackedParameter<bool>("applyJEC",true)),
@@ -74,6 +75,44 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD):
   if(fShowerDecoConf.size() > 0) { 
     fShowerDeco = new ShowerDeco(cmssw_base_src+fShowerDecoConf);
   }
+  fTokRhoTag        = iC.consumes<double>               (fRhoName);
+  if(fUseAOD)  fTokJetName       = iC.consumes<reco::PFJetCollection>(fJetName);
+  if(!fUseAOD) fTokPatJetName    = iC.consumes<pat::JetCollection>   (fJetName);
+  fTokGenJetName    = iC.consumes<reco::GenJetCollection>(fGenJetName);
+  fTokJetFlavorName = iC.consumes<reco::JetFlavourInfoMatchingCollection>(fJetFlavorName);
+  fTokPVName        = iC.consumes<reco::VertexCollection>(fPVName);
+  fTokCSVbtagName   = iC.consumes<reco::JetTagCollection>(fCSVbtagName);
+  edm::InputTag lQGLikelihood(fQGLikelihood,"qgLikelihood");
+  edm::InputTag lQGLAxis2    (fQGLikelihood,"axis2");
+  edm::InputTag lQGLPtD      (fQGLikelihood,"ptD");
+  edm::InputTag lQGLMult     (fQGLikelihood,"mult");
+  fTokQGLikelihood        = iC.consumes<edm::ValueMap<float> >   (lQGLikelihood);
+  fTokQGLAxis2            = iC.consumes<edm::ValueMap<float> >   (lQGLAxis2);
+  fTokQGLPtD              = iC.consumes<edm::ValueMap<float> >   (lQGLPtD);
+  fTokQGLMult             = iC.consumes<edm::ValueMap<int> >     (lQGLMult);
+  if(fComputeFullJetInfo) { 
+    fTokPrunedJetName     = iC.consumes<reco::BasicJetCollection>(fPrunedJetName);
+    fTokTrimmedJetName    = iC.consumes<reco::BasicJetCollection>(fTrimmedJetName);
+    fTokSoftDropJetName   = iC.consumes<reco::BasicJetCollection>(fSoftDropJetName);
+    fTokCSVbtagSubJetName = iC.consumes<reco::JetTagCollection>  (fCSVbtagSubJetName);
+    fTokCSVDoubleBtagName = iC.consumes<reco::JetTagCollection>  (fCSVDoubleBtagName);
+    edm::InputTag lTau1(fJettinessName,"tau1");
+    edm::InputTag lTau2(fJettinessName,"tau2");
+    edm::InputTag lTau3(fJettinessName,"tau3");
+    edm::InputTag lTau4(fJettinessName,"tau4");
+    edm::InputTag lQGSubJets(fQGLikelihoodSubJets,"qgLikelihood");
+    edm::InputTag lSubJets  (fSubJetName,"SubJets");
+    edm::InputTag lTopTagSubJet(fTopTaggerName,"caTopSubJets"); //"cmsTopTagPFJetsCHS"
+    edm::InputTag lTopTag      (fTopTaggerName);
+    fTokTau1Name           = iC.consumes<edm::ValueMap<float> >   (lTau1);
+    fTokTau2Name           = iC.consumes<edm::ValueMap<float> >   (lTau2);
+    fTokTau3Name           = iC.consumes<edm::ValueMap<float> >   (lTau3);
+    fTokTau4Name           = iC.consumes<edm::ValueMap<float> >   (lTau4);
+    fTokQGLSubJets         = iC.consumes<edm::ValueMap<float> >   (lQGSubJets);
+    fTokSubJets            = iC.consumes<reco::PFJetCollection>   (lSubJets);
+    fTokCMSTTJetProduct    = iC.consumes<reco::BasicJetCollection>(lTopTag);
+    fTokCMSTTSubJetProduct = iC.consumes<reco::PFJetCollection>   (lTopTagSubJet);
+  }
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -106,8 +145,8 @@ void FillerJet::initJetCorr(const std::vector<std::string> &jecFiles,
   }
   fJetCorr = new FactorizedJetCorrector(corrParams);
   
-//  JetCorrectorParameters param(cmssw_base_src + jecUncFiles[0]);
-//  fJetUnc = new JetCorrectionUncertainty(param);
+  JetCorrectorParameters param(cmssw_base_src + jecUncFiles[0]);
+  fJetUnc = new JetCorrectionUncertainty(param);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -126,7 +165,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
   
   // Get jet collection
   edm::Handle<reco::PFJetCollection> hJetProduct;
-  iEvent.getByLabel(fJetName,hJetProduct);
+  iEvent.getByToken(fTokJetName,hJetProduct);
   assert(hJetProduct.isValid());
   const reco::PFJetCollection *jetCol = hJetProduct.product();
   
@@ -134,7 +173,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
   edm::Handle<reco::GenJetCollection> hGenJetProduct;
   const reco::GenJetCollection *genJetCol = 0;
   if(fUseGen) { 
-    iEvent.getByLabel(fGenJetName,hGenJetProduct);
+    iEvent.getByToken(fTokGenJetName,hGenJetProduct);
     assert(hGenJetProduct.isValid());
     genJetCol = hGenJetProduct.product();
   }
@@ -142,42 +181,41 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
   // Get Jet Flavor Match
   edm::Handle<reco::JetFlavourInfoMatchingCollection> hJetFlavourMatch;
   if(fUseGen) {
-    iEvent.getByLabel(fJetFlavorName, hJetFlavourMatch);
+    iEvent.getByToken(fTokJetFlavorName, hJetFlavourMatch);
     assert(hJetFlavourMatch.isValid());
   }
 
   // Get vertex collection
   edm::Handle<reco::VertexCollection> hVertexProduct;
-  iEvent.getByLabel(fPVName,hVertexProduct);
+  iEvent.getByToken(fTokPVName,hVertexProduct);
   assert(hVertexProduct.isValid());
   const reco::VertexCollection *pvCol = hVertexProduct.product();
 
   // Get event energy density for jet correction
   edm::Handle<double> hRho;
-  edm::InputTag rhoTag(fRhoName,"");
-  iEvent.getByLabel(rhoTag,hRho);
+  iEvent.getByToken(fTokRhoTag,hRho);
   assert(hRho.isValid()); 
  
   // Get b-jet tagger
   edm::Handle<reco::JetTagCollection> hCSVbtags;
-  iEvent.getByLabel(fCSVbtagName, hCSVbtags);
+  iEvent.getByToken(fTokCSVbtagName, hCSVbtags);
   assert(hCSVbtags.isValid());
 
   //Get Quark Gluon Likelihood
   edm::Handle<edm::ValueMap<float> > hQGLikelihood; 
-  iEvent.getByLabel(fQGLikelihood,"qgLikelihood",hQGLikelihood); 
+  iEvent.getByToken(fTokQGLikelihood,hQGLikelihood); 
   assert(hQGLikelihood.isValid());
 
   edm::Handle<edm::ValueMap<float> > hQGLaxis2;
-  iEvent.getByLabel(fQGLikelihood,"axis2",hQGLaxis2);
+  iEvent.getByToken(fTokQGLAxis2,hQGLaxis2);
   assert(hQGLaxis2.isValid());
 
   edm::Handle<edm::ValueMap<float> > hQGLptD;
-  iEvent.getByLabel(fQGLikelihood,"ptD",hQGLptD);
+  iEvent.getByToken(fTokQGLPtD,hQGLptD);
   assert(hQGLptD.isValid());
 
   edm::Handle<edm::ValueMap<int> > hQGLmult;
-  iEvent.getByLabel(fQGLikelihood,"mult",hQGLmult);
+  iEvent.getByToken(fTokQGLMult,hQGLmult);
   assert(hQGLmult.isValid());
 
 
@@ -202,9 +240,9 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     // jet pT cut (BOTH raw AND corrected pT must exceed threshold)
     if(ptRaw*jetcorr < fMinPt || ptRaw < fMinPt) continue;
     
-//    fJetUnc->setJetPt ( ptRaw  );
-//    fJetUnc->setJetEta( itJet->eta() );
-//    double jetunc = fJetUnc->getUncertainty(true);
+    fJetUnc->setJetPt ( ptRaw  );
+    fJetUnc->setJetEta( itJet->eta() );
+    double jetunc = fJetUnc->getUncertainty(true);
     bool passLoose = JetTools::passPFLooseID(*itJet);
     // construct object and place in array
     assert(rArray.GetEntries() < rArray.GetSize());
@@ -221,7 +259,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     pJet->mass  = itJet->mass() * jetcorr;
     pJet->ptRaw = ptRaw;
     pJet->area  = itJet->jetArea();
-    //    pJet->unc   = jetunc;
+    pJet->unc   = jetunc;
     //
     // Impact Parameter
     //==============================
@@ -322,19 +360,18 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
 
   // Get jet collection
   edm::Handle<pat::JetCollection> hJetProduct;
-  iEvent.getByLabel(fJetName,hJetProduct);
+  iEvent.getByToken(fTokPatJetName,hJetProduct);
   assert(hJetProduct.isValid());
   const pat::JetCollection *jetCol = hJetProduct.product();
 
   // Get vertex collection
   edm::Handle<reco::VertexCollection> hVertexProduct;
-  iEvent.getByLabel(fPVName,hVertexProduct);
+  iEvent.getByToken(fTokPVName,hVertexProduct);
   assert(hVertexProduct.isValid());
   const reco::VertexCollection *pvCol = hVertexProduct.product();
   // Get event energy density for jet correction
   edm::Handle<double> hRho;
-  edm::InputTag rhoTag(fRhoName,"");
-  iEvent.getByLabel(rhoTag,hRho);
+  iEvent.getByToken(fTokRhoTag,hRho);
   assert(hRho.isValid()); 
 
   // Get Quark Gluon Likelihood
@@ -343,23 +380,23 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
   edm::Handle<edm::ValueMap<float> > hQGLptD;
   edm::Handle<edm::ValueMap<int> >   hQGLmult;
   if(fQGLikelihood.size() > 0) { 
-    iEvent.getByLabel(fQGLikelihood,"qgLikelihood",hQGLikelihood);
+    iEvent.getByToken(fTokQGLikelihood,hQGLikelihood);
     assert(hQGLikelihood.isValid());
 
-    iEvent.getByLabel(fQGLikelihood,"axis2",hQGLaxis2);
+    iEvent.getByToken(fTokQGLAxis2,hQGLaxis2);
     assert(hQGLaxis2.isValid());
     
-    iEvent.getByLabel(fQGLikelihood,"ptD",hQGLptD);
+    iEvent.getByToken(fTokQGLPtD,hQGLptD);
     assert(hQGLptD.isValid());
     
-    iEvent.getByLabel(fQGLikelihood,"mult",hQGLmult);
+    iEvent.getByToken(fTokQGLMult,hQGLmult);
     assert(hQGLmult.isValid());
   }
   // Get gen jet collection
   edm::Handle<reco::GenJetCollection> hGenJetProduct;
   const reco::GenJetCollection *genJetCol = 0;
   if(fUseGen) {
-    iEvent.getByLabel(fGenJetName,hGenJetProduct);
+    iEvent.getByToken(fTokGenJetName,hGenJetProduct);
     assert(hGenJetProduct.isValid());
     genJetCol = hGenJetProduct.product();
   }
@@ -387,6 +424,9 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
 
     // jet pT cut (BOTH raw AND corrected pT must exceed threshold)
     if(ptRaw*jetcorr < fMinPt || ptRaw < fMinPt) continue;
+    fJetUnc->setJetPt ( ptRaw  );
+    fJetUnc->setJetEta( itJet->eta() );
+    double jetunc = fJetUnc->getUncertainty(true);
 
     // construct object and place in array
     assert(rArray.GetEntries() < rArray.GetSize());
@@ -405,7 +445,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     //if(fApplyJEC) pJet->mass    = itJet->mass()*jetcorr;
     pJet->ptRaw = ptRaw;
     pJet->area  = itJet->jetArea();
-    //    pJet->unc   = jetunc;
+    pJet->unc   = jetunc;
     //
     // Impact Parameter
     //==============================
@@ -487,62 +527,60 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
 { 
   // Get pruned jet collection
   edm::Handle<reco::BasicJetCollection> hPrunedJetProduct;
-  iEvent.getByLabel(fPrunedJetName,hPrunedJetProduct);
+  iEvent.getByToken(fTokPrunedJetName,hPrunedJetProduct);
   assert(hPrunedJetProduct.isValid());
   const reco::BasicJetCollection *prunedJetCol = hPrunedJetProduct.product();
 
   // Get trimmed jet collection
   edm::Handle<reco::BasicJetCollection> hTrimmedJetProduct;
-  iEvent.getByLabel(fTrimmedJetName,hTrimmedJetProduct);
+  iEvent.getByToken(fTokTrimmedJetName,hTrimmedJetProduct);
   assert(hTrimmedJetProduct.isValid());
   const reco::BasicJetCollection *trimmedJetCol = hTrimmedJetProduct.product();
 
   // Get soft drop jet collection
   edm::Handle<reco::BasicJetCollection> hSoftDropJetProduct;
-  iEvent.getByLabel(fSoftDropJetName,hSoftDropJetProduct);
+  iEvent.getByToken(fTokSoftDropJetName,hSoftDropJetProduct);
   assert(hSoftDropJetProduct.isValid());
   const reco::BasicJetCollection *softdropJetCol = hSoftDropJetProduct.product();
 
   // Get sub-jet collection
   edm::Handle<reco::PFJetCollection> hSubJetProduct;
-  edm::InputTag subJetTag(fSubJetName,"SubJets");
-  iEvent.getByLabel(subJetTag,hSubJetProduct);
+  iEvent.getByToken(fTokSubJets,hSubJetProduct);
   assert(hSubJetProduct.isValid());
   const reco::PFJetCollection *subJetCol = hSubJetProduct.product();
 
   // Get b sub-jets 
   edm::Handle<reco::JetTagCollection> hCSVbtagsSubJets;
-  iEvent.getByLabel(fCSVbtagSubJetName, hCSVbtagsSubJets);
+  iEvent.getByToken(fTokCSVbtagSubJetName, hCSVbtagsSubJets);
   assert(hCSVbtagsSubJets.isValid());
 
   // Get double b tag
   edm::Handle<reco::JetTagCollection> hCSVDoubleBtag;
-  iEvent.getByLabel(fCSVDoubleBtagName, hCSVDoubleBtag);
+  iEvent.getByToken(fTokCSVDoubleBtagName, hCSVDoubleBtag);
   assert(hCSVDoubleBtag.isValid());
 
   //Get Quark Gluon Likelihood on subjets
   edm::Handle<edm::ValueMap<float> > hQGLikelihoodSubJets;
-  iEvent.getByLabel(fQGLikelihoodSubJets,"qgLikelihood",hQGLikelihoodSubJets);
+  iEvent.getByToken(fTokQGLSubJets,hQGLikelihoodSubJets);
   assert(hQGLikelihoodSubJets.isValid());
   
   // Get N-subjettiness moments
   edm::Handle<edm::ValueMap<float> > hTau1;
-  iEvent.getByLabel(fJettinessName,"tau1",hTau1);                                                                                                                                                      
+  iEvent.getByToken(fTokTau1Name,hTau1);                                                                                                                                                      
   assert(hTau1.isValid());
   edm::Handle<edm::ValueMap<float> > hTau2;
-  iEvent.getByLabel(fJettinessName,"tau2",hTau2);
+  iEvent.getByToken(fTokTau2Name,hTau2);
   assert(hTau2.isValid());
   edm::Handle<edm::ValueMap<float> > hTau3;
-  iEvent.getByLabel(fJettinessName,"tau3",hTau3); 
+  iEvent.getByToken(fTokTau3Name,hTau3); 
   assert(hTau3.isValid());
   edm::Handle<edm::ValueMap<float> > hTau4;
-  iEvent.getByLabel(fJettinessName,"tau4",hTau4); 
+  iEvent.getByToken(fTokTau4Name,hTau4); 
   assert(hTau4.isValid());
 
   // Get event energy density for jet correction
   edm::Handle<double> hRho;
-  edm::InputTag rhoTag(fRhoName,"");
-  iEvent.getByLabel(rhoTag,hRho);
+  iEvent.getByToken(fTokRhoTag,hRho);
   assert(hRho.isValid());
 
 
@@ -561,6 +599,19 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
       lClusterParticles.push_back(pPart);                                                                                                                                                       
     }                                                                           
     pAddJet->topchi2 = fShowerDeco->chi(itJet.pt(),lClusterParticles);
+    fastjet::JetDefinition lCJet_def(fastjet::cambridge_algorithm, 2.0);
+    fastjet::ClusterSequence lCClust_seq(lClusterParticles, lCJet_def);
+    std::vector<fastjet::PseudoJet> inclusive_jets = lCClust_seq.inclusive_jets(0);
+    fastjet::EnergyCorrelatorDoubleRatio C2beta0 (2,0. ,fastjet::EnergyCorrelator::pt_R);
+    fastjet::EnergyCorrelatorDoubleRatio C2beta02(2,0.2,fastjet::EnergyCorrelator::pt_R);
+    fastjet::EnergyCorrelatorDoubleRatio C2beta05(2,0.5,fastjet::EnergyCorrelator::pt_R);
+    fastjet::EnergyCorrelatorDoubleRatio C2beta10(2,1.0,fastjet::EnergyCorrelator::pt_R);
+    fastjet::EnergyCorrelatorDoubleRatio C2beta20(2,2.0,fastjet::EnergyCorrelator::pt_R);
+    pAddJet->c2_0   = C2beta0 (inclusive_jets[0]);
+    pAddJet->c2_0P2 = C2beta02(inclusive_jets[0]);
+    pAddJet->c2_0P5 = C2beta05(inclusive_jets[0]);
+    pAddJet->c2_1P0 = C2beta10(inclusive_jets[0]);
+    pAddJet->c2_2P0 = C2beta20(inclusive_jets[0]);
   }
 
   double pCorr=1;
@@ -587,28 +638,6 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
     pAddJet->mass_sd0  = matchJet->mass()*pCorr;
   }
   /*
-  // Jet Shape Correlation observables
-  std::vector<reco::PFCandidatePtr> pfConstituents = itJet.getPFConstituents(); 
-  std::vector<fastjet::PseudoJet>  lClusterParticles;
-  for(unsigned int ic=0; ic<pfConstituents.size(); ic++) {
-    reco::PFCandidatePtr pfcand = pfConstituents[ic];
-    fastjet::PseudoJet   pPart(pfcand->px(),pfcand->py(),pfcand->pz(),pfcand->energy());
-    lClusterParticles.push_back(pPart);
-  }
-  fastjet::JetDefinition lCJet_def(fastjet::cambridge_algorithm, 2.0);
-  fastjet::ClusterSequence lCClust_seq(lClusterParticles, lCJet_def);
-  std::vector<fastjet::PseudoJet> inclusive_jets = lCClust_seq.inclusive_jets(0);
-  fastjet::EnergyCorrelatorDoubleRatio C2beta0 (2,0. ,fastjet::EnergyCorrelator::pt_R);
-  fastjet::EnergyCorrelatorDoubleRatio C2beta02(2,0.2,fastjet::EnergyCorrelator::pt_R);
-  fastjet::EnergyCorrelatorDoubleRatio C2beta05(2,0.5,fastjet::EnergyCorrelator::pt_R);
-  fastjet::EnergyCorrelatorDoubleRatio C2beta10(2,1.0,fastjet::EnergyCorrelator::pt_R);
-  fastjet::EnergyCorrelatorDoubleRatio C2beta20(2,2.0,fastjet::EnergyCorrelator::pt_R);
-  pAddJet->c2_0   = C2beta0 (inclusive_jets[0]);
-  pAddJet->c2_0P2 = C2beta02(inclusive_jets[0]);
-  pAddJet->c2_0P5 = C2beta05(inclusive_jets[0]);
-  pAddJet->c2_1P0 = C2beta10(inclusive_jets[0]);
-  pAddJet->c2_2P0 = C2beta20(inclusive_jets[0]);
-
   // Q-Jets
   pAddJet->qjet = 0;
   if(itJet.pt() > 100) pAddJet->qjet = JetTools::qJetVolatility(lClusterParticles,25.,fRand->Rndm());  // (!) why pT > 100 cut? computation time?
@@ -727,12 +756,12 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   if(fTopTaggerName.compare("CMS")==0) {  // CMS Top Tagger
 
     edm::Handle<reco::BasicJetCollection> hCMSTTJetProduct;
-    iEvent.getByLabel("cmsTopTagPFJetsCHS",hCMSTTJetProduct);  // (!) hard-code
+    iEvent.getByToken(fTokCMSTTJetProduct,hCMSTTJetProduct);  // (!) hard-code
     assert(hCMSTTJetProduct.isValid());
     const reco::BasicJetCollection *cmsttJetCol = hCMSTTJetProduct.product();
 
     edm::Handle<reco::PFJetCollection> hCMSTTSubJetProduct;
-    iEvent.getByLabel("cmsTopTagPFJetsCHS","caTopSubJets",hCMSTTSubJetProduct);  // (!) hard-code
+    iEvent.getByToken(fTokCMSTTSubJetProduct,hCMSTTSubJetProduct);  // (!) hard-code
     assert(hCMSTTSubJetProduct.isValid());
     const reco::PFJetCollection *cmsttSubJetCol = hCMSTTSubJetProduct.product();
 
@@ -780,7 +809,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   } else if(fTopTaggerName.compare("HEP")==0) {  // HEP Top Tagger
 
     edm::Handle<reco::HTTTopJetTagInfoCollection> hHTTTagInfos;
-    iEvent.getByLabel("CA15HTTCHSAOD",hHTTTagInfos);  // (!) hard-code
+    //iEvent.getByLabel("CA15HTTCHSAOD",hHTTTagInfos);  // (!) hard-code
     assert(hHTTTagInfos.isValid());
     const reco::HTTTopJetTagInfoCollection *httTagInfoCol = hHTTTagInfos.product();
 

@@ -10,6 +10,7 @@
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/ParticleFlowReco/interface/PFRecHitFwd.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 
 class TClonesArray;
 
@@ -19,7 +20,7 @@ namespace baconhep
   class FillerPF
   {
     public:
-      FillerPF(const edm::ParameterSet &iConfig);
+       FillerPF(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC);
       ~FillerPF();
       
        void fill(TClonesArray       *array,    // output array to be filled
@@ -41,6 +42,12 @@ namespace baconhep
       std::string fPFName;
       std::string fPVName;
       bool        fAddDepthTime;
+      
+      edm::EDGetTokenT<reco::PFCandidateCollection>   fTokPFName;
+      edm::EDGetTokenT<reco::VertexCollection>        fTokPVName;
+      edm::EDGetTokenT<reco::PFRecHitCollection>      fTokPFRecHitECAL;
+      edm::EDGetTokenT<reco::PFRecHitCollection>      fTokPFRecHitHCAL;
+      edm::EDGetTokenT<reco::PFRecHitCollection>      fTokPFRecHitHO;
   };
 }
 #endif

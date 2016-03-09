@@ -20,7 +20,7 @@ using namespace baconhep;
 
 
 //--------------------------------------------------------------------------------------------------
-FillerCaloJet::FillerCaloJet(const edm::ParameterSet &iConfig):
+FillerCaloJet::FillerCaloJet(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC):
   fMinPt              (iConfig.getUntrackedParameter<double>("minPt",20)),
   fUseGen             (iConfig.getUntrackedParameter<bool>("doGenJet",true)),
   fRhoName            (iConfig.getUntrackedParameter<std::string>("edmRhoName","fixedGridRhoFastjetAll")),
@@ -34,6 +34,10 @@ FillerCaloJet::FillerCaloJet(const edm::ParameterSet &iConfig):
   std::vector<std::string> empty_vstring;
   initJetCorr(iConfig.getUntrackedParameter< std::vector<std::string> >("jecFiles",empty_vstring),
 	      iConfig.getUntrackedParameter< std::vector<std::string> >("jecUncFiles",empty_vstring));
+
+  fTokJetName         = iC.consumes<reco::CaloJetCollection>(fJetName);
+  fTokGenJetName      = iC.consumes<reco::GenJetCollection> (fGenJetName);
+  fTokRhoTag          = iC.consumes<double>                 (fRhoName);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -74,7 +78,7 @@ void FillerCaloJet::fill(TClonesArray *array,
   
   // Get jet collection
   edm::Handle<reco::CaloJetCollection> hCaloJetProduct;
-  iEvent.getByLabel(fJetName,hCaloJetProduct);
+  iEvent.getByToken(fTokJetName,hCaloJetProduct);
   assert(hCaloJetProduct.isValid());
   const reco::CaloJetCollection *jetCol = hCaloJetProduct.product();
   
@@ -82,7 +86,7 @@ void FillerCaloJet::fill(TClonesArray *array,
   edm::Handle<reco::GenJetCollection> hGenJetProduct;
   const reco::GenJetCollection *genJetCol = 0;
   if(fUseGen) { 
-    iEvent.getByLabel(fGenJetName,hGenJetProduct);
+    iEvent.getByToken(fTokGenJetName,hGenJetProduct);
     assert(hGenJetProduct.isValid());
     genJetCol = hGenJetProduct.product();
   }
@@ -90,14 +94,13 @@ void FillerCaloJet::fill(TClonesArray *array,
   // Get Jet Flavor Match
   //edm::Handle<reco::JetFlavourInfoMatchingCollection> hJetFlavourMatch;
   //if(fUseGen) {
-  //  iEvent.getByLabel(fJetFlavorName, hJetFlavourMatch);
+  //  iEvent.getByToken(fTokJetFlavorName, hJetFlavourMatch);
   //  assert(hJetFlavourMatch.isValid());
   //}
   
   // Get event energy density for jet correction
   edm::Handle<double> hRho;
-  edm::InputTag rhoTag(fRhoName,"");
-  iEvent.getByLabel(rhoTag,hRho);
+  iEvent.getByToken(fTokRhoTag,hRho);
   assert(hRho.isValid()); 
  
   TClonesArray &rArray      = *array;

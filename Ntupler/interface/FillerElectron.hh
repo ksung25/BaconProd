@@ -11,6 +11,17 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/EgammaCandidates/interface/Conversion.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+
 class TClonesArray;
 namespace trigger {
   class TriggerEvent;
@@ -25,7 +36,7 @@ namespace baconhep
   class FillerElectron
   {
     public:
-      FillerElectron(const edm::ParameterSet &iConfig, const bool useAOD);
+       FillerElectron(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC);
       ~FillerElectron();
 
       // === filler for AOD ===
@@ -60,7 +71,7 @@ namespace baconhep
       std::string fPFCandName;
       std::string fTrackName;
       std::string fConvName;
-      std::string fSCName;
+      edm::InputTag fSCName;
       // Puppi
       std::string fPuppiName; 
       std::string fPuppiNoLepName; 
@@ -71,6 +82,17 @@ namespace baconhep
       edm::InputTag fHcalPFClusterIsoMapTag;
 
       bool fUseAOD;
+      edm::EDGetTokenT<reco::GsfElectronCollection>  fTokEleName;
+      edm::EDGetTokenT<pat::ElectronCollection>      fTokPatEleName;
+      edm::EDGetTokenT<reco::BeamSpot>               fTokBSName;
+      edm::EDGetTokenT<reco::PFCandidateCollection>  fTokPFCandName;
+      edm::EDGetTokenT<reco::PFCandidateCollection>  fTokPuppiName;
+      edm::EDGetTokenT<reco::PFCandidateCollection>  fTokPuppiNoLepName;
+      edm::EDGetTokenT<reco::TrackCollection>        fTokTrackName;
+      edm::EDGetTokenT<reco::ConversionCollection>   fTokConvName;
+      edm::EDGetTokenT<reco::SuperClusterCollection> fTokSCName;
+      edm::EDGetTokenT<edm::ValueMap<float> > fTokEcalPFClusterIsoMap;
+      edm::EDGetTokenT<edm::ValueMap<float> > fTokHcalPFClusterIsoMap;
   };
 }
 #endif

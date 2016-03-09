@@ -13,11 +13,14 @@
 using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
-FillerGenJets::FillerGenJets(const edm::ParameterSet &iConfig):
+FillerGenJets::FillerGenJets(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC):
   fGenParName    (iConfig.getUntrackedParameter<std::string>("edmGenParticlesName","genParticles")),
   fGenJetName    (iConfig.getUntrackedParameter<std::string>("genJetName","AK4GenJets")),
   fGenFatJetName (iConfig.getUntrackedParameter<std::string>("genFatJetName","AK8GenJets"))
 {
+  fTokGenJet       = iC.consumes<reco::GenJetCollection>(fGenJetName); 
+  fTokGenFatJet    = iC.consumes<reco::GenJetCollection>(fGenFatJetName); 
+  fTokGenPar       = iC.consumes<reco::GenParticleCollection>(fGenParName); 
   fCAJetDef = new fastjet::JetDefinition(fastjet::cambridge_algorithm, 0.8);
   int activeAreaRepeats = 1;
   double ghostArea      = 0.01;
@@ -38,14 +41,14 @@ void FillerGenJets::fill(TClonesArray *array,TClonesArray *fatJetArray,
   // Get generator jet collection
   edm::Handle<reco::GenJetCollection> hGenJetProduct;
   const reco::GenJetCollection *genJets = 0;
-  iEvent.getByLabel(fGenJetName,hGenJetProduct);
+  iEvent.getByToken(fTokGenJet,hGenJetProduct);
   assert(hGenJetProduct.isValid());
   genJets = hGenJetProduct.product();
 
   edm::Handle<reco::GenJetCollection> hGenFatJetProduct;
   const reco::GenJetCollection *genFatJets = 0;
   if(fGenFatJetName.size() > 0) { 
-    iEvent.getByLabel(fGenFatJetName,hGenFatJetProduct);
+    iEvent.getByToken(fTokGenFatJet,hGenFatJetProduct);
     assert(hGenFatJetProduct.isValid());
     genFatJets = hGenFatJetProduct.product();
   }
@@ -57,7 +60,7 @@ void FillerGenJets::fill(TClonesArray *array,TClonesArray *fatJetArray,
 
   // Get generator particles collection
   edm::Handle<reco::GenParticleCollection> hGenParProduct;
-  iEvent.getByLabel(fGenParName,hGenParProduct);
+  iEvent.getByToken(fTokGenPar,hGenParProduct);
   assert(hGenParProduct.isValid());  
   const reco::GenParticleCollection genParticles = *(hGenParProduct.product());  
 

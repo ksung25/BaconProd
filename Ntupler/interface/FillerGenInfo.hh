@@ -6,6 +6,13 @@
 // forward class declarations
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
+
 class TClonesArray;
 
 
@@ -16,7 +23,7 @@ namespace baconhep
   class FillerGenInfo
   {
     public:
-      FillerGenInfo(const edm::ParameterSet &iConfig);
+       FillerGenInfo(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC);
       ~FillerGenInfo();
       
       void fill(TGenEventInfo    *genEvtInfo,     // output object to be filled
@@ -30,8 +37,10 @@ namespace baconhep
       std::string fGenEvtInfoName;
       std::string fLHEEvtInfoName;
       std::string fGenParName;
-
       bool fFillAll;
+      edm::EDGetTokenT<GenEventInfoProduct>         fTokGenEvent;
+      edm::EDGetTokenT<reco::GenParticleCollection> fTokGenPar;
+      edm::EDGetTokenT<LHEEventProduct>             fTokLHEEventInfo;
       bool fFillLHEWeights;
   };
 }

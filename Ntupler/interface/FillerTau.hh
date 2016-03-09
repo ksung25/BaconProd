@@ -5,6 +5,8 @@
 //#include "BaconProd/Utils/interface/TauIsoMVACalculator.hh"
 #include "DataFormats/TauReco/interface/PFTauDiscriminator.h"
 #include "DataFormats/Common/interface/Handle.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
+
 #include <vector>
 #include <string>
 
@@ -13,6 +15,8 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/TauReco/interface/PFTauFwd.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
+
 class TClonesArray;
 namespace trigger {
   class TriggerEvent;
@@ -24,7 +28,7 @@ namespace baconhep
   class MyTauDiscHandle
   {
     public:
-      MyTauDiscHandle(const std::string inName="", const unsigned long inFlag=0):name(inName),flag(inFlag){}
+       MyTauDiscHandle(const std::string inName="", const unsigned long inFlag=0):name(inName),flag(inFlag){}
       ~MyTauDiscHandle(){}
     
       edm::Handle<reco::PFTauDiscriminator> handle;  // EDM handle
@@ -39,7 +43,7 @@ namespace baconhep
   class FillerTau
   {
     public:
-      FillerTau(const edm::ParameterSet &iConfig, const bool useAOD);
+       FillerTau(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC);
       ~FillerTau();
 
       // === filler for AOD ===            
@@ -74,9 +78,21 @@ namespace baconhep
       //TauIsoMVACalculator fRingIso2;
   
       std::vector<MyTauDiscHandle*> fMyTauDiscHandles;
+      std::vector<edm::EDGetTokenT<reco::PFTauDiscriminator> > fTokTauHandles;
       // Puppi
       std::string fPuppiName; 
       std::string fPuppiNoLepName; 
+      edm::EDGetTokenT<reco::PFTauCollection>               fTokTauName; 
+      edm::EDGetTokenT<pat::TauCollection>                  fTokPatTauName; 
+      edm::EDGetTokenT<reco::PFCandidateCollection>         fTokPuppiName;
+      edm::EDGetTokenT<reco::PFCandidateCollection>         fTokPuppiNoLepName;
+      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokMVA5EleRejRaw;
+      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokMVA5EleRejCat;
+      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokMVAMuonRejRaw;
+      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokCombIsoDBSumPtCorr3HitsRaw;
+      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3oldwRaw;
+      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3newwoRaw;
+      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3newwRaw;
       bool fUsePuppi;
       bool fUseAOD;
   };

@@ -4,13 +4,6 @@
 #include "BaconAna/DataFormats/interface/TMuon.hh"
 #include "FWCore/Framework/interface/Event.h"
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/MuonReco/interface/Muon.h"
-#include "DataFormats/MuonReco/interface/MuonFwd.h"
-#include "DataFormats/MuonReco/interface/MuonSelectors.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
-#include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
@@ -22,7 +15,7 @@
 using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
-FillerMuon::FillerMuon(const edm::ParameterSet &iConfig, const bool useAOD):
+FillerMuon::FillerMuon(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC):
   fMinPt         (iConfig.getUntrackedParameter<double>("minPt",0)),
   fMuonName      (iConfig.getUntrackedParameter<std::string>("edmName","muons")),
   fPFCandName    (iConfig.getUntrackedParameter<std::string>("edmPFCandName","particleFlow")),
@@ -33,7 +26,14 @@ FillerMuon::FillerMuon(const edm::ParameterSet &iConfig, const bool useAOD):
   fPuppiNoLepName(iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppinolep")),
   fUsePuppi      (iConfig.getUntrackedParameter<bool>("usePuppi",true)),
   fUseAOD        (useAOD)
-{}
+{
+  if(fUseAOD)  fTokMuonName       = iC.consumes<reco::MuonCollection>       (fMuonName);
+  if(!fUseAOD) fTokPatMuonName    = iC.consumes<pat::MuonCollection>        (fMuonName);
+  fTokPFCandName     = iC.consumes<reco::PFCandidateCollection>(fPFCandName);
+  fTokPuppiName      = iC.consumes<reco::PFCandidateCollection>(fPuppiName);
+  fTokPuppiNoLepName = iC.consumes<reco::PFCandidateCollection>(fPuppiNoLepName);
+  fTokTrackName      = iC.consumes<reco::TrackCollection>      (fTrackName);
+}
 
 //--------------------------------------------------------------------------------------------------
 FillerMuon::~FillerMuon(){}
@@ -49,13 +49,13 @@ void FillerMuon::fill(TClonesArray *array,
   
   // Get muon collection
   edm::Handle<reco::MuonCollection> hMuonProduct;
-  iEvent.getByLabel(fMuonName,hMuonProduct);
+  iEvent.getByToken(fTokMuonName,hMuonProduct);
   assert(hMuonProduct.isValid());
   const reco::MuonCollection *muonCol = hMuonProduct.product();
   
   // Get PF-candidates collection
   edm::Handle<reco::PFCandidateCollection> hPFCandProduct;
-  iEvent.getByLabel(fPFCandName,hPFCandProduct);
+  iEvent.getByToken(fTokPFCandName,hPFCandProduct);
   assert(hPFCandProduct.isValid());
   const reco::PFCandidateCollection *pfCandCol = hPFCandProduct.product();
 
@@ -64,19 +64,19 @@ void FillerMuon::fill(TClonesArray *array,
   if(fUsePuppi) { 
     // Get Puppi-candidates collection woof woof
     edm::Handle<reco::PFCandidateCollection> hPuppiProduct;
-    iEvent.getByLabel(fPuppiName,hPuppiProduct);
+    iEvent.getByToken(fTokPuppiName,hPuppiProduct);
     assert(hPuppiProduct.isValid());
     pfPuppi = hPuppiProduct.product();
     
     // Get Puppi-no lep candidates collection arf arf
     edm::Handle<reco::PFCandidateCollection> hPuppiNoLepProduct;
-    iEvent.getByLabel(fPuppiNoLepName,hPuppiNoLepProduct);
+    iEvent.getByToken(fTokPuppiNoLepName,hPuppiNoLepProduct);
     assert(hPuppiNoLepProduct.isValid());
     pfPuppiNoLep = hPuppiNoLepProduct.product();
   }
   // Get track collection
   edm::Handle<reco::TrackCollection> hTrackProduct;
-  iEvent.getByLabel(fTrackName,hTrackProduct);
+  iEvent.getByToken(fTokTrackName,hTrackProduct);
   assert(hTrackProduct.isValid());
   const reco::TrackCollection *trackCol = hTrackProduct.product();
   
@@ -339,19 +339,19 @@ void FillerMuon::fill(TClonesArray *array,
   if(fUsePuppi) { 
     // Get Puppi-candidates collection woof woof
     edm::Handle<reco::PFCandidateCollection> hPuppiProduct;
-    iEvent.getByLabel(fPuppiName,hPuppiProduct);
+    iEvent.getByToken(fTokPuppiName,hPuppiProduct);
     assert(hPuppiProduct.isValid());
     pfPuppi      = hPuppiProduct.product();
 
     // Get Puppi-no lep candidates collection arf arf
     edm::Handle<reco::PFCandidateCollection> hPuppiNoLepProduct;
-    iEvent.getByLabel(fPuppiNoLepName,hPuppiNoLepProduct);
+    iEvent.getByToken(fTokPuppiNoLepName,hPuppiNoLepProduct);
     assert(hPuppiNoLepProduct.isValid());
     pfPuppiNoLep = hPuppiNoLepProduct.product();
   }
   // Get muon collection
   edm::Handle<pat::MuonCollection> hMuonProduct;
-  iEvent.getByLabel(fMuonName,hMuonProduct);
+  iEvent.getByToken(fTokPatMuonName,hMuonProduct);
   assert(hMuonProduct.isValid());
   const pat::MuonCollection *muonCol = hMuonProduct.product();
 

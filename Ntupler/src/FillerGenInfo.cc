@@ -6,20 +6,23 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
-#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "DataFormats/Common/interface/RefToPtr.h"
 #include <TClonesArray.h>
 
 using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
-FillerGenInfo::FillerGenInfo(const edm::ParameterSet &iConfig):
+FillerGenInfo::FillerGenInfo(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC):
   fGenEvtInfoName(iConfig.getUntrackedParameter<std::string>("edmGenEventInfoName","generator")),
   fLHEEvtInfoName(iConfig.getUntrackedParameter<std::string>("edmLHEEventInfoName","externalLHEProducer")),
   fGenParName    (iConfig.getUntrackedParameter<std::string>("edmGenParticlesName","genParticles")),
   fFillAll       (iConfig.getUntrackedParameter<bool>("fillAllGen",false)),
   fFillLHEWeights(iConfig.getUntrackedParameter<bool>("fillLHEWeights",false))
-{}
+{
+  fTokGenEvent     = iC.mayConsume<GenEventInfoProduct>        ( fGenEvtInfoName);
+  fTokGenPar       = iC.mayConsume<reco::GenParticleCollection>( fGenParName    );
+  fTokLHEEventInfo = iC.mayConsume<LHEEventProduct>            ( fLHEEvtInfoName );
+}
 
 //--------------------------------------------------------------------------------------------------
 FillerGenInfo::~FillerGenInfo(){}
@@ -33,7 +36,7 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, 
 
   // Get generator event information
   edm::Handle<GenEventInfoProduct> hGenEvtInfoProduct;
-  iEvent.getByLabel(fGenEvtInfoName,hGenEvtInfoProduct);
+  iEvent.getByToken(fTokGenEvent,hGenEvtInfoProduct);
   assert(hGenEvtInfoProduct.isValid());
 
   const gen::PdfInfo *pdfInfo = (hGenEvtInfoProduct->hasPDF()) ? hGenEvtInfoProduct->pdf() : 0;
@@ -48,7 +51,7 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, 
   // Get LHE event information
   if(fFillLHEWeights) {
     edm::Handle<LHEEventProduct> hLHEEvtInfoProduct;
-    iEvent.getByLabel(fLHEEvtInfoName,hLHEEvtInfoProduct);
+    iEvent.getByToken(fTokLHEEventInfo,hLHEEvtInfoProduct);
     assert(hLHEEvtInfoProduct.isValid());
     TClonesArray &rWeightsArray = *weightsArr;
     unsigned int lMax = hLHEEvtInfoProduct->weights().size();
@@ -69,7 +72,7 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, 
 
   // Get generator particles collection
   edm::Handle<reco::GenParticleCollection> hGenParProduct;
-  iEvent.getByLabel(fGenParName,hGenParProduct);
+  iEvent.getByToken(fTokGenPar,hGenParProduct);
   assert(hGenParProduct.isValid());  
   const reco::GenParticleCollection genParticles = *(hGenParProduct.product());  
 

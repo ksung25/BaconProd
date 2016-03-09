@@ -4,24 +4,13 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
-#include "DataFormats/BeamSpot/interface/BeamSpot.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/METReco/interface/CaloMET.h"
-#include "DataFormats/METReco/interface/CaloMETCollection.h"
-#include "DataFormats/METReco/interface/PFMET.h"
-#include "DataFormats/METReco/interface/PFMETCollection.h"
-#include "DataFormats/PatCandidates/interface/MET.h"
-#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
-#include "DataFormats/METReco/interface/BeamHaloSummary.h"
 #include <TLorentzVector.h>
 #include <string>
 
 using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
-FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig, const bool useAOD):
+FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC):
   fPFCandName    (iConfig.getUntrackedParameter<std::string>("edmPFCandName","particleFlow")),
   fPUInfoName    (iConfig.getUntrackedParameter<std::string>("edmPileupInfoName","addPileupInfo")),
   fPVName        (iConfig.getUntrackedParameter<std::string>("edmPVName","offlinePrimaryVertices")),
@@ -33,19 +22,49 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig, const bool us
   fMVAMETName    (iConfig.getUntrackedParameter<std::string>("edmMVAMETName","pfMEtMVA")),
   fPUPPETName    (iConfig.getUntrackedParameter<std::string>("edmPuppETName","pfMetPuppi")),
   fPUPPETCName   (iConfig.getUntrackedParameter<std::string>("edmPuppETCorrName","pfType1CorrectedMetPuppi")),
-  fPFMET30Name   (iConfig.getUntrackedParameter<std::string>("edmPFMET30Name","")),
-  fPFMETC30Name  (iConfig.getUntrackedParameter<std::string>("edmPFMET30CorrName","")),
-  fMVAMET30Name  (iConfig.getUntrackedParameter<std::string>("edmMVAMET30Name","")),
-  fPUPPET30Name  (iConfig.getUntrackedParameter<std::string>("edmPuppET30Name","")),
-  fPUPPETC30Name (iConfig.getUntrackedParameter<std::string>("edmPuppET30CorrName","")),
   fALPACAMETName (iConfig.getUntrackedParameter<std::string>("edmAlpacaMETName"    ,"pfMetAlpacaMC")),
   fPALPACAMETName(iConfig.getUntrackedParameter<std::string>("edmPupAlpacaMETName","pfMetPuppiAlpacaMC")),
   fRhoIsoName    (iConfig.getUntrackedParameter<std::string>("edmRhoForIsoName","fixedGridRhoFastjetAll")),
   fRhoJetName    (iConfig.getUntrackedParameter<std::string>("edmRhoForJetEnergy","fixedGridRhoFastjetAll")),
   fUseFilters    (iConfig.getUntrackedParameter<bool>("doFillMETFilters",true)),
   fUseAOD        (useAOD)
-{}
-
+{
+  fTokPUInfoName     = iC.consumes< std::vector<PileupSummaryInfo> > (fPUInfoName);
+  fTokBSName         = iC.consumes<reco::BeamSpot>                   (fBSName);
+  fTokCaloMETName    = iC.consumes<reco::CaloMETCollection>          (fCaloMETName);
+  fTokPFMETName      = iC.consumes<reco::PFMETCollection>            (fPFMETName);
+  fTokPFMETCName     = iC.consumes<reco::PFMETCollection>            (fPFMETCName);
+  fTokMVAMETName     = iC.consumes<reco::PFMETCollection>            (fMVAMETName);
+  fTokPUPPETName     = iC.consumes<reco::PFMETCollection>            (fPUPPETName);
+  fTokPUPPETCName    = iC.consumes<reco::PFMETCollection>            (fPUPPETCName);
+  fTokALPACAMETName  = iC.consumes<reco::PFMETCollection>            (fALPACAMETName);
+  fTokPALPACAMETName = iC.consumes<reco::PFMETCollection>            (fPALPACAMETName);
+  fTokPVName         = iC.consumes<reco::VertexCollection>           (fPVName);
+  if(fUseAOD)  fTokPFCandName     = iC.consumes<reco::PFCandidateCollection>    (fPFCandName);
+  if(!fUseAOD) fTokPackCandName   = iC.consumes<pat::PackedCandidateCollection> (fPFCandName);
+  fTokRhoIso         = iC.consumes<double>                            (fRhoIsoName);
+  fTokRhoJet         = iC.consumes<double>                            (fRhoJetName);
+  edm::InputTag lBeamHaloSummary("BeamHaloSummary");
+  edm::InputTag lHBHENoiseFilter("HBHENoiseFilterResultProducer","HBHENoiseFilterResult");
+  edm::InputTag lLaserEvtFilter ("hcalLaserEventFilter");
+  edm::InputTag lEEBadScFilter  ("eeBadScFilter");
+  edm::InputTag lEcalDeadCell   ("EcalDeadCellTriggerPrimitiveFilter");
+  edm::InputTag lTrkFailure     ("trackingFailureFilter");
+  edm::InputTag lManyStrip53X   ("manystripclus53X");
+  edm::InputTag lTooMany53X     ("toomanystripclus53X");
+  edm::InputTag lLogError       ("logErrorTooManyClusters");
+  edm::InputTag lMetFilters     ("TriggerResults","");
+  fTokBeamHaloSummary                    = iC.consumes<reco::BeamHaloSummary> (lBeamHaloSummary);
+  fTokHBHENoiseFilterResultProducer      = iC.consumes<bool>                  (lHBHENoiseFilter);
+  fTokHcalLaserEventFilter               = iC.consumes<bool>                  (lLaserEvtFilter);
+  fTokEEBadScFilter                      = iC.consumes<bool>                  (lEEBadScFilter);
+  fTokEcalDeadCellTriggerPrimitiveFilter = iC.consumes<bool>                  (lEcalDeadCell);
+  fToktrackingFailureFilter              = iC.consumes<bool>                  (lTrkFailure);
+  fTokManystripClus53X                   = iC.consumes<bool>                  (lManyStrip53X);
+  fTokTooManyStripClus53X                = iC.consumes<bool>                  (lTooMany53X);
+  fToklogErrorTooManyClusters            = iC.consumes<bool>                  (lLogError);
+  fTokMetFiltersTag                      = iC.consumes<edm::TriggerResults>   (lMetFilters);
+}
 //--------------------------------------------------------------------------------------------------
 FillerEventInfo::~FillerEventInfo(){}
 
@@ -66,7 +85,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
   //==============================
   if(!iEvent.isRealData()) {
     edm::Handle< std::vector<PileupSummaryInfo> > hPileupInfoProduct;
-    iEvent.getByLabel(fPUInfoName,hPileupInfoProduct);
+    iEvent.getByToken(fTokPUInfoName,hPileupInfoProduct);
     assert(hPileupInfoProduct.isValid());
     const std::vector<PileupSummaryInfo> *inPUInfos = hPileupInfoProduct.product();
     for (std::vector<PileupSummaryInfo>::const_iterator itPUInfo = inPUInfos->begin(); itPUInfo!=inPUInfos->end(); ++itPUInfo) {
@@ -97,7 +116,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
   // beam spot info
   //==============================
   edm::Handle<reco::BeamSpot> hBeamSpotProduct;
-  iEvent.getByLabel(fBSName,hBeamSpotProduct);
+  iEvent.getByToken(fTokBSName,hBeamSpotProduct);
   assert(hBeamSpotProduct.isValid());
   const reco::BeamSpot *bs = hBeamSpotProduct.product();
   evtInfo->bsx = bs->x0();
@@ -113,7 +132,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     if(fUseAOD) {  // === AOD ===
       // beam halo filter using CSCs
       edm::Handle<reco::BeamHaloSummary> hBeamHaloSummary;
-      iEvent.getByLabel("BeamHaloSummary",hBeamHaloSummary);
+      iEvent.getByToken(fTokBeamHaloSummary,hBeamHaloSummary);
       assert(hBeamHaloSummary.isValid());
       const reco::BeamHaloSummary *beamHaloSummary = hBeamHaloSummary.product();
       if(beamHaloSummary->CSCTightHaloId()) {  // if true, then event has identified beam halo
@@ -122,7 +141,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       
       // HB,HE anomalous noise filter
       edm::Handle<bool> hHBHENoiseFilterResult;
-      iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",hHBHENoiseFilterResult);
+      iEvent.getByToken(fTokHBHENoiseFilterResultProducer,hHBHENoiseFilterResult);
       assert(hHBHENoiseFilterResult.isValid());
       if(!(*hHBHENoiseFilterResult)) {  // if result is "false", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kHBHENoiseFilter;
@@ -130,7 +149,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       
       // HCAL laser filter
       edm::Handle<bool> hHCALLaserEventFilter;
-      iEvent.getByLabel("hcalLaserEventFilter",hHCALLaserEventFilter);
+      iEvent.getByToken(fTokHcalLaserEventFilter,hHCALLaserEventFilter);
       assert(hHCALLaserEventFilter.isValid());
       if(!(*hHCALLaserEventFilter)) {  // if result is "false", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kHCALLaserEventFilter;
@@ -138,7 +157,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       
       // bad EE SuperCrystal filter
       edm::Handle<bool> hEEBadScFilter;
-      iEvent.getByLabel("eeBadScFilter",hEEBadScFilter);
+      iEvent.getByToken(fTokEEBadScFilter,hEEBadScFilter);
       assert(hEEBadScFilter.isValid());
       if(!(*hEEBadScFilter)) {  // if result is "false", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kEEBadScFilter;
@@ -146,7 +165,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       
       // ECAL dead cell filter using trigger primitives
       edm::Handle<bool> hECALDeadCellTriggerPrimitiveFilter;
-      iEvent.getByLabel("EcalDeadCellTriggerPrimitiveFilter",hECALDeadCellTriggerPrimitiveFilter);
+      iEvent.getByToken(fTokEcalDeadCellTriggerPrimitiveFilter,hECALDeadCellTriggerPrimitiveFilter);
       assert(hECALDeadCellTriggerPrimitiveFilter.isValid());
       if(!(*hECALDeadCellTriggerPrimitiveFilter)) {  // if result is "false", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kECALDeadCellTriggerPrimitiveFilter;
@@ -155,7 +174,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       /*
       // ECAL bad laser correction filter
       edm::Handle<bool> hECALLaserCorrFilter;
-      iEvent.getByLabel("ecalLaserCorrFilter",hECALLaserCorrFilter);
+      //iEvent.getByLabel("ecalLaserCorrFilter",hECALLaserCorrFilter);
       assert(hECALLaserCorrFilter.isValid());
       if(!(*hECALLaserCorrFilter)) {  // if result is "false", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kECALLaserCorrFilter;
@@ -163,7 +182,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       */
       // tracking failure filter
       edm::Handle<bool> hTrackingFailureFilter;
-      iEvent.getByLabel("trackingFailureFilter",hTrackingFailureFilter);
+      iEvent.getByToken(fToktrackingFailureFilter,hTrackingFailureFilter);
       assert(hTrackingFailureFilter.isValid());
       if(!(*hTrackingFailureFilter)) {  // if result is "false", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kTrackingFailureFilter;
@@ -171,21 +190,21 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       
       // tracking POG filters
       edm::Handle<bool> hTrkPOGFilter_manystripclus53X;
-      iEvent.getByLabel("manystripclus53X",hTrkPOGFilter_manystripclus53X);
+      iEvent.getByToken(fTokManystripClus53X,hTrkPOGFilter_manystripclus53X);
       assert(hTrkPOGFilter_manystripclus53X.isValid());
       if(*hTrkPOGFilter_manystripclus53X) {  // if result is "true", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kTrkPOGFilter_manystripclus53X;
       }
       
       edm::Handle<bool> hTrkPOGFilter_toomanystripclus53X;
-      iEvent.getByLabel("toomanystripclus53X",hTrkPOGFilter_toomanystripclus53X);
+      iEvent.getByToken(fTokTooManyStripClus53X,hTrkPOGFilter_toomanystripclus53X);
       assert(hTrkPOGFilter_toomanystripclus53X.isValid());
       if(*hTrkPOGFilter_toomanystripclus53X) {  // if result is "true", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kTrkPOGFilter_toomanystripclus53X;
       }
       
       edm::Handle<bool> hTrkPOGFilter_logErrorTooManyClusters;
-      iEvent.getByLabel("logErrorTooManyClusters",hTrkPOGFilter_logErrorTooManyClusters);
+      iEvent.getByToken(fToklogErrorTooManyClusters,hTrkPOGFilter_logErrorTooManyClusters);
       assert(hTrkPOGFilter_logErrorTooManyClusters.isValid());
       if(*hTrkPOGFilter_logErrorTooManyClusters) {  // if result is "true", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kTrkPOGFilter_logErrorTooManyClusters;
@@ -194,9 +213,10 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 
       
     } else {  // === MINIAOD ===
+      /*
       // beam halo filter using CSCs
       edm::Handle<reco::BeamHaloSummary> hBeamHaloSummary;
-      iEvent.getByLabel("BeamHaloSummary",hBeamHaloSummary);
+      //iEvent.getByLabel("BeamHaloSummary",hBeamHaloSummary);
       assert(hBeamHaloSummary.isValid());
       const reco::BeamHaloSummary *beamHaloSummary = hBeamHaloSummary.product();
       if(beamHaloSummary->CSCTightHaloId()) {  // if true, then event has identified beam halo
@@ -205,7 +225,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       
       // HB,HE anomalous noise filter
       edm::Handle<bool> hHBHENoiseFilterResult;
-      iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",hHBHENoiseFilterResult);
+      //iEvent.getByLabel("HBHENoiseFilterResultProducer","HBHENoiseFilterResult",hHBHENoiseFilterResult);
       assert(hHBHENoiseFilterResult.isValid());
       if(!(*hHBHENoiseFilterResult)) {  // if result is "false", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kHBHENoiseFilter;
@@ -213,15 +233,15 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       
       // HCAL laser filter
       edm::Handle<bool> hHCALLaserEventFilter;
-      iEvent.getByLabel("hcalLaserEventFilter",hHCALLaserEventFilter);
+      //iEvent.getByLabel("hcalLaserEventFilter",hHCALLaserEventFilter);
       assert(hHCALLaserEventFilter.isValid());
       if(!(*hHCALLaserEventFilter)) {  // if result is "false", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kHCALLaserEventFilter;
       }
-      /*
+      
       // tracking failure filter
       edm::Handle<bool> hTrackingFailureFilter;
-      iEvent.getByLabel("trackingFailureFilter",hTrackingFailureFilter);
+      //iEvent.getByLabel("trackingFailureFilter",hTrackingFailureFilter);
       assert(hTrackingFailureFilter.isValid());
       if(!(*hTrackingFailureFilter)) {  // if result is "false", then event is flagged as bad
 	evtInfo->metFilterFailBits |= kTrackingFailureFilter;
@@ -230,14 +250,14 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       //edm::InputTag metFiltersTag("TriggerResults","","PAT");
       edm::InputTag metFiltersTag("TriggerResults","","HLT");
       edm::Handle<edm::TriggerResults> hMETFilters;
-      iEvent.getByLabel(metFiltersTag,hMETFilters);
+      iEvent.getByToken(fTokMetFiltersTag,hMETFilters);
       assert(hMETFilters.isValid());
       const edm::TriggerNames &metFilterNames = iEvent.triggerNames(*hMETFilters);
       
       unsigned int index;
-      /*
+
       // beam halo filter using CSCs
-      index = metFilterNames.triggerIndex("Flag_CSCTightHaloFilter");
+      index = metFilterNames.triggerIndex("Flag_CSCTightHalo2015Filter");
       if(index < hMETFilters->size()) {  // check for valid index
 	if(!hMETFilters->accept(index)) {
 	  evtInfo->metFilterFailBits |= kCSCTightHaloFilter;
@@ -251,6 +271,14 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 	  evtInfo->metFilterFailBits |= kHBHENoiseFilter;
 	}
       }
+
+      // HB,HE anomalous noise filter
+      index = metFilterNames.triggerIndex("Flag_HBHENoiseIsoFilter");
+      if(index < hMETFilters->size()) {  // check for valid index
+	if(!hMETFilters->accept(index)) {
+	  evtInfo->metFilterFailBits |= kHBHENoiseIsoFilter;
+	}
+      }
       
       // HCAL laser filter
       index = metFilterNames.triggerIndex("Flag_hcalLaserEventFilter");
@@ -259,7 +287,6 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 	  evtInfo->metFilterFailBits |= kHCALLaserEventFilter;
 	}
       }
-      */
       // bad EE SuperCrystal filter
       index = metFilterNames.triggerIndex("Flag_eeBadScFilter");
       if(index < hMETFilters->size()) {  // check for valid index
@@ -273,6 +300,26 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       if(index < hMETFilters->size()) {  // check for valid index
 	if(!hMETFilters->accept(index)) {
 	  evtInfo->metFilterFailBits |= kECALDeadCellTriggerPrimitiveFilter;
+	}
+      }
+      // Good vertex MET Filter
+      index = metFilterNames.triggerIndex("Flag_goodVertices");
+      if(index < hMETFilters->size()) {  // check for valid index
+	if(!hMETFilters->accept(index)) {
+	  evtInfo->metFilterFailBits |= kGoodVerticesFilter;
+	}
+      }
+      // Good vertex MET Filter
+      index = metFilterNames.triggerIndex("Flag_chargedHadronTrackResolutionFilter");
+      if(index < hMETFilters->size()) {  // check for valid index
+	if(!hMETFilters->accept(index)) {
+	  evtInfo->metFilterFailBits |= kChargedHadronTrackResolutionFilter;
+	}
+      }
+      index = metFilterNames.triggerIndex("Flag_muonBadTrackFilter");
+      if(index < hMETFilters->size()) {  // check for valid index
+	if(!hMETFilters->accept(index)) {
+	  evtInfo->metFilterFailBits |= kMuonBadTrackFilter;
 	}
       }
       /*
@@ -323,8 +370,9 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
   if(fUseAOD) {  // === AOD ===
     ////!!!!! Temporary
     // Raw PF MET
+    /*
     edm::Handle<reco::CaloMETCollection> hCaloMETProduct;
-    iEvent.getByLabel(fCaloMETName,hCaloMETProduct);
+    iEvent.getByToken(fTokCaloMETName,hCaloMETProduct);
     assert(hCaloMETProduct.isValid());
     const reco::CaloMET &inCaloMET = hCaloMETProduct.product()->front();
     evtInfo->caloMET      = inCaloMET.pt();
@@ -332,10 +380,11 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     evtInfo->caloMETCov00 = inCaloMET.getSignificanceMatrix()(0,0);
     evtInfo->caloMETCov01 = inCaloMET.getSignificanceMatrix()(0,1);
     evtInfo->caloMETCov11 = inCaloMET.getSignificanceMatrix()(1,1);
+    */
 
     // Raw PF MET
     edm::Handle<reco::PFMETCollection> hPFMETProduct;
-    iEvent.getByLabel(fPFMETName,hPFMETProduct);
+    iEvent.getByToken(fTokPFMETName,hPFMETProduct);
     assert(hPFMETProduct.isValid());
     const reco::PFMET &inPFMET = hPFMETProduct.product()->front();
     evtInfo->pfMET      = inPFMET.pt();
@@ -346,7 +395,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 
     // Corrected PF MET
     edm::Handle<reco::PFMETCollection> hPFMETCProduct;
-    iEvent.getByLabel(fPFMETCName,hPFMETCProduct);
+    iEvent.getByToken(fTokPFMETCName,hPFMETCProduct);
     assert(hPFMETCProduct.isValid());
     const reco::PFMET &inPFMETC = hPFMETCProduct.product()->front();
     evtInfo->pfMETC      = inPFMETC.pt();
@@ -356,41 +405,43 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     evtInfo->pfMETCCov11 = inPFMETC.getSignificanceMatrix()(1,1);
 
     // MVA MET
-    edm::Handle<reco::PFMETCollection> hMVAMETProduct;
-    iEvent.getByLabel(fMVAMETName,hMVAMETProduct);
-    assert(hMVAMETProduct.isValid());
-    const reco::PFMET &inMVAMET = hMVAMETProduct.product()->front();
-    evtInfo->mvaMET      = inMVAMET.pt();
-    evtInfo->mvaMETphi   = inMVAMET.phi();
-    evtInfo->mvaMETCov00 = inMVAMET.getSignificanceMatrix()(0,0);
-    evtInfo->mvaMETCov01 = inMVAMET.getSignificanceMatrix()(0,1);
-    evtInfo->mvaMETCov11 = inMVAMET.getSignificanceMatrix()(1,1);
-/*
+    /*
+    if(fMVAMETName.size() > 0) { 
+      edm::Handle<reco::PFMETCollection> hMVAMETProduct;
+      iEvent.getByToken(fTokMVAMETName,hMVAMETProduct);
+      assert(hMVAMETProduct.isValid());
+      const reco::PFMET &inMVAMET = hMVAMETProduct.product()->front();
+      evtInfo->mvaMET      = inMVAMET.pt();
+      evtInfo->mvaMETphi   = inMVAMET.phi();
+      evtInfo->mvaMETCov00 = inMVAMET.getSignificanceMatrix()(0,0);
+      evtInfo->mvaMETCov01 = inMVAMET.getSignificanceMatrix()(0,1);
+      evtInfo->mvaMETCov11 = inMVAMET.getSignificanceMatrix()(1,1);
+    }
     // MVA MET with unity response
     edm::Handle<reco::PFMETCollection> hMVAMETUProduct;
-    iEvent.getByLabel(fMVAMETUName,hMVAMETUProduct);
+    iEvent.getByToken(fTokMVAMETUName,hMVAMETUProduct);
     assert(hMVAMETUProduct.isValid());
     const reco::PFMET &inMVAMETU = hMVAMETUProduct.product()->front();
     evtInfo->mvaMETU      = inMVAMETU.pt();
     evtInfo->mvaMETUphi   = inMVAMETU.phi();
-//    evtInfo->mvaMETUCov00 = inMVAMETU.getSignificanceMatrix()(0,0);
-//    evtInfo->mvaMETUCov01 = inMVAMETU.getSignificanceMatrix()(0,1);
-//    evtInfo->mvaMETUCov11 = inMVAMETU.getSignificanceMatrix()(1,1);
+    //    evtInfo->mvaMETUCov00 = inMVAMETU.getSignificanceMatrix()(0,0);
+    //    evtInfo->mvaMETUCov01 = inMVAMETU.getSignificanceMatrix()(0,1);
+    //    evtInfo->mvaMETUCov11 = inMVAMETU.getSignificanceMatrix()(1,1);
 
     // MVA MET without jet smearing (relevant only for MC)
     edm::Handle<reco::PFMETCollection> hMVAMET0Product;
-    iEvent.getByLabel(fMVAMET0Name,hMVAMET0Product);
+    iEvent.getByToken(fTokMVAMET0Name,hMVAMET0Product);
     assert(hMVAMET0Product.isValid());
     const reco::PFMET &inMVAMET0 = hMVAMET0Product.product()->front();
     evtInfo->mvaMET0      = inMVAMET0.pt();
     evtInfo->mvaMET0phi   = inMVAMET0.phi();
-//    evtInfo->mvaMET0Cov00 = inMVAMET0.getSignificanceMatrix()(0,0);
-//    evtInfo->mvaMET0Cov01 = inMVAMET0.getSignificanceMatrix()(0,1);
-//    evtInfo->mvaMET0Cov11 = inMVAMET0.getSignificanceMatrix()(1,1);
-*/
+    //    evtInfo->mvaMET0Cov00 = inMVAMET0.getSignificanceMatrix()(0,0);
+    //    evtInfo->mvaMET0Cov01 = inMVAMET0.getSignificanceMatrix()(0,1);
+    //    evtInfo->mvaMET0Cov11 = inMVAMET0.getSignificanceMatrix()(1,1);
+    */
     // PUPPI MET
     edm::Handle<reco::PFMETCollection> hPuppET;
-    iEvent.getByLabel(fPUPPETName,hPuppET);
+    iEvent.getByToken(fTokPUPPETName,hPuppET);
     assert(hPuppET.isValid());
     const reco::PFMET &inPuppET = hPuppET.product()->front();
     evtInfo->puppET      = inPuppET.pt();
@@ -401,7 +452,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 
     // Type 1 PUPPI MET
     edm::Handle<reco::PFMETCollection> hPuppETC;
-    iEvent.getByLabel(fPUPPETCName,hPuppETC);
+    iEvent.getByToken(fTokPUPPETCName,hPuppETC);
     assert(hPuppETC.isValid());
     const reco::PFMET &inPuppETC = hPuppETC.product()->front();
     evtInfo->puppETC      = inPuppETC.pt();
@@ -410,55 +461,10 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     evtInfo->puppETCCov01 = inPuppETC.getSignificanceMatrix()(0,1);
     evtInfo->puppETCCov11 = inPuppETC.getSignificanceMatrix()(1,1);
 
-    // Raw PF MET
-    if(fPFMET30Name.size() > 0) { 
-      edm::Handle<reco::PFMETCollection> hPFMET30Product;
-      iEvent.getByLabel(fPFMET30Name,hPFMET30Product);
-      assert(hPFMET30Product.isValid());
-      const reco::PFMET &inPFMET30 = hPFMET30Product.product()->front();
-      evtInfo->pfMET30      = inPFMET30.pt();
-      evtInfo->pfMET30phi   = inPFMET30.phi();
-    }
-    // Corrected PF MET
-    if(fPFMET30Name.size() > 0) {
-      edm::Handle<reco::PFMETCollection> hPFMETC30Product;
-      iEvent.getByLabel(fPFMETC30Name,hPFMETC30Product);
-      assert(hPFMETC30Product.isValid());
-      const reco::PFMET &inPFMETC30 = hPFMETC30Product.product()->front();
-      evtInfo->pfMETC30      = inPFMETC30.pt();
-      evtInfo->pfMETC30phi   = inPFMETC30.phi();
-    }
-    // MVA MET
-    if(fMVAMET30Name.size() > 0) {
-      edm::Handle<reco::PFMETCollection> hMVAMET30Product;
-      iEvent.getByLabel(fMVAMET30Name,hMVAMET30Product);
-      assert(hMVAMET30Product.isValid());
-      const reco::PFMET &inMVAMET30 = hMVAMET30Product.product()->front();
-      evtInfo->mvaMET30      = inMVAMET30.pt();
-      evtInfo->mvaMET30phi   = inMVAMET30.phi();
-    }
-    // PUPPI MET
-    if(fPUPPET30Name.size() > 0) {
-      edm::Handle<reco::PFMETCollection> hPuppET30;
-      iEvent.getByLabel(fPUPPET30Name,hPuppET30);
-      assert(hPuppET30.isValid());
-      const reco::PFMET &inPuppET30 = hPuppET30.product()->front();
-      evtInfo->puppET30      = inPuppET30.pt();
-      evtInfo->puppET30phi   = inPuppET30.phi();
-    }
-    // Type 1 PUPPI MET
-    if(fPUPPETC30Name.size() > 0) { 
-      edm::Handle<reco::PFMETCollection> hPuppETC30;
-      iEvent.getByLabel(fPUPPETC30Name,hPuppETC30);
-      assert(hPuppETC30.isValid());
-      const reco::PFMET &inPuppETC30 = hPuppETC30.product()->front();
-      evtInfo->puppETC30      = inPuppETC30.pt();
-      evtInfo->puppETC30phi   = inPuppETC30.phi();
-    }
     // Alpaca MET
     if(fALPACAMETName.size() > 0) { 
       edm::Handle<reco::PFMETCollection> hAlpacaMET;
-      iEvent.getByLabel(fALPACAMETName,hAlpacaMET);
+      iEvent.getByToken(fTokALPACAMETName,hAlpacaMET);
       assert(hAlpacaMET.isValid());
       const reco::PFMET &inAlpacaMET = hAlpacaMET.product()->front();
       evtInfo->alpacaMET      = inAlpacaMET.pt();
@@ -466,7 +472,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     }
     if(fPALPACAMETName.size() > 0) { 
       edm::Handle<reco::PFMETCollection> hPAlpacaMET;
-      iEvent.getByLabel(fPALPACAMETName,hPAlpacaMET);
+      iEvent.getByToken(fTokPALPACAMETName,hPAlpacaMET);
       assert(hPAlpacaMET.isValid());
       const reco::PFMET &inPAlpacaMET = hPAlpacaMET.product()->front();
       evtInfo->pcpMET      = inPAlpacaMET.pt();
@@ -474,17 +480,18 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     }
 
     // Track MET
+    /*
     edm::Handle<reco::VertexCollection> hVertexProduct;
-    iEvent.getByLabel(fPVName,hVertexProduct);
+    iEvent.getByToken(fTokPVName,hVertexProduct);
     assert(hVertexProduct.isValid());
     const reco::VertexCollection *pvCol = hVertexProduct.product();
 
     edm::Handle<reco::PFCandidateCollection> hPFCandProduct;
-    iEvent.getByLabel(fPFCandName,hPFCandProduct);
+    iEvent.getByToken(fTokPFCandName,hPFCandProduct);
     assert(hPFCandProduct.isValid());
     const reco::PFCandidateCollection *pfCandCol = hPFCandProduct.product();
     computeTrackMET(0, pvCol, pfCandCol, evtInfo->trkMET, evtInfo->trkMETphi);
-
+    */
   } else {  // === MINIAOD ===
 
     //edm::Handle<pat::METCollection> hMETProduct;
@@ -499,7 +506,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     //evtInfo->pfMETCov11 = inPFMET.getSignificanceMatrix()(1,1);
    
     edm::Handle<reco::PFMETCollection> hPFMETProduct;
-    iEvent.getByLabel(fPFMETName,hPFMETProduct);
+    iEvent.getByToken(fTokPFMETName,hPFMETProduct);
     assert(hPFMETProduct.isValid());
     const reco::PFMET &inPFMET = hPFMETProduct.product()->front();
     evtInfo->pfMET      = inPFMET.pt();
@@ -509,7 +516,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     evtInfo->pfMETCov11 = inPFMET.getSignificanceMatrix()(1,1);
     // Corrected PF MET
     edm::Handle<reco::PFMETCollection> hPFMETCProduct;
-    iEvent.getByLabel(fPFMETCName,hPFMETCProduct);
+    iEvent.getByToken(fTokPFMETCName,hPFMETCProduct);
     assert(hPFMETCProduct.isValid());
     const reco::PFMET &inPFMETC = hPFMETCProduct.product()->front();
     evtInfo->pfMETC      = inPFMETC.pt();
@@ -519,19 +526,23 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     evtInfo->pfMETCCov11 = inPFMETC.getSignificanceMatrix()(1,1);
 
     // MVA MET
-    edm::Handle<reco::PFMETCollection> hMVAMETProduct;
-    iEvent.getByLabel(fMVAMETName,hMVAMETProduct);
-    assert(hMVAMETProduct.isValid());
-    const reco::PFMET &inMVAMET = hMVAMETProduct.product()->front();
-    evtInfo->mvaMET      = inMVAMET.pt();
-    evtInfo->mvaMETphi   = inMVAMET.phi();
+    /*
+    if(fMVAMETName.size() > 0) { 
+      edm::Handle<reco::PFMETCollection> hMVAMETProduct;
+      iEvent.getByToken(fTokMVAMETName,hMVAMETProduct);
+      assert(hMVAMETProduct.isValid());
+      const reco::PFMET &inMVAMET = hMVAMETProduct.product()->front();
+      evtInfo->mvaMET      = inMVAMET.pt();
+      evtInfo->mvaMETphi   = inMVAMET.phi();
+    }
+    */
     //    evtInfo->mvaMETCov00 = inMVAMET.getSignificanceMatrix()(0,0);
     //    evtInfo->mvaMETCov01 = inMVAMET.getSignificanceMatrix()(0,1);
     //    evtInfo->mvaMETCov11 = inMVAMET.getSignificanceMatrix()(1,1);
 
     // MVA MET with unity response
     //edm::Handle<reco::PFMETCollection> hMVAMETUProduct;
-    //iEvent.getByLabel(fMVAMETUName,hMVAMETUProduct);
+    //iEvent.getByToken(fTokMVAMETUName,hMVAMETUProduct);
     //assert(hMVAMETUProduct.isValid());
     //const reco::PFMET &inMVAMETU = hMVAMETUProduct.product()->front();
     //evtInfo->mvaMETU      = inMVAMETU.pt();
@@ -542,7 +553,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 
     // MVA MET without jet smearing (relevant only for MC)
     //edm::Handle<reco::PFMETCollection> hMVAMET0Product;
-    //iEvent.getByLabel(fMVAMET0Name,hMVAMET0Product);
+    //iEvent.getByToken(fTokMVAMET0Name,hMVAMET0Product);
     //assert(hMVAMET0Product.isValid());
     //const reco::PFMET &inMVAMET0 = hMVAMET0Product.product()->front();
     //evtInfo->mvaMET0      = inMVAMET0.pt();
@@ -553,7 +564,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 
     // PUPPI MET
     edm::Handle<reco::PFMETCollection> hPuppET;
-    iEvent.getByLabel(fPUPPETName,hPuppET);
+    iEvent.getByToken(fTokPUPPETName,hPuppET);
     assert(hPuppET.isValid());
     const reco::PFMET &inPuppET = hPuppET.product()->front();
     evtInfo->puppET      = inPuppET.pt();
@@ -564,7 +575,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 
     //Type1 PUPPI MET
     edm::Handle<reco::PFMETCollection> hPuppETC;
-    iEvent.getByLabel(fPUPPETCName,hPuppETC);
+    iEvent.getByToken(fTokPUPPETCName,hPuppETC);
     assert(hPuppETC.isValid());
     const reco::PFMET &inPuppETC = hPuppETC.product()->front();
     evtInfo->puppETC      = inPuppETC.pt();
@@ -573,54 +584,10 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     //evtInfo->puppETCCov01 = inPuppETC.getSignificanceMatrix()(0,1);
     //evtInfo->puppETCCov11 = inPuppETC.getSignificanceMatrix()(1,1);
     // Corrected PF MET
-    if(fPFMET30Name.size() > 0) { 
-      edm::Handle<reco::PFMETCollection> hPFMET30Product;
-      iEvent.getByLabel(fPFMET30Name,hPFMET30Product);
-      assert(hPFMET30Product.isValid());
-      const reco::PFMET &inPFMET30 = hPFMET30Product.product()->front();
-      evtInfo->pfMET30      = inPFMET30.pt();
-      evtInfo->pfMET30phi   = inPFMET30.phi();
-    }
-    // Corrected PF MET
-    if(fPFMETC30Name.size() > 0) { 
-      edm::Handle<reco::PFMETCollection> hPFMETC30Product;
-      iEvent.getByLabel(fPFMETC30Name,hPFMETC30Product);
-      assert(hPFMETC30Product.isValid());
-      const reco::PFMET &inPFMETC30 = hPFMETC30Product.product()->front();
-      evtInfo->pfMETC30      = inPFMETC30.pt();
-      evtInfo->pfMETC30phi   = inPFMETC30.phi();
-    }
-    // MVA MET
-    if(fMVAMET30Name.size() > 0) { 
-      edm::Handle<reco::PFMETCollection> hMVAMET30Product;
-      iEvent.getByLabel(fMVAMET30Name,hMVAMET30Product);
-      assert(hMVAMET30Product.isValid());
-      const reco::PFMET &inMVAMET30 = hMVAMET30Product.product()->front();
-      evtInfo->mvaMET30      = inMVAMET30.pt();
-      evtInfo->mvaMET30phi   = inMVAMET30.phi();
-    }
-    // PUPPI MET
-    if(fPUPPET30Name.size() > 0) { 
-      edm::Handle<reco::PFMETCollection> hPuppET30;
-      iEvent.getByLabel(fPUPPET30Name,hPuppET30);
-      assert(hPuppET30.isValid());
-      const reco::PFMET &inPuppET30 = hPuppET30.product()->front();
-      evtInfo->puppET30      = inPuppET30.pt();
-      evtInfo->puppET30phi   = inPuppET30.phi();
-    }
-    // Type 1 PUPPI MET
-    if(fPUPPETC30Name.size() > 0) { 
-      edm::Handle<reco::PFMETCollection> hPuppETC30;
-      iEvent.getByLabel(fPUPPETC30Name,hPuppETC30);
-      assert(hPuppETC30.isValid());
-      const reco::PFMET &inPuppETC30 = hPuppETC30.product()->front();
-      evtInfo->puppETC30      = inPuppETC30.pt();
-      evtInfo->puppETC30phi   = inPuppETC30.phi();
-    }
     // Alpaca MET
     if(fALPACAMETName.size() > 0) { 
       edm::Handle<reco::PFMETCollection> hAlpacaMET;
-      iEvent.getByLabel(fALPACAMETName,hAlpacaMET);
+      iEvent.getByToken(fTokALPACAMETName,hAlpacaMET);
       assert(hAlpacaMET.isValid());
       const reco::PFMET &inAlpacaMET = hAlpacaMET.product()->front();
       evtInfo->alpacaMET      = inAlpacaMET.pt();
@@ -628,18 +595,20 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     }
     if(fPALPACAMETName.size() > 0) { 
       edm::Handle<reco::PFMETCollection> hPAlpacaMET;
-      iEvent.getByLabel(fPALPACAMETName,hPAlpacaMET);
+      iEvent.getByToken(fTokPALPACAMETName,hPAlpacaMET);
       assert(hPAlpacaMET.isValid());
       const reco::PFMET &inPAlpacaMET = hPAlpacaMET.product()->front();
       evtInfo->pcpMET      = inPAlpacaMET.pt();
       evtInfo->pcpMETphi   = inPAlpacaMET.phi();
     }
     // Track MET
+    /*
     edm::Handle<pat::PackedCandidateCollection> hPFCandProduct;
-    iEvent.getByLabel(fPFCandName,hPFCandProduct);
+    iEvent.getByToken(fTokPackCandName,hPFCandProduct);
     assert(hPFCandProduct.isValid());
     const pat::PackedCandidateCollection *pfCandCol = hPFCandProduct.product();
     computeTrackMET(pfCandCol, evtInfo->trkMET, evtInfo->trkMETphi);
+    */
   }
   
   
@@ -649,15 +618,13 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
   
   // Rho for isolation correction
   edm::Handle<double> hRhoIso;
-  edm::InputTag rhoIsoTag(fRhoIsoName,"");
-  iEvent.getByLabel(rhoIsoTag,hRhoIso);
+  iEvent.getByToken(fTokRhoIso,hRhoIso);
   assert(hRhoIso.isValid());
   evtInfo->rhoIso = *hRhoIso;
   
   // Rho for jet energy correction
   edm::Handle<double> hRhoJet;
-  edm::InputTag rhoJetTag(fRhoJetName,"");
-  iEvent.getByLabel(rhoJetTag,hRhoJet);
+  iEvent.getByToken(fTokRhoJet,hRhoJet);
   assert(hRhoJet.isValid());
   evtInfo->rhoJet = *hRhoJet;
 

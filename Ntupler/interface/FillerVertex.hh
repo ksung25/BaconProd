@@ -7,6 +7,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 class TClonesArray;
 
 
@@ -15,7 +16,7 @@ namespace baconhep
   class FillerVertex
   {
     public:
-      FillerVertex(const edm::ParameterSet &iConfig, const bool useAOD);
+       FillerVertex(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC);
       ~FillerVertex();
       
       const reco::Vertex* fill(TClonesArray     *array,    // output array to be filled
@@ -31,6 +32,7 @@ namespace baconhep
       double       fMinNdof;
       double       fMaxAbsZ;
       double       fMaxRho;
+      edm::EDGetTokenT<reco::VertexCollection>         fTokVertex;
 
       bool fUseAOD;
   };

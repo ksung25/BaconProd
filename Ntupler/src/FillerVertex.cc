@@ -8,14 +8,16 @@
 using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
-FillerVertex::FillerVertex(const edm::ParameterSet &iConfig, const bool useAOD):
+FillerVertex::FillerVertex(const edm::ParameterSet &iConfig, const bool useAOD, edm::ConsumesCollector && iC):
   fPVName       (iConfig.getUntrackedParameter<std::string>("edmName","offlinePrimaryVertices")),
   fMinNTracksFit(0),
   fMinNdof      (4),
   fMaxAbsZ      (24),
   fMaxRho       (2),
   fUseAOD       (useAOD)
-{}
+{
+  fTokVertex       = iC.consumes<reco::VertexCollection>(fPVName); 
+}
 
 //--------------------------------------------------------------------------------------------------
 FillerVertex::~FillerVertex(){}
@@ -27,7 +29,7 @@ const reco::Vertex* FillerVertex::fill(TClonesArray *array, int &nvtx, const edm
   
   // Get vertex collection
   edm::Handle<reco::VertexCollection> hVertexProduct;
-  iEvent.getByLabel(fPVName,hVertexProduct);
+  iEvent.getByToken(fTokVertex,hVertexProduct);
   assert(hVertexProduct.isValid());
   const reco::VertexCollection *pvCol = hVertexProduct.product();
 

@@ -4,6 +4,7 @@
 #include "DataFormats/JetReco/interface/GenJetCollection.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "fastjet/GhostedAreaSpec.hh"
 #include "fastjet/ClusterSequenceArea.hh"
 #include "fastjet/tools/Filter.hh"
@@ -24,7 +25,7 @@ namespace baconhep
   class FillerGenJets
   {
     public:
-       FillerGenJets(const edm::ParameterSet &iConfig);
+       FillerGenJets(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC);
       ~FillerGenJets();
     void    fill(TClonesArray *array,TClonesArray *fatJetArray,const edm::Event &iEvent);
     protected:
@@ -41,6 +42,9 @@ namespace baconhep
       fastjet::ActiveAreaSpec*      fActiveArea;
       fastjet::AreaDefinition*      fAreaDefinition;
       fastjet::ClusterSequenceArea* fClustering;
+      edm::EDGetTokenT<reco::GenJetCollection>      fTokGenJet;
+      edm::EDGetTokenT<reco::GenJetCollection>      fTokGenFatJet;
+      edm::EDGetTokenT<reco::GenParticleCollection> fTokGenPar;
 
   };
 }

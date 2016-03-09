@@ -10,6 +10,19 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "BaconAna/DataFormats/interface/BaconAnaDefs.hh"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/METReco/interface/CaloMET.h"
+#include "DataFormats/METReco/interface/CaloMETCollection.h"
+#include "DataFormats/METReco/interface/PFMET.h"
+#include "DataFormats/METReco/interface/PFMETCollection.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/METReco/interface/BeamHaloSummary.h"
+
 namespace trigger {
   class TriggerEvent;
 }
@@ -22,7 +35,7 @@ namespace baconhep
   class FillerEventInfo
   {
     public:
-      FillerEventInfo(const edm::ParameterSet &iConfig, const bool useAOD);
+       FillerEventInfo(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC);
       ~FillerEventInfo();
       
       void fill(TEventInfo         *evtInfo,       // output object to be filled
@@ -52,17 +65,38 @@ namespace baconhep
       std::string fMVAMETName;
       std::string fPUPPETName;
       std::string fPUPPETCName;
-      std::string fPFMET30Name;
-      std::string fPFMETC30Name;
-      std::string fMVAMET30Name;
-      std::string fPUPPET30Name;
-      std::string fPUPPETC30Name;
       std::string fALPACAMETName;
       std::string fPALPACAMETName;
       std::string fRhoIsoName;
       std::string fRhoJetName;
       bool fUseFilters;
       bool fUseAOD;
+
+    edm::EDGetTokenT<std::vector<PileupSummaryInfo> >  fTokPUInfoName;
+    edm::EDGetTokenT<reco::BeamSpot>              fTokBSName         ;
+    edm::EDGetTokenT<reco::CaloMETCollection>     fTokCaloMETName    ;
+    edm::EDGetTokenT<reco::PFMETCollection>       fTokPFMETName      ;
+    edm::EDGetTokenT<reco::PFMETCollection>       fTokPFMETCName     ;
+    edm::EDGetTokenT<reco::PFMETCollection>       fTokMVAMETName     ;
+    edm::EDGetTokenT<reco::PFMETCollection>       fTokPUPPETName     ;
+    edm::EDGetTokenT<reco::PFMETCollection>       fTokPUPPETCName    ;
+    edm::EDGetTokenT<reco::PFMETCollection>       fTokALPACAMETName  ;
+    edm::EDGetTokenT<reco::PFMETCollection>       fTokPALPACAMETName ;
+    edm::EDGetTokenT<reco::VertexCollection>      fTokPVName         ;
+    edm::EDGetTokenT<reco::PFCandidateCollection> fTokPFCandName     ;
+    edm::EDGetTokenT<pat::PackedCandidateCollection> fTokPackCandName;
+    edm::EDGetTokenT<double>                      fTokRhoIso;
+    edm::EDGetTokenT<double>                      fTokRhoJet;
+    edm::EDGetTokenT<reco::BeamHaloSummary>       fTokBeamHaloSummary;
+    edm::EDGetTokenT<bool>                        fTokHBHENoiseFilterResultProducer;
+    edm::EDGetTokenT<bool>                        fTokHcalLaserEventFilter         ;
+    edm::EDGetTokenT<bool>                        fTokEEBadScFilter                ;
+    edm::EDGetTokenT<bool>                        fTokEcalDeadCellTriggerPrimitiveFilter;
+    edm::EDGetTokenT<bool>                        fToktrackingFailureFilter        ;
+    edm::EDGetTokenT<bool>                        fTokManystripClus53X             ;
+    edm::EDGetTokenT<bool>                        fTokTooManyStripClus53X          ;
+    edm::EDGetTokenT<bool>                        fToklogErrorTooManyClusters      ;
+    edm::EDGetTokenT<edm::TriggerResults>         fTokMetFiltersTag                ;
   };
 }
 #endif

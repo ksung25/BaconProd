@@ -26,9 +26,10 @@
 using namespace baconhep;
 
 //--------------------------------------------------------------------------------------------------
-FillerRH::FillerRH(const edm::ParameterSet &iConfig):
+FillerRH::FillerRH(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC):
   fRHName      (iConfig.getUntrackedParameter<edm::InputTag>("edmRecHitName"))
 {
+  fTokRH = iC.consumes<HBHERecHitCollection>(fRHName);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -46,7 +47,7 @@ void FillerRH::fill(TClonesArray *array,const edm::Event &iEvent,const edm::Even
 
   const HBHERecHitCollection *recHitHCAL   = 0;
   edm::Handle<HBHERecHitCollection> hRecHitHCAL;
-  iEvent.getByLabel(fRHName,hRecHitHCAL);
+  iEvent.getByToken(fTokRH,hRecHitHCAL);
   recHitHCAL = hRecHitHCAL.product();
 
   TClonesArray &rArray = *array;

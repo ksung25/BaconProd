@@ -3,10 +3,15 @@
 #include "FWCore/Framework/interface/EDAnalyzer.h"       // EDAnalyzer class
 #include "FWCore/ParameterSet/interface/ParameterSet.h"  // Parameters
 #include "FWCore/Utilities/interface/InputTag.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include <string>                                        // string class
 
 // forward class declarations
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 class TFile;
 class TH1D;
 class TTree;
@@ -74,7 +79,10 @@ class NtuplerMod : public edm::EDAnalyzer {
     // Collection names
     std::string fPVName;
     std::string fGenRunInfoName;
-
+    edm::EDGetTokenT<GenRunInfoProduct>      fTokGenRunInfo;
+    edm::EDGetTokenT<edm::TriggerResults>    fTokTrgRes       ;
+    edm::EDGetTokenT<trigger::TriggerEvent>    fTokTrgEvt       ;
+    edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection>    fTokTrgObj       ;
     bool fFillLHEWgt;
     bool fUseAODJet,      fUseAODFatJet,      fUseAODFatterJet;
     bool fUseAODPuppiJet, fUseAODFatPuppiJet, fUseAODFatterPuppiJet;
