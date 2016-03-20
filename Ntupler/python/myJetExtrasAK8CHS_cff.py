@@ -63,35 +63,6 @@ AK8caPFJetsSoftDropCHS = AK8PFJetsCHS.clone(
     jetCollInstanceName = cms.string("SubJets")
   )
 
-# b-tagging
-from RecoBTag.Configuration.RecoBTag_cff import *
-AK8PFImpactParameterTagInfosCHS = pfImpactParameterTagInfos.clone(
-    jets      = cms.InputTag('AK8PFJetsCHS'),
-    maxDeltaR = cms.double(0.8)
-  )
-AK8PFInclusiveSecondaryVertexFinderTagInfosCHS = pfInclusiveSecondaryVertexFinderTagInfos.clone(
-    trackIPTagInfos = cms.InputTag("AK8PFImpactParameterTagInfosCHS")
-  )
-AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-    tagInfos = cms.VInputTag( cms.InputTag("AK8PFImpactParameterTagInfosCHS"), cms.InputTag("AK8PFInclusiveSecondaryVertexFinderTagInfosCHS") )
-  )
-
-# subjet b-tagging
-AK8PFImpactParameterTagInfosSJCHS = pfImpactParameterTagInfos.clone(
-    jets      = cms.InputTag('AK8caPFJetsSoftDropCHS','SubJets'),
-    maxDeltaR = cms.double(0.8)
-  )
-AK8PFInclusiveSecondaryVertexFinderTagInfosSJCHS = pfInclusiveSecondaryVertexFinderTagInfos.clone(
-    trackIPTagInfos = cms.InputTag("AK8PFImpactParameterTagInfosSJCHS")
-  )
-AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-    tagInfos = cms.VInputTag( cms.InputTag("AK8PFImpactParameterTagInfosSJCHS"), cms.InputTag("AK8PFInclusiveSecondaryVertexFinderTagInfosSJCHS") )
-  )
-#double b-tagging
-AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS = pfBoostedDoubleSecondaryVertexAK8BJetTags.clone(
-     tagInfos = cms.VInputTag(cms.InputTag("AK8PFImpactParameterTagInfosCHS"), cms.InputTag("AK8PFInclusiveSecondaryVertexFinderTagInfosCHS") )
-)
-
 # q/g discriminator
 # Note: need to provide JECs (or corrected jet collection) to QGL calculator
 from JetMETCorrections.Configuration.JetCorrectorsAllAlgos_cff import *
@@ -142,13 +113,6 @@ AK8jetsequenceCHS = cms.Sequence(
     AK8caPFJetsPrunedCHS*
     AK8caPFJetsTrimmedCHS*
     AK8caPFJetsSoftDropCHS*
-    AK8PFImpactParameterTagInfosCHS*
-    AK8PFInclusiveSecondaryVertexFinderTagInfosCHS*
-    AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS*
-    AK8PFImpactParameterTagInfosSJCHS*
-    AK8PFInclusiveSecondaryVertexFinderTagInfosSJCHS*
-    AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS*
-    AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS*
     ak8PFCHSL1FastL2L3CorrectorChain*
     AK8QGTaggerCHS*
     AK8QGTaggerSubJetsCHS*                
@@ -162,13 +126,6 @@ AK8jetsequenceCHSData = cms.Sequence(
     AK8caPFJetsPrunedCHS*
     AK8caPFJetsTrimmedCHS*
     AK8caPFJetsSoftDropCHS*
-    AK8PFImpactParameterTagInfosCHS*
-    AK8PFInclusiveSecondaryVertexFinderTagInfosCHS*
-    AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS*
-    AK8PFImpactParameterTagInfosSJCHS*
-    AK8PFInclusiveSecondaryVertexFinderTagInfosSJCHS*
-    AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS*
-    AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS*
     #ak8PFCHSL1FastL2L3ResidualCorrectorChain*
     ak8chsL1FastL2L3ResidualChain* 
     AK8QGTaggerCHS*
@@ -179,12 +136,6 @@ AK8jetsequenceCHSData = cms.Sequence(
 def setMiniAODAK8CHS(process) :
     process.AK8PFJetsCHS.src                                                      = cms.InputTag("packedPFCandidates")
     #process.AK8GenJetsCHS.src                                                     = cms.InputTag("packedGenParticles")
-    process.AK8PFImpactParameterTagInfosCHS.primaryVertex                         = cms.InputTag("offlineSlimmedPrimaryVertices")
-    process.AK8PFImpactParameterTagInfosCHS.candidates                            = cms.InputTag("packedPFCandidates")
-    process.AK8PFInclusiveSecondaryVertexFinderTagInfosCHS.extSVCollection        = cms.InputTag('slimmedSecondaryVertices')
-    process.AK8PFImpactParameterTagInfosSJCHS.primaryVertex                       = cms.InputTag("offlineSlimmedPrimaryVertices")
-    process.AK8PFImpactParameterTagInfosSJCHS.candidates                          = cms.InputTag("packedPFCandidates")
-    process.AK8PFInclusiveSecondaryVertexFinderTagInfosSJCHS.extSVCollection      = cms.InputTag('slimmedSecondaryVertices')
     process.QGTaggerAK8                  = process.QGTagger.clone()
     process.QGTaggerAK8.srcJets          = cms.InputTag('slimmedJetsAK8')
     process.QGTaggerAK8.jetsLabel        = cms.string('QGL_AK4PFchs')

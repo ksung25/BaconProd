@@ -63,35 +63,6 @@ CA15caPFJetsSoftDropCHS = CA15PFJetsCHS.clone(
     jetCollInstanceName = cms.string("SubJets")
   )
   
-# b-tagging
-from RecoBTag.Configuration.RecoBTag_cff import *
-CA15PFImpactParameterTagInfosCHS = pfImpactParameterTagInfos.clone(
-    jets      = cms.InputTag('CA15PFJetsCHS'),
-    maxDeltaR = cms.double(1.5)
-  )
-CA15PFInclusiveSecondaryVertexFinderTagInfosCHS = pfInclusiveSecondaryVertexFinderTagInfos.clone(
-    trackIPTagInfos = cms.InputTag("CA15PFImpactParameterTagInfosCHS")
-  )
-CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-    tagInfos = cms.VInputTag( cms.InputTag("CA15PFImpactParameterTagInfosCHS"), cms.InputTag("CA15PFInclusiveSecondaryVertexFinderTagInfosCHS") )
-  )
-
-# subjet b-tagging
-CA15PFImpactParameterTagInfosSJCHS = pfImpactParameterTagInfos.clone(
-    jets      = cms.InputTag('CA15caPFJetsSoftDropCHS','SubJets'),
-    maxDeltaR = cms.double(1.5)
-  )
-CA15PFInclusiveSecondaryVertexFinderTagInfosSJCHS = pfInclusiveSecondaryVertexFinderTagInfos.clone(
-    trackIPTagInfos = cms.InputTag("CA15PFImpactParameterTagInfosSJCHS")
-  )
-CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-    tagInfos = cms.VInputTag( cms.InputTag("CA15PFImpactParameterTagInfosSJCHS"), cms.InputTag("CA15PFInclusiveSecondaryVertexFinderTagInfosSJCHS") )
-  )
-#double b-tagging
-CA15PFBoostedDoubleSecondaryVertexBJetTagsCHS = pfBoostedDoubleSecondaryVertexCA15BJetTags.clone(
-     tagInfos = cms.VInputTag(cms.InputTag("CA15PFImpactParameterTagInfosCHS"), cms.InputTag("CA15PFInclusiveSecondaryVertexFinderTagInfosCHS") )
-)
-
 # q/g discriminator
 # Note: need to provide JECs (or corrected jet collection) to QGL calculator
 from JetMETCorrections.Configuration.JetCorrectorsAllAlgos_cff import *
@@ -142,13 +113,6 @@ CA15jetsequenceCHS = cms.Sequence(
     CA15caPFJetsPrunedCHS*
     CA15caPFJetsTrimmedCHS*
     CA15caPFJetsSoftDropCHS*
-    CA15PFImpactParameterTagInfosCHS*
-    CA15PFInclusiveSecondaryVertexFinderTagInfosCHS*
-    CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS*
-    CA15PFImpactParameterTagInfosSJCHS*
-    CA15PFInclusiveSecondaryVertexFinderTagInfosSJCHS*
-    CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS*
-    CA15PFBoostedDoubleSecondaryVertexBJetTagsCHS*
     ca15PFCHSL1FastL2L3CorrectorChain*
     CA15QGTaggerCHS*
     CA15QGTaggerSubJetsCHS*                
@@ -162,13 +126,6 @@ CA15jetsequenceCHSData = cms.Sequence(
     CA15caPFJetsPrunedCHS*
     CA15caPFJetsTrimmedCHS*
     CA15caPFJetsSoftDropCHS*
-    CA15PFImpactParameterTagInfosCHS*
-    CA15PFInclusiveSecondaryVertexFinderTagInfosCHS*
-    CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS*
-    CA15PFImpactParameterTagInfosSJCHS*
-    CA15PFInclusiveSecondaryVertexFinderTagInfosSJCHS*
-    CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS*
-    CA15PFBoostedDoubleSecondaryVertexBJetTagsCHS*
     #ca15PFCHSL1FastL2L3ResidualCorrectorChain*
     ca15chsL1FastL2L3ResidualChain*
     CA15QGTaggerCHS*

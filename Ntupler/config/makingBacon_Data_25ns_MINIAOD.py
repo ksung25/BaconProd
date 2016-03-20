@@ -9,9 +9,14 @@ hlt_filename  = "BaconAna/DataFormats/data/HLTFile_25ns"   # list of relevant tr
 do_alpaca     = False
 
 cmssw_base = os.environ['CMSSW_BASE']
+from BaconProd.Ntupler.myJecFromDB_cff    import setupJEC
+setupJEC(process,is_data_flag)
+if is_data_flag:
+  process.jec.connect = cms.string('sqlite:////'+cmssw_base+'/src/BaconProd/Utils/data/Fall15_25nsV2_DATA.db')
+else:
+  process.jec.connect = cms.string('sqlite:////'+cmssw_base+'/src/BaconProd/Utils/data/Fall15_25nsV2_MC.db')
 
-process.load('BaconProd/Ntupler/myJecFromDB_cff')
-process.jec.connect = cms.string('sqlite:////'+cmssw_base+'/src/BaconProd/Utils/data/Summer15_25nsV6_DATA.db')
+process.load('BaconProd/Ntupler/myQGLFromDB_cff')
 #--------------------------------------------------------------------------------
 # Import of standard configurations
 #================================================================================
@@ -28,9 +33,10 @@ process.load('BaconProd/Ntupler/myCHSCorrections_cff')
 process.load('BaconProd/Ntupler/myCorrections_cff')
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
 if is_data_flag:
-  process.GlobalTag.globaltag = cms.string('74X_dataRun2_v2')
+  process.GlobalTag.globaltag = cms.string('76X_dataRun2_16Dec2015_v0')
 else:
-  process.GlobalTag.globaltag = cms.string('74X_mcRun2_asymptotic_v2')
+  process.GlobalTag.globaltag = cms.string('76X_mcRun2_asymptotic_RunIIFall15DR76_v1')
+
 
 #--------------------------------------------------------------------------------
 # Import custom configurations
@@ -46,20 +52,35 @@ process.load('BaconProd/Ntupler/myJetExtrasAK4Puppi_cff')
 process.load('BaconProd/Ntupler/myJetExtrasCA8Puppi_cff')
 process.load('BaconProd/Ntupler/myJetExtrasCA15Puppi_cff')
 
+process.load("RecoBTag.ImpactParameter.impactParameter_cff")
+process.load("RecoBTag.SecondaryVertex.secondaryVertex_cff")
+process.load("RecoBTag.SoftLepton.softLepton_cff")
+process.load("RecoBTag.Combined.combinedMVA_cff")
+process.load("RecoBTag.CTagging.cTagging_cff")
+
+from BaconProd.Ntupler.myBtagging_cff           import addBTagging
 from BaconProd.Ntupler.myGenJets_cff            import setMiniAODGenJets
 from BaconProd.Ntupler.myJetExtrasAK4CHS_cff    import setMiniAODAK4CHS
 from BaconProd.Ntupler.myJetExtrasAK8CHS_cff    import setMiniAODAK8CHS
-from BaconProd.Ntupler.myJetExtrasCA8CHS_cff    import setMiniAODCA8CHS
+#from BaconProd.Ntupler.myJetExtrasCA8CHS_cff    import setMiniAODCA8CHS
 from BaconProd.Ntupler.myJetExtrasCA15CHS_cff   import setMiniAODCA15CHS
 
 from BaconProd.Ntupler.myJetExtrasAK4Puppi_cff  import setMiniAODAK4Puppi
 from BaconProd.Ntupler.myJetExtrasCA8Puppi_cff  import setMiniAODCA8Puppi
 from BaconProd.Ntupler.myJetExtrasCA15Puppi_cff import setMiniAODCA15Puppi
 
+process.btagging = cms.Sequence()
+#addBTagging(process,'AK4PFJetsCHS'   ,0.4,'AK4' ,'CHS',True,True)
+addBTagging(process,'AK8PFJetsCHS'   ,0.8,'AK8' ,'CHS')
+addBTagging(process,'CA15PFJetsCHS'  ,1.5,'CA15','CHS')
+addBTagging(process,'AK4PFJetsPuppi' ,0.4,'AK4' ,'Puppi')
+addBTagging(process,'CA8PFJetsPuppi' ,0.8,'CA8' ,'Puppi')
+addBTagging(process,'CA15PFJetsPuppi',1.5,'CA15','Puppi')
+
 setMiniAODGenJets(process)
 setMiniAODAK4CHS(process)
 setMiniAODAK8CHS(process)
-setMiniAODCA8CHS(process)
+#setMiniAODCA8CHS(process)
 setMiniAODCA15CHS(process)
 
 setMiniAODAK4Puppi (process)
@@ -75,8 +96,6 @@ process.chs = cms.EDFilter("CandPtrSelector",
                            src = cms.InputTag('packedPFCandidates'),
                            cut = cms.string('fromPV')
                            )
-process.load('BaconProd/Ntupler/myMETFilters_cff')     
-
 # PF MET corrections
 process.load("BaconProd/Ntupler/myPFMETCorrections_cff")
 process.pfJetMETcorr.jetCorrLabel = cms.InputTag("ak4L1FastL2L3Corrector")
@@ -104,8 +123,8 @@ process.pfCandNoLep = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packed
 process.pfCandLep   = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates"), cut = cms.string("abs(pdgId) == 13 || abs(pdgId) == 11 || abs(pdgId) == 15"))
 process.puppinolep = process.puppi.clone()
 #process.puppinolep.candName = 'pfCandNoLep'
-process.puppi.useExistingWeights      = True
-process.puppinolep.useExistingWeights = True
+process.puppi.useExistingWeights      = False
+process.puppinolep.useExistingWeights = False
 process.puppinolep.useWeightsNoLep    = True
 process.load('CommonTools/PileupAlgos/PhotonPuppi_cff')
 #process.puppiPhoton.candName    = 'pfCandNoLep'
@@ -137,9 +156,9 @@ if do_alpaca:
   alpacaPuppiMet = ('pfMetPuppiAlpacaData'   if is_data_flag else 'pfMetPuppiAlpacaMC' ) 
 
 #JEC
-JECTag='Summer15_25nsV6_DATA'
+JECTag='Fall15_25nsV2_DATA'
 if not is_data_flag: 
-  JECTag='Summer15_25nsV6_MC'
+  JECTag='Fall15_25nsV2_MC'
 ak4CHSJEC = cms.untracked.vstring('BaconProd/Utils/data/'+JECTag+'_L1FastJet_AK4PFchs.txt',
                                   'BaconProd/Utils/data/'+JECTag+'_L2Relative_AK4PFchs.txt',
                                   'BaconProd/Utils/data/'+JECTag+'_L3Absolute_AK4PFchs.txt',
@@ -177,7 +196,7 @@ ca15PUPPIUnc = ak4PUPPIUnc
 #================================================================================
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
-                            fileNames  = cms.untracked.vstring('/store/data/Run2015D/SingleMuon/MINIAOD/05Oct2015-v1/60000/F0040E8B-756F-E511-B1B1-0026189438D5.root')
+                            fileNames  = cms.untracked.vstring('/store/data/Run2015D/SingleMuon/MINIAOD/16Dec2015-v1/10000/FEE3B6D1-B9A8-E511-BC5A-0CC47A4D76D6.root')
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -197,19 +216,22 @@ process.options = cms.untracked.PSet(
 #================================================================================
 process.ntupler = cms.EDAnalyzer('NtuplerMod',
   skipOnHLTFail     = cms.untracked.bool(do_hlt_filter),
+  useTrigger        = cms.untracked.bool(True),
+  TriggerObject     = cms.untracked.string("selectedPatTrigger"),
+  TriggerFile       = cms.untracked.string(hlt_filename),
   useAOD            = cms.untracked.bool(False),
   outputName        = cms.untracked.string('Output.root'),
-  TriggerFile       = cms.untracked.string(hlt_filename),
   edmPVName         = cms.untracked.string('offlineSlimmedPrimaryVertices'),
   edmGenRunInfoName = cms.untracked.string('generator'),
   
   Info = cms.untracked.PSet(
     isActive             = cms.untracked.bool(True),
     edmPFCandName        = cms.untracked.string('packedPFCandidates'),
-    edmPileupInfoName    = cms.untracked.string('addPileupInfo'),
+    edmPileupInfoName    = cms.untracked.string('slimmedAddPileupInfo'),
+    #edmPileupInfoName    = cms.untracked.string('addPileupInfo'),
     edmBeamspotName      = cms.untracked.string('offlineBeamSpot'),
     edmMETName           = cms.untracked.string('slimmedMETs'),
-    edmMVAMETName        = cms.untracked.string('pfMVAMEt'),
+    edmMVAMETName        = cms.untracked.string(''),
     edmPuppETName        = cms.untracked.string('pfMetPuppi'),
     edmPuppETCorrName    = cms.untracked.string('pfType1PuppiCorrectedMet'),
     edmPFMET30Name       = cms.untracked.string(''),
@@ -246,6 +268,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     isActive                  = cms.untracked.bool(True),
     minPt                     = cms.untracked.double(7),
     edmName                   = cms.untracked.string('slimmedElectrons'),
+    edmSCName                 = cms.untracked.InputTag('reducedEgamma','reducedSuperClusters'),
     edmPuppiName              = cms.untracked.string('puppi'),
     edmPuppiNoLepName         = cms.untracked.string('puppinolep'),
     usePuppi                  = cms.untracked.bool(True),
@@ -267,6 +290,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     isActive              = cms.untracked.bool(True),
     minPt                 = cms.untracked.double(10),
     edmName               = cms.untracked.string('slimmedPhotons'),
+    edmSCName             = cms.untracked.InputTag('reducedEgamma','reducedSuperClusters'),
     edmChHadIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoChargedIsolation"),        # EGM recommendation not in AOD/MINIAOD
     edmNeuHadIsoMapTag    = cms.untracked.InputTag("photonIDValueMapProducer:phoNeutralHadronIsolation"),  # EGM recommendation not in AOD/MINIAOD
     edmGammaIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoPhotonIsolation")          # EGM recommendation not in AOD/MINIAOD
@@ -298,6 +322,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     jetName              = cms.untracked.string('slimmedJets'),
     genJetName           = cms.untracked.string('slimmedGenJets'),
     csvBTagName          = cms.untracked.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
+    mvaBTagName          = cms.untracked.string('pfCombinedMVAV2BJetTags'),
+    cvlcTagName          = cms.untracked.string('pfCombinedCvsLJetTags'),
+    cvbcTagName          = cms.untracked.string('pfCombinedCvsBJetTags'),
     qgLikelihood         = cms.untracked.string('QGTagger')
     ),
 
@@ -327,6 +354,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     softdropJetName    = cms.untracked.string('AK4caPFJetsSoftDropPuppi'),
     subJetName         = cms.untracked.string('AK4caPFJetsSoftDropPuppi'),
     csvBTagName        = cms.untracked.string('AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsPuppi'),
+    mvaBTagName        = cms.untracked.string('AK4PFCombinedMVAV2BJetTagsPuppi'),
+    cvlcTagName        = cms.untracked.string('AK4PFCombinedCvsLJetTagsPuppi'),
+    cvbcTagName        = cms.untracked.string('AK4PFCombinedCvsBJetTagsPuppi'),
     csvBTagSubJetName  = cms.untracked.string('AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi'),
     csvDoubleBTagName  = cms.untracked.string('AK4PFBoostedDoubleSecondaryVertexBJetTagsPuppi'),
     jettiness          = cms.untracked.string('AK4NjettinessPuppi'),
@@ -361,6 +391,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     softdropJetName      = cms.untracked.string('AK8caPFJetsSoftDropCHS'),
     subJetName           = cms.untracked.string('AK8caPFJetsSoftDropCHS'),
     csvBTagName          = cms.untracked.string('AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS'),
+    mvaBTagName          = cms.untracked.string('AK8PFCombinedMVAV2BJetTagsCHS'),
+    cvlcTagName          = cms.untracked.string('AK8PFCombinedCvsLJetTagsCHS'),
+    cvbcTagName          = cms.untracked.string('AK8PFCombinedCvsBJetTagsCHS'),
     csvBTagSubJetName    = cms.untracked.string('AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS'),
     csvDoubleBTagName    = cms.untracked.string('AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS'),
     qgLikelihood         = cms.untracked.string('AK8QGTaggerCHS'),
@@ -424,6 +457,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     softdropJetName    = cms.untracked.string('CA8caPFJetsSoftDropPuppi'),
     subJetName         = cms.untracked.string('CA8caPFJetsSoftDropPuppi'),
     csvBTagName        = cms.untracked.string('CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsPuppi'),
+    mvaBTagName        = cms.untracked.string('CA8PFCombinedMVAV2BJetTagsPuppi'),
+    cvlcTagName        = cms.untracked.string('CA8PFCombinedCvsLJetTagsPuppi'),
+    cvbcTagName        = cms.untracked.string('CA8PFCombinedCvsBJetTagsPuppi'),
     csvBTagSubJetName  = cms.untracked.string('CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi'),
     csvDoubleBTagName  = cms.untracked.string('CA8PFBoostedDoubleSecondaryVertexBJetTagsPuppi'),
     jettiness          = cms.untracked.string('CA8NjettinessPuppi'),
@@ -457,6 +493,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     softdropJetName    = cms.untracked.string('CA15caPFJetsSoftDropCHS'),
     subJetName         = cms.untracked.string('CA15caPFJetsSoftDropCHS'),
     csvBTagName        = cms.untracked.string('CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS'),
+    mvaBTagName        = cms.untracked.string('CA15PFCombinedMVAV2BJetTagsCHS'),
+    cvlcTagName        = cms.untracked.string('CA15PFCombinedCvsLJetTagsCHS'),
+    cvbcTagName        = cms.untracked.string('CA15PFCombinedCvsBJetTagsCHS'),
     csvBTagSubJetName  = cms.untracked.string('CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS'),
     csvDoubleBTagName  = cms.untracked.string('CA15PFBoostedDoubleSecondaryVertexBJetTagsCHS'),
     jettiness          = cms.untracked.string('CA15NjettinessCHS'),
@@ -489,6 +528,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     softdropJetName    = cms.untracked.string('CA15caPFJetsSoftDropPuppi'),
     subJetName         = cms.untracked.string('CA15caPFJetsSoftDropPuppi'),
     csvBTagName        = cms.untracked.string('CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsPuppi'),
+    mvaBTagName        = cms.untracked.string('CA15PFCombinedMVAV2BJetTagsPuppi'),
+    cvlcTagName        = cms.untracked.string('CA15PFCombinedCvsLJetTagsPuppi'),
+    cvbcTagName        = cms.untracked.string('CA15PFCombinedCvsBJetTagsPuppi'),
     csvBTagSubJetName  = cms.untracked.string('CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi'),
     csvDoubleBTagName  = cms.untracked.string('CA15PFBoostedDoubleSecondaryVertexBJetTagsPuppi'),
     jettiness          = cms.untracked.string('CA15NjettinessPuppi'),
@@ -505,8 +547,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   )
 )
 
-process.baconSequence = cms.Sequence(process.metFilters*
-                                     process.photonIDValueMapProducer *
+process.baconSequence = cms.Sequence(#process.photonIDValueMapProducer *
                                      process.ak4L1FastL2L3ResidualChain*
                                      process.QGTagger                 *
                                      process.ak4PFJets                *
@@ -521,14 +562,13 @@ process.baconSequence = cms.Sequence(process.metFilters*
                                      process.slimmedMuonsTight        * 
                                      process.slimmedTausLoose         * 
                                      process.slimmedElectronsTight    * 
-                                     process.pfMVAMEtSequenceNoLep    *
+                                     #process.pfMVAMEtSequenceNoLep    *
                                      process.pfCandNoLep              *
                                      process.pfCandLep                *
                                      process.pfNoPileUpJME            *
                                      process.puppi                    *
                                      process.puppinolep               *
                                      process.puppiPhoton              *
-                                     #process.ak4PuppiL1FastL2L3ResidualChain*
                                      #process.alpacaSequenceData       * 
                                      process.puppiForMET              *
                                      process.pfMetPuppi               *
@@ -543,6 +583,7 @@ process.baconSequence = cms.Sequence(process.metFilters*
                                      process.CA15jetsequenceCHSData   *
                                      process.CA8jetsequencePuppiData  *
                                      process.CA15jetsequencePuppiData *
+                                     process.btagging                 *
                                      process.ntupler)
 
 #--------------------------------------------------------------------------------

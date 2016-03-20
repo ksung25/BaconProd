@@ -141,6 +141,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fPFParArr          (0),
   fRHParArr          (0)
 {
+  fUseTrigger          = iConfig.getUntrackedParameter<bool>("useTrigger",true);
   fTokGenRunInfo       = consumes<GenRunInfoProduct>(edm::InputTag(fGenRunInfoName)); 
   fTokTrgRes           = consumes<edm::TriggerResults>(edm::InputTag(fHLTTag)); 
   fTokTrgEvt           = consumes<trigger::TriggerEvent>(edm::InputTag(fHLTTag)); 
@@ -162,7 +163,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   baconhep::TRHPart::Class()->IgnoreTObjectStreamer();
 
   // trigger object information
-  if(iConfig.existsAs<std::string>("TriggerFile",false)) {
+  if(iConfig.existsAs<std::string>("TriggerFile",false) && fUseTrigger) {
     fUseTrigger = true;
     if(fUseAOD) {
       fHLTObjTag = edm::InputTag("hltTriggerSummaryAOD","","HLT");
@@ -587,7 +588,7 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
       if(fUseAODJet) { fFillerJet->fill(fJetArr, fAddJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
       else           { fFillerJet->fill(fJetArr, fAddJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     } else {
-      if(fUseAODJet) { fFillerJet->fill(fJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, &(*hTrgEvt) ,hTrgObjsDummy);  }
+      if(fUseAODJet) { fFillerJet->fill(fJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
       else           { fFillerJet->fill(fJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     }
   }

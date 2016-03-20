@@ -87,6 +87,9 @@ namespace baconhep
       std::string fTrimmedJetName;
       std::string fSoftDropJetName;
       std::string fSubJetName;
+      std::string fCVLctagName;
+      std::string fCVBctagName;
+      std::string fMVAbtagName;
       std::string fCSVbtagName;
       std::string fCSVbtagSubJetName;
       std::string fCSVDoubleBtagName;
@@ -118,6 +121,9 @@ namespace baconhep
     edm::EDGetTokenT<reco::JetFlavourInfoMatchingCollection> fTokJetFlavorName;
     edm::EDGetTokenT<reco::VertexCollection> fTokPVName;
     edm::EDGetTokenT<reco::JetTagCollection> fTokCSVbtagName;
+    edm::EDGetTokenT<reco::JetTagCollection> fTokMVAbtagName;
+    edm::EDGetTokenT<reco::JetTagCollection> fTokCVBctagName;
+    edm::EDGetTokenT<reco::JetTagCollection> fTokCVLctagName;
     edm::EDGetTokenT<reco::BasicJetCollection> fTokPrunedJetName;
     edm::EDGetTokenT<reco::BasicJetCollection> fTokTrimmedJetName;
     edm::EDGetTokenT<reco::BasicJetCollection> fTokSoftDropJetName;

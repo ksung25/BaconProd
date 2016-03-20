@@ -63,36 +63,6 @@ CA8caPFJetsSoftDropPuppi = CA8PFJetsPuppi.clone(
     jetCollInstanceName = cms.string("SubJets")
   )
 
-# b-tagging
-from RecoBTag.Configuration.RecoBTag_cff import *
-CA8PFImpactParameterTagInfosPuppi = pfImpactParameterTagInfos.clone(
-    jets      = cms.InputTag('CA8PFJetsPuppi'),
-    maxDeltaR = cms.double(0.8)
-  )
-CA8PFInclusiveSecondaryVertexFinderTagInfosPuppi = pfInclusiveSecondaryVertexFinderTagInfos.clone(
-    trackIPTagInfos = cms.InputTag("CA8PFImpactParameterTagInfosPuppi")
-  )
-CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsPuppi = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-    tagInfos = cms.VInputTag( cms.InputTag("CA8PFImpactParameterTagInfosPuppi"), cms.InputTag("CA8PFInclusiveSecondaryVertexFinderTagInfosPuppi") )
-  )
-
-# subjet b-tagging
-CA8PFImpactParameterTagInfosSJPuppi = pfImpactParameterTagInfos.clone(
-    jets      = cms.InputTag('CA8caPFJetsSoftDropPuppi','SubJets'),
-    maxDeltaR = cms.double(0.8)
-  )
-CA8PFInclusiveSecondaryVertexFinderTagInfosSJPuppi = pfInclusiveSecondaryVertexFinderTagInfos.clone(
-    trackIPTagInfos = cms.InputTag("CA8PFImpactParameterTagInfosSJPuppi")
-  )
-CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-    tagInfos = cms.VInputTag( cms.InputTag("CA8PFImpactParameterTagInfosSJPuppi"), cms.InputTag("CA8PFInclusiveSecondaryVertexFinderTagInfosSJPuppi") )
-  )
-#double b-tagging
-CA8PFBoostedDoubleSecondaryVertexBJetTagsPuppi = pfBoostedDoubleSecondaryVertexAK8BJetTags.clone(
-     tagInfos = cms.VInputTag(cms.InputTag("CA8PFImpactParameterTagInfosPuppi"), cms.InputTag("CA8PFInclusiveSecondaryVertexFinderTagInfosPuppi") )
-)
-
-
 # q/g discriminator
 # Note: need to provide JECs (or corrected jet collection) to QGL calculator
 #from JetMETCorrections.Configuration.JetCorrectorsAllAlgos_cff import *
@@ -129,13 +99,6 @@ CA8jetsequencePuppi = cms.Sequence(
     CA8caPFJetsPrunedPuppi*
     CA8caPFJetsTrimmedPuppi*
     CA8caPFJetsSoftDropPuppi*
-    CA8PFImpactParameterTagInfosPuppi*
-    CA8PFInclusiveSecondaryVertexFinderTagInfosPuppi*
-    CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsPuppi*
-    CA8PFImpactParameterTagInfosSJPuppi*
-    CA8PFInclusiveSecondaryVertexFinderTagInfosSJPuppi*
-    CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi*
-    CA8PFBoostedDoubleSecondaryVertexBJetTagsPuppi*
     ak8PuppiL1FastL2L3Chain*
     CA8QGTaggerPuppi*
     CA8QGTaggerSubJetsPuppi*                
@@ -148,13 +111,6 @@ CA8jetsequencePuppiData = cms.Sequence(
     CA8caPFJetsPrunedPuppi*
     CA8caPFJetsTrimmedPuppi*
     CA8caPFJetsSoftDropPuppi*
-    CA8PFImpactParameterTagInfosPuppi*
-    CA8PFInclusiveSecondaryVertexFinderTagInfosPuppi*
-    CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsPuppi*
-    CA8PFImpactParameterTagInfosSJPuppi*
-    CA8PFInclusiveSecondaryVertexFinderTagInfosSJPuppi*
-    CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi*
-    CA8PFBoostedDoubleSecondaryVertexBJetTagsPuppi*
     ak8PuppiL1FastL2L3ResidualChain*
     #ak8PuppiL1FastL2L3Chain*
     CA8QGTaggerPuppi*

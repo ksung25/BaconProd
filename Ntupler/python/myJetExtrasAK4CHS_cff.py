@@ -62,35 +62,6 @@ AK4caPFJetsSoftDropCHS = AK4PFJetsCHS.clone(
     jetCollInstanceName = cms.string("SubJets")
   )
 
-# b-tagging
-from RecoBTag.Configuration.RecoBTag_cff import *
-AK4PFImpactParameterTagInfosCHS = pfImpactParameterTagInfos.clone(
-    jets      = cms.InputTag('ak4PFJetsCHS'),
-    maxDeltaR = cms.double(0.4)
-  )
-AK4PFInclusiveSecondaryVertexFinderTagInfosCHS = pfInclusiveSecondaryVertexFinderTagInfos.clone(
-    trackIPTagInfos = cms.InputTag("AK4PFImpactParameterTagInfosCHS")
-  )
-AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-    tagInfos = cms.VInputTag( cms.InputTag("AK4PFImpactParameterTagInfosCHS"), cms.InputTag("AK4PFInclusiveSecondaryVertexFinderTagInfosCHS") )
-  )
-
-# subjet b-tagging
-AK4PFImpactParameterTagInfosSJCHS = pfImpactParameterTagInfos.clone(
-    jets      = cms.InputTag('AK4caPFJetsSoftDropCHS','SubJets'),
-    maxDeltaR = cms.double(0.4)
-  )
-AK4PFInclusiveSecondaryVertexFinderTagInfosSJCHS = pfInclusiveSecondaryVertexFinderTagInfos.clone(
-    trackIPTagInfos = cms.InputTag("AK4PFImpactParameterTagInfosSJCHS")
-  )
-AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-    tagInfos = cms.VInputTag( cms.InputTag("AK4PFImpactParameterTagInfosSJCHS"), cms.InputTag("AK4PFInclusiveSecondaryVertexFinderTagInfosSJCHS") )
-  )
-#double b-tagging
-AK4PFBoostedDoubleSecondaryVertexBJetTagsCHS = pfBoostedDoubleSecondaryVertexAK8BJetTags.clone(
-     tagInfos = cms.VInputTag(cms.InputTag("AK4PFImpactParameterTagInfosCHS"), cms.InputTag("AK4PFInclusiveSecondaryVertexFinderTagInfosCHS") )
-)
-
 # q/g discriminator
 # Note: need to provide JECs (or corrected jet collection) to QGL calculator
 from JetMETCorrections.Configuration.JetCorrectors_cff import *
@@ -123,10 +94,10 @@ AK4genjetsequenceCHS = cms.Sequence(
 )
 
 AK4jetsequenceCHS = cms.Sequence(
-#    AK4PFJetsCHS*   ### no need to run, already in AOD
-#    AK4caPFJetsPrunedCHS*
-#    AK4caPFJetsTrimmedCHS*
-#    AK4caPFJetsSoftDropCHS*
+    AK4PFJetsCHS*   ### no need to run, already in AOD
+    AK4caPFJetsPrunedCHS*
+    AK4caPFJetsTrimmedCHS*
+    AK4caPFJetsSoftDropCHS*
 #    AK4PFImpactParameterTagInfosCHS*                     ### no need to run, already in AOD
 #    AK4PFInclusiveSecondaryVertexFinderTagInfosCHS*      ###
 #    AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS*  ###
@@ -135,9 +106,9 @@ AK4jetsequenceCHS = cms.Sequence(
 #    AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS*
     AK4FlavorCHS*
     ak4PFCHSL1FastL2L3CorrectorChain*
-    AK4QGTaggerCHS#*
-#    AK4QGTaggerSubJetsCHS*                
-#    AK4NjettinessCHS
+    AK4QGTaggerCHS*
+    AK4QGTaggerSubJetsCHS*                
+    AK4NjettinessCHS
   )
 
 AK4jetsequenceCHSData = cms.Sequence(

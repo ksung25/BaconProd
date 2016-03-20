@@ -7,7 +7,7 @@ eos='/afs/cern.ch/project/eos/installation/cms/bin/eos.select'
 
 aparser = argparse.ArgumentParser()
 aparser.add_argument('-dir'   ,'--dir'      ,nargs='+',type=str,default='crap')
-aparser.add_argument('-base'  ,'--base'     ,nargs='+',type=str,default=['06'])
+aparser.add_argument('-base'  ,'--base'     ,nargs='+',type=str,default=['08'])
 aparser.add_argument('-mod'   ,'--mod'       ,nargs='+',type=str,default=[50])
 
 args = aparser.parse_args()

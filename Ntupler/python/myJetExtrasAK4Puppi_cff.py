@@ -63,36 +63,6 @@ AK4caPFJetsSoftDropPuppi = AK4PFJetsPuppi.clone(
     jetCollInstanceName = cms.string("SubJets")
   )
 
-# b-tagging
-from RecoBTag.Configuration.RecoBTag_cff import *
-AK4PFImpactParameterTagInfosPuppi = pfImpactParameterTagInfos.clone(
-    jets      = cms.InputTag('AK4PFJetsPuppi'),
-    maxDeltaR = cms.double(0.4)
-  )
-AK4PFInclusiveSecondaryVertexFinderTagInfosPuppi = pfInclusiveSecondaryVertexFinderTagInfos.clone(
-    trackIPTagInfos = cms.InputTag("AK4PFImpactParameterTagInfosPuppi")
-  )
-AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsPuppi = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-    tagInfos = cms.VInputTag( cms.InputTag("AK4PFImpactParameterTagInfosPuppi"), cms.InputTag("AK4PFInclusiveSecondaryVertexFinderTagInfosPuppi") )
-  )
-
-# subjet b-tagging
-AK4PFImpactParameterTagInfosSJPuppi = pfImpactParameterTagInfos.clone(
-    jets      = cms.InputTag('AK4caPFJetsSoftDropPuppi','SubJets'),
-    maxDeltaR = cms.double(0.4)
-  )
-AK4PFInclusiveSecondaryVertexFinderTagInfosSJPuppi = pfInclusiveSecondaryVertexFinderTagInfos.clone(
-    trackIPTagInfos = cms.InputTag("AK4PFImpactParameterTagInfosSJPuppi")
-  )
-AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-    tagInfos = cms.VInputTag( cms.InputTag("AK4PFImpactParameterTagInfosSJPuppi"), cms.InputTag("AK4PFInclusiveSecondaryVertexFinderTagInfosSJPuppi") )
-  )
-#double b-tagging
-AK4PFBoostedDoubleSecondaryVertexBJetTagsPuppi = pfBoostedDoubleSecondaryVertexAK8BJetTags.clone(
-     tagInfos = cms.VInputTag(cms.InputTag("AK4PFImpactParameterTagInfosPuppi"), cms.InputTag("AK4PFInclusiveSecondaryVertexFinderTagInfosPuppi") )
-)
-
-
 # q/g discriminator
 # Note: need to provide JECs (or corrected jet collection) to QGL calculator
 from BaconProd.Ntupler.myPUPPICorrections_cff                  import *
@@ -128,13 +98,6 @@ AK4jetsequencePuppi = cms.Sequence(
     AK4caPFJetsPrunedPuppi*
     AK4caPFJetsTrimmedPuppi*
     AK4caPFJetsSoftDropPuppi*
-    AK4PFImpactParameterTagInfosPuppi*                    
-    AK4PFInclusiveSecondaryVertexFinderTagInfosPuppi*     
-    AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsPuppi* 
-    AK4PFImpactParameterTagInfosSJPuppi*
-    AK4PFInclusiveSecondaryVertexFinderTagInfosSJPuppi*
-    AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi*
-    AK4PFBoostedDoubleSecondaryVertexBJetTagsPuppi*
     ak4PuppiL1FastL2L3Chain* #   => using type 1 Met
     AK4QGTaggerPuppi*
     AK4QGTaggerSubJetsPuppi*                
@@ -147,13 +110,6 @@ AK4jetsequencePuppiData = cms.Sequence(
     AK4caPFJetsPrunedPuppi*
     AK4caPFJetsTrimmedPuppi*
     AK4caPFJetsSoftDropPuppi*
-    AK4PFImpactParameterTagInfosPuppi*                    
-    AK4PFInclusiveSecondaryVertexFinderTagInfosPuppi*     
-    AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsPuppi* 
-    AK4PFImpactParameterTagInfosSJPuppi*
-    AK4PFInclusiveSecondaryVertexFinderTagInfosSJPuppi*
-    AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi*
-    AK4PFBoostedDoubleSecondaryVertexBJetTagsPuppi*
     ak4PuppiL1FastL2L3ResidualChain* #   => using type 1 Met
     #ak4PuppiL1FastL2L3Chain* #   => using type 1 Met
     AK4QGTaggerPuppi*

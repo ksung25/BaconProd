@@ -64,35 +64,6 @@ CA8caPFJetsSoftDropCHS = CA8PFJetsCHS.clone(
     jetCollInstanceName = cms.string("SubJets")
   )
 
-# b-tagging
-from RecoBTag.Configuration.RecoBTag_cff import *
-CA8PFImpactParameterTagInfosCHS = pfImpactParameterTagInfos.clone(
-    jets      = cms.InputTag('CA8PFJetsCHS'),
-    maxDeltaR = cms.double(0.8)
-  )
-CA8PFInclusiveSecondaryVertexFinderTagInfosCHS = pfInclusiveSecondaryVertexFinderTagInfos.clone(
-    trackIPTagInfos = cms.InputTag("CA8PFImpactParameterTagInfosCHS")
-  )
-CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-    tagInfos = cms.VInputTag( cms.InputTag("CA8PFImpactParameterTagInfosCHS"), cms.InputTag("CA8PFInclusiveSecondaryVertexFinderTagInfosCHS") )
-  )
-
-# subjet b-tagging
-CA8PFImpactParameterTagInfosSJCHS = pfImpactParameterTagInfos.clone(
-    jets      = cms.InputTag('CA8caPFJetsSoftDropCHS','SubJets'),
-    maxDeltaR = cms.double(0.8)
-  )
-CA8PFInclusiveSecondaryVertexFinderTagInfosSJCHS = pfInclusiveSecondaryVertexFinderTagInfos.clone(
-    trackIPTagInfos = cms.InputTag("CA8PFImpactParameterTagInfosSJCHS")
-  )
-CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS = pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-    tagInfos = cms.VInputTag( cms.InputTag("CA8PFImpactParameterTagInfosSJCHS"), cms.InputTag("CA8PFInclusiveSecondaryVertexFinderTagInfosSJCHS") )
-  )
-#double b-tagging
-CA8PFBoostedDoubleSecondaryVertexBJetTagsCHS = pfBoostedDoubleSecondaryVertexAK8BJetTags.clone(
-     tagInfos = cms.VInputTag(cms.InputTag("CA8PFImpactParameterTagInfosCHS"), cms.InputTag("CA8PFInclusiveSecondaryVertexFinderTagInfosCHS") )
-)
-
 # q/g discriminator
 # Note: need to provide JECs (or corrected jet collection) to QGL calculator
 from JetMETCorrections.Configuration.JetCorrectorsAllAlgos_cff import *
@@ -134,8 +105,8 @@ CA8NjettinessCHS = Njettiness.clone(
 # Define sequences
 #
 CA8genjetsequenceCHS = cms.Sequence(
-  CA8GenJetsCHS*
-  CA8FlavorCHS
+  CA8GenJetsCHS
+  #CA8FlavorCHS
 )
 
 CA8jetsequenceCHS = cms.Sequence(
@@ -143,13 +114,6 @@ CA8jetsequenceCHS = cms.Sequence(
     CA8caPFJetsPrunedCHS*
     CA8caPFJetsTrimmedCHS*
     CA8caPFJetsSoftDropCHS*
-    CA8PFImpactParameterTagInfosCHS*
-    CA8PFInclusiveSecondaryVertexFinderTagInfosCHS*
-    CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS*
-    CA8PFImpactParameterTagInfosSJCHS*
-    CA8PFInclusiveSecondaryVertexFinderTagInfosSJCHS*
-    CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS*
-    CA8PFBoostedDoubleSecondaryVertexBJetTagsCHS*
     ca8PFCHSL1FastL2L3CorrectorChain*
     CA8QGTaggerCHS*
     CA8QGTaggerSubJetsCHS*                
@@ -163,13 +127,6 @@ CA8jetsequenceCHSData = cms.Sequence(
     CA8caPFJetsPrunedCHS*
     CA8caPFJetsTrimmedCHS*
     CA8caPFJetsSoftDropCHS*
-    CA8PFImpactParameterTagInfosCHS*
-    CA8PFInclusiveSecondaryVertexFinderTagInfosCHS*
-    CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsCHS*
-    CA8PFImpactParameterTagInfosSJCHS*
-    CA8PFInclusiveSecondaryVertexFinderTagInfosSJCHS*
-    CA8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS*
-    CA8PFBoostedDoubleSecondaryVertexBJetTagsCHS*
     ca8PFCHSL1FastL2L3ResidualCorrectorChain*
     CA8QGTaggerCHS*
     CA8QGTaggerSubJetsCHS*
