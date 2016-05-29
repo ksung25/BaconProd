@@ -17,7 +17,7 @@ siteHandling = {
    }
 
 
-def makeCaFiles(dir,njobs=-1,jobid=0,nf=[0],maxfiles=-1,site="cern.ch"):
+def makeCaFiles(dir,blist,njobs=-1,jobid=0,nf=[0],maxfiles=-1,site="cern.ch"):
 
    dir = str(dir)
    return_files = []
@@ -66,7 +66,12 @@ def makeCaFiles(dir,njobs=-1,jobid=0,nf=[0],maxfiles=-1,site="cern.ch"):
    if not sc:
       ifile = 0
       for f in files:
-         if '.root' in f:
+      	 blacklisted = False
+         for B in blist: 
+	   if B in f:
+	     blacklisted = True
+	     break
+         if '.root' in f and not blacklisted:
             if( maxfiles > 0 and ifile >= maxfiles):
                break
             ifile += 1
@@ -92,7 +97,7 @@ def makeCaFiles(dir,njobs=-1,jobid=0,nf=[0],maxfiles=-1,site="cern.ch"):
    return return_files
 
 
-def makeDcFiles(dir,njobs=-1,jobid=0,nf=[0],maxfiles=-1):
+def makeDcFiles(dir,blist,njobs=-1,jobid=0,nf=[0],maxfiles=-1):
 
    dcache_prepend = 'root://xrootd.grid.hep.ph.ic.ac.uk/'
    dir = str(dir)
@@ -106,7 +111,12 @@ def makeDcFiles(dir,njobs=-1,jobid=0,nf=[0],maxfiles=-1):
          if len(f) < 1: continue
          f = (f.split()[-1]).split('/')[-1]
          ifile = 0
-         if '.root' in f:
+      	 blacklisted = False
+         for B in blist: 
+	   if B in f:
+	     blacklisted = True
+	     break
+         if '.root' in f and not blacklisted:
             if( maxfiles > 0 and ifile >= maxfiles):
                break
             ifile += 1
@@ -136,7 +146,7 @@ def unmounteos(dir):
 def makeEosFiles(dir,njobs=-1,jobid=0,nf=[0]):
    sys.exit("makeEosFiles not supported anymore")
    
-def makeFiles(dir,njobs=-1,jobid=0,nf=[0],maxfiles=-1):
+def makeFiles(dir,blist,njobs=-1,jobid=0,nf=[0],maxfiles=-1):
 
    dir = str(dir)
    return_files = []
@@ -145,7 +155,12 @@ def makeFiles(dir,njobs=-1,jobid=0,nf=[0],maxfiles=-1):
       files = os.listdir(dir)
       for f in files:
          ifile = 0
-         if '.root' in f:
+      	 blacklisted = False
+         for B in blist: 
+	   if B in f:
+	     blacklisted = True
+	     break
+         if '.root' in f and not blacklisted:
             if( maxfiles > 0 and ifile >= maxfiles):
                break
             ifile += 1

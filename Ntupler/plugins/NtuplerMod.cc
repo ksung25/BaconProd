@@ -142,7 +142,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fRHParArr          (0)
 {
   fUseTrigger          = iConfig.getUntrackedParameter<bool>("useTrigger",true);
-  fTokGenRunInfo       = consumes<GenRunInfoProduct>(edm::InputTag(fGenRunInfoName)); 
+  fTokGenRunInfo       = consumes<GenRunInfoProduct,edm::InRun>(edm::InputTag(fGenRunInfoName)); 
   fTokTrgRes           = consumes<edm::TriggerResults>(edm::InputTag(fHLTTag)); 
   fTokTrgEvt           = consumes<trigger::TriggerEvent>(edm::InputTag(fHLTTag)); 
   fTokTrgObj           = consumes<pat::TriggerObjectStandAloneCollection>(edm::InputTag(fHLTObjTag)); 
@@ -312,8 +312,8 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
     }
   }
 
-  if(iConfig.existsAs<edm::ParameterSet>("CA8Puppi",false)) {
-    edm::ParameterSet cfg(iConfig.getUntrackedParameter<edm::ParameterSet>("CA8Puppi"));
+  if(iConfig.existsAs<edm::ParameterSet>("AK8Puppi",false)) {
+    edm::ParameterSet cfg(iConfig.getUntrackedParameter<edm::ParameterSet>("AK8Puppi"));
     fIsActiveFatPuppiJet = cfg.getUntrackedParameter<bool>("isActive");
     fUseAODFatPuppiJet   = cfg.getUntrackedParameter<bool>("useAOD");
     fComputeFullFatPuppiJetInfo = cfg.getUntrackedParameter<bool>("doComputeFullJetInfo");
@@ -463,8 +463,8 @@ void NtuplerMod::beginJob()
     if(fComputeFullPuppiJetInfo) { fEventTree->Branch("AddAK4Puppi", &fAddPuppiJetArr); }
   }
   if(fIsActiveFatPuppiJet) {
-    fEventTree->Branch("CA8Puppi", &fFatPuppiJetArr);
-    if(fComputeFullFatPuppiJetInfo) { fEventTree->Branch("AddCA8Puppi", &fAddFatPuppiJetArr); }
+    fEventTree->Branch("AK8Puppi", &fFatPuppiJetArr);
+    if(fComputeFullFatPuppiJetInfo) { fEventTree->Branch("AddAK8Puppi", &fAddFatPuppiJetArr); }
   }
   if(fIsActiveFatterPuppiJet) {
     fEventTree->Branch("CA15Puppi", &fFatterPuppiJetArr);
@@ -486,6 +486,11 @@ void NtuplerMod::endJob()
   fOutputFile->cd();
   fTotalEvents->Write();
   fOutputFile->Write();
+  TTree *xs = new TTree("xs","xs");
+  double lXS = double(fXS);
+  xs->Branch("xs",&lXS,"lXS/D");
+  xs->Fill();
+  xs->Write();
   fOutputFile->Close();
 }
 
@@ -689,15 +694,6 @@ void NtuplerMod::initHLT(const edm::TriggerResults& result, const edm::TriggerNa
 //--------------------------------------------------------------------------------------------------
 void NtuplerMod::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
-  /*
-  if(fIsActiveGenInfo) { 
-    // Get generator event information
-    edm::Handle<GenRunInfoProduct> hGenRunInfoProduct;
-    iRun.getByToken(fTokGenRunInfo,hGenRunInfoProduct);
-    assert(hGenRunInfoProduct.isValid());
-    fXS = float(hGenRunInfoProduct->crossSection());
-  }
-  */
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -708,7 +704,17 @@ void NtuplerMod::fillDescriptions(edm::ConfigurationDescriptions& descriptions) 
   desc.setUnknown();
   descriptions.addDefault(desc);
 }
-void NtuplerMod::endRun  (const edm::Run& iRun, const edm::EventSetup& iSetup){}
+void NtuplerMod::endRun  (const edm::Run& iRun, const edm::EventSetup& iSetup){
+  if(fIsActiveGenInfo) { 
+    // Get generator event information
+    edm::Handle<GenRunInfoProduct> hGenRunInfoProduct;
+    iRun.getByToken(fTokGenRunInfo,hGenRunInfoProduct);
+    assert(hGenRunInfoProduct.isValid());
+    fXS = float(hGenRunInfoProduct->crossSection());
+    std::cout << "===> cross section => " << fXS << " -- " << hGenRunInfoProduct->externalXSecLO().value() << " -- " << hGenRunInfoProduct->externalXSecNLO().value()  << " -- " << hGenRunInfoProduct->filterEfficiency()  << std::endl;
+  }
+
+}
 void NtuplerMod::beginLuminosityBlock(const edm::LuminosityBlock& iLumi, const edm::EventSetup& iSetup){}
 void NtuplerMod::endLuminosityBlock  (const edm::LuminosityBlock& iLumi, const edm::EventSetup& iSetup){}
 

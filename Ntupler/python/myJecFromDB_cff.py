@@ -6,18 +6,23 @@ def setupJEC(process,isData) :
     label='MC'
     if isData:
         label='DATA'
+    process.puppijec =  cms.ESSource("PoolDBESSource",
+                                     CondDBSetup,
+                                     toGet = cms.VPSet(
+            cms.PSet(record  = cms.string('JetCorrectionsRecord'),
+                     tag     = cms.string('JetCorrectorParametersCollection_Fall15_25nsV2_'+label+'_AK4PFPuppi'),
+                     label   = cms.untracked.string('AK4Puppi')
+                     ),
+            cms.PSet(record  = cms.string('JetCorrectionsRecord'),
+                                    tag     = cms.string('JetCorrectorParametersCollection_Fall15_25nsV2_'+label+'_AK8PFPuppi'),
+                     label   = cms.untracked.string('AK8Puppi')
+                     ),
+            ), 
+                                     )
     process.jec =  cms.ESSource("PoolDBESSource",
                                 CondDBSetup,
                                 toGet = cms.VPSet(
-                          cms.PSet(record  = cms.string('JetCorrectionsRecord'),
-                                   tag     = cms.string('JetCorrectorParametersCollection_Fall15_25nsV2_'+label+'_AK4PFPuppi'),
-                                   label   = cms.untracked.string('AK4Puppi')
-                                   ),
-                           cms.PSet(record  = cms.string('JetCorrectionsRecord'),
-                                    tag     = cms.string('JetCorrectorParametersCollection_Fall15_25nsV2_'+label+'_AK8PFPuppi'),
-                                    label   = cms.untracked.string('AK8Puppi')
-                                    ),
-                          cms.PSet(record  = cms.string('JetCorrectionsRecord'),
+                            cms.PSet(record  = cms.string('JetCorrectionsRecord'),
                                    tag     = cms.string('JetCorrectorParametersCollection_Fall15_25nsV2_'+label+'_AK4PFchs'),
                                    label   = cms.untracked.string('AK4chs')
                                    ),
