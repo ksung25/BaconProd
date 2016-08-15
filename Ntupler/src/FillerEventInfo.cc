@@ -81,7 +81,6 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
   evtInfo->runNum  = iEvent.id().run();
   evtInfo->lumiSec = iEvent.luminosityBlock();
   evtInfo->evtNum  = iEvent.id().event();
-  
   //
   // Pile-up info
   //==============================
