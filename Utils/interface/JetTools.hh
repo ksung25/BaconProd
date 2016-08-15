@@ -8,7 +8,9 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/Common/interface/ValueMap.h"
+
 #include "fastjet/PseudoJet.hh"
+#include "fastjet/contrib/EnergyCorrelator.hh"
 #include "TLorentzVector.h"
 #include <TVector2.h>
 
@@ -84,6 +86,12 @@ namespace baconhep {
       // Compute input variables to q/g likelihood
       static void calcQGLVars(const reco::PFJet &jet, float &out_axis2, float &out_ptD, int &out_mult);
       static void calcQGLVars(const pat::Jet    &jet, float &out_axis2, float &out_ptD, int &out_mult);
+      
+      // Compute the inputs to the correlation functions 
+      static double angle_squared(const fastjet::PseudoJet& jet1, const fastjet::PseudoJet& jet2);
+      static double e2_func(double beta, fastjet::contrib::EnergyCorrelator::Measure measurelist, fastjet::PseudoJet myjet );
+      static double e3_func(double beta, fastjet::contrib::EnergyCorrelator::Measure measurelist, fastjet::PseudoJet myjet );
+      static double e3_vn_func(unsigned int n, double beta,fastjet::contrib::EnergyCorrelator::Measure measurelist, fastjet::PseudoJet myjet );
   };
 }
 #endif

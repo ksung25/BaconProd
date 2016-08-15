@@ -1132,3 +1132,46 @@ void JetTools::calcQGLVars(const pat::Jet &jet, float &out_axis2, float &out_ptD
   out_ptD   = ptD;
   out_mult  = mult;
 }
+
+double JetTools::angle_squared(const fastjet::PseudoJet& jet1, const fastjet::PseudoJet& jet2)  {
+  return jet1.squared_distance(jet2);
+}
+double JetTools::e2_func(double beta, fastjet::contrib::EnergyCorrelator::Measure measurelist, fastjet::PseudoJet myjet ){
+  fastjet::contrib::EnergyCorrelator ECF1(1,beta,measurelist);
+  fastjet::contrib::EnergyCorrelator ECF2(2,beta,measurelist);
+  double temp = ECF2(myjet)/(pow(ECF1(myjet),2));
+  return temp;
+}
+
+double JetTools::e3_func(double beta, fastjet::contrib::EnergyCorrelator::Measure measurelist, fastjet::PseudoJet myjet ){
+  fastjet::contrib::EnergyCorrelator ECF1(1,beta,measurelist);
+  fastjet::contrib::EnergyCorrelator ECF3(3,beta,measurelist);
+  double temp =  ECF3(myjet)/(pow(ECF1(myjet),3));
+  return temp;
+}
+double JetTools::e3_vn_func(unsigned int n, double beta,fastjet::contrib::EnergyCorrelator::Measure measurelist, fastjet::PseudoJet myjet ) {
+  // n is the number of angles here used in the function, so 1 for 1e3, 2 for 2e3 and 3 for the usual e3.
+  int N_total = 3;
+  double temp = 0.0;
+  double angle1, angle2, angle3;
+  fastjet::contrib::EnergyCorrelator ECF1(1,beta,measurelist);
+  double EJ = ECF1(myjet);
+  vector<fastjet::PseudoJet> jet_consts = myjet.constituents();
+  for (unsigned int i = 0; i< jet_consts.size(); i++){
+    for (unsigned int j = i + 1; j < jet_consts.size(); j++){
+      for (unsigned int k = j + 1; k < jet_consts.size(); k++) {
+	angle1 = pow(angle_squared(jet_consts[i], jet_consts[j]), beta/2.);
+	angle2 = pow(angle_squared(jet_consts[i], jet_consts[k]), beta/2.);
+	angle3 = pow(angle_squared(jet_consts[j], jet_consts[k]), beta/2.);
+	// Let's sort the angles first, then figure out what to multiply
+	double angle_list[] = {angle1, angle2, angle3};
+	std::vector<double> angle_vector (angle_list, angle_list+N_total);
+	std::sort (angle_vector.begin(), angle_vector.begin()+N_total);
+	double angle = 1.0;
+	for (unsigned int l=0 ; l<n; l++){angle = angle*angle_vector[l];}
+	temp += ( jet_consts[i].pt() / EJ) * ( jet_consts[j].pt() / EJ)*( jet_consts[k].pt() / EJ) * angle;
+      }
+    }
+  }
+  return temp;
+}

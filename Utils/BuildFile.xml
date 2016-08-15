@@ -6,6 +6,7 @@
 <use name="root"/>
 <use name="roottmva"/>
 <use name="fastjet"/>
+<use name="fastjet-contrib"/>
 <flags CXXFLAGS="-g -Wall"/>
 <export>
   <lib name="1"/>

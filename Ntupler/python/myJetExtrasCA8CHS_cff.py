@@ -97,7 +97,7 @@ CA8QGTaggerSubJetsCHS.jec       = cms.InputTag("ca8PFCHSL1FastL2L3Corrector") # 
 from RecoJets.JetProducers.nJettinessAdder_cfi import Njettiness
 CA8NjettinessCHS = Njettiness.clone(
     src   = cms.InputTag('CA8PFJetsCHS'),
-    cone  = cms.double(0.8),
+    R0    = cms.double(0.8),
     Njets = cms.vuint32(1,2,3,4)
   )
 

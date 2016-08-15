@@ -67,12 +67,18 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
                                           cms.InputTag(head+"PFInclusiveSecondaryVertexFinderTagInfosSJ"+tail) )
                 ))
      #double b-tagging
-        setattr(process, head+'PFBoostedDoubleSecondaryVertexBJetTags'+tail,
-                pfBoostedDoubleSecondaryVertexAK8BJetTags.clone(
-                tagInfos = cms.VInputTag(cms.InputTag(head+"PFImpactParameterTagInfos"+tail), 
-                                         cms.InputTag(head+"PFInclusiveSecondaryVertexFinderTagInfos"+tail) )
-                ))    
-
+        if cone < 1.0:
+            setattr(process, head+'PFBoostedDoubleSecondaryVertexBJetTags'+tail,
+                    pfBoostedDoubleSecondaryVertexAK8BJetTags.clone(
+                    tagInfos = cms.VInputTag(cms.InputTag(head+"PFImpactParameterTagInfos"+tail), 
+                                             cms.InputTag(head+"PFInclusiveSecondaryVertexFinderTagInfos"+tail) )
+                    ))    
+        else:
+            setattr(process, head+'PFBoostedDoubleSecondaryVertexBJetTags'+tail,
+                    pfBoostedDoubleSecondaryVertexCA15BJetTags.clone(
+                    tagInfos = cms.VInputTag(cms.InputTag(head+"PFImpactParameterTagInfos"+tail), 
+                                             cms.InputTag(head+"PFInclusiveSecondaryVertexFinderTagInfos"+tail) )
+                    ))    
     process.btagging *= getattr(process,head+'PFImpactParameterTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFSecondaryVertexTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFInclusiveSecondaryVertexFinderTagInfos'+tail)

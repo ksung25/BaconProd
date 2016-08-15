@@ -21,11 +21,11 @@ FillerTau::FillerTau(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByLooseElectronRejection",kByLooseElectronRejection));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMediumElectronRejection",kByMediumElectronRejection));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByTightElectronRejection",kByTightElectronRejection));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMVA5VLooseElectronRejection",kByMVA5VLooseElectronRejection));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMVA5LooseElectronRejection",kByMVA5LooseElectronRejection));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMVA5MediumElectronRejection",kByMVA5MediumElectronRejection));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMVA5TightElectronRejection",kByMVA5TightElectronRejection));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMVA5VTightElectronRejection",kByMVA5VTightElectronRejection));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMVA6VLooseElectronRejection",kByMVA6VLooseElectronRejection));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMVA6LooseElectronRejection",kByMVA6LooseElectronRejection));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMVA6MediumElectronRejection",kByMVA6MediumElectronRejection));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMVA6TightElectronRejection",kByMVA6TightElectronRejection));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMVA6VTightElectronRejection",kByMVA6VTightElectronRejection));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByLooseMuonRejection",kByLooseMuonRejection));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMediumMuonRejection",kByMediumMuonRejection));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByTightMuonRejection",kByTightMuonRejection));
@@ -43,6 +43,7 @@ FillerTau::FillerTau(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByLooseCombinedIsolationDBSumPtCorr3Hits",kByLooseCombinedIsolationDBSumPtCorr3Hits));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMediumCombinedIsolationDBSumPtCorr3Hits",kByMediumCombinedIsolationDBSumPtCorr3Hits));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByTightCombinedIsolationDBSumPtCorr3Hits",kByTightCombinedIsolationDBSumPtCorr3Hits));
+    /*
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByVLooseIsolationMVA3oldDMwoLT",kByVLooseIsolationMVA3oldDMwoLT));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByLooseIsolationMVA3oldDMwoLT",kByLooseIsolationMVA3oldDMwoLT));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByMediumIsolationMVA3oldDMwoLT",kByMediumIsolationMVA3oldDMwoLT));
@@ -67,16 +68,16 @@ FillerTau::FillerTau(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByTightIsolationMVA3newDMwLT",kByTightIsolationMVA3newDMwLT));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByVTightIsolationMVA3newDMwLT",kByVTightIsolationMVA3newDMwLT));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("hpsPFTauDiscriminationByVVTightIsolationMVA3newDMwLT",kByVVTightIsolationMVA3newDMwLT));
-
+    */
   } else {
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronLoose",kByLooseElectronRejection));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronMedium",kByMediumElectronRejection));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronTight",kByTightElectronRejection));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronVLooseMVA5",kByMVA5VLooseElectronRejection));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronLooseMVA5",kByMVA5LooseElectronRejection));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronMediumMVA5",kByMVA5MediumElectronRejection));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronTightMVA5",kByMVA5TightElectronRejection));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronVTightMVA5",kByMVA5VTightElectronRejection));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronVLooseMVA6",kByMVA6VLooseElectronRejection));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronLooseMVA6",kByMVA6LooseElectronRejection));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronMediumMVA6",kByMVA6MediumElectronRejection));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronTightMVA6",kByMVA6TightElectronRejection));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstElectronVTightMVA6",kByMVA6VTightElectronRejection));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstMuonLoose",kByLooseMuonRejection));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstMuonMedium",kByMediumMuonRejection));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("againstMuonTight",kByTightMuonRejection));
@@ -100,24 +101,24 @@ FillerTau::FillerTau(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byTightIsolationMVA3oldDMwoLT",kByTightIsolationMVA3oldDMwoLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVTightIsolationMVA3oldDMwoLT",kByVTightIsolationMVA3oldDMwoLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVVTightIsolationMVA3oldDMwoLT",kByVVTightIsolationMVA3oldDMwoLT));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVLooseIsolationMVA3oldDMwLT",kByVLooseIsolationMVA3oldDMwLT));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byLooseIsolationMVA3oldDMwLT",kByLooseIsolationMVA3oldDMwLT));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byMediumIsolationMVA3oldDMwLT",kByMediumIsolationMVA3oldDMwLT));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byTightIsolationMVA3oldDMwLT",kByTightIsolationMVA3oldDMwLT));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVTightIsolationMVA3oldDMwLT",kByVTightIsolationMVA3oldDMwLT));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVVTightIsolationMVA3oldDMwLT",kByVVTightIsolationMVA3oldDMwLT));
+    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVLooseIsolationMVA3oldDMwLT",kByVLooseIsolationMVA3oldDMwLT));
+    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byLooseIsolationMVA3oldDMwLT",kByLooseIsolationMVA3oldDMwLT));
+    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byMediumIsolationMVA3oldDMwLT",kByMediumIsolationMVA3oldDMwLT));
+    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byTightIsolationMVA3oldDMwLT",kByTightIsolationMVA3oldDMwLT));
+    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVTightIsolationMVA3oldDMwLT",kByVTightIsolationMVA3oldDMwLT));
+    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVVTightIsolationMVA3oldDMwLT",kByVVTightIsolationMVA3oldDMwLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVLooseIsolationMVA3newDMwoLT",kByVLooseIsolationMVA3newDMwoLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byLooseIsolationMVA3newDMwoLT",kByLooseIsolationMVA3newDMwoLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byMediumIsolationMVA3newDMwoLT",kByMediumIsolationMVA3newDMwoLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byTightIsolationMVA3newDMwoLT",kByTightIsolationMVA3newDMwoLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVTightIsolationMVA3newDMwoLT",kByVTightIsolationMVA3newDMwoLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVVTightIsolationMVA3newDMwoLT",kByVVTightIsolationMVA3newDMwoLT));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVLooseIsolationMVA3newDMwLT",kByVLooseIsolationMVA3newDMwLT));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byLooseIsolationMVA3newDMwLT",kByLooseIsolationMVA3newDMwLT));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byMediumIsolationMVA3newDMwLT",kByMediumIsolationMVA3newDMwLT));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byTightIsolationMVA3newDMwLT",kByTightIsolationMVA3newDMwLT));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVTightIsolationMVA3newDMwLT",kByVTightIsolationMVA3newDMwLT));
-    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVVTightIsolationMVA3newDMwLT",kByVVTightIsolationMVA3newDMwLT));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVLooseIsolationMVArun2v1DBnewDMwLT",kByVLooseIsolationMVA3newDMwLT));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byLooseIsolationMVArun2v1DBnewDMwLT",kByLooseIsolationMVA3newDMwLT));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byMediumIsolationMVArun2v1DBnewDMwLT",kByMediumIsolationMVA3newDMwLT));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byTightIsolationMVArun2v1DBnewDMwLT",kByTightIsolationMVA3newDMwLT));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVTightIsolationMVArun2v1DBnewDMwLT",kByVTightIsolationMVA3newDMwLT));
+    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVVTightIsolationMVA3newDMwLT",kByVVTightIsolationMVA3newDMwLT));
   }
   if(fUseAOD)  fTokTauName      = iC.consumes<reco::PFTauCollection>(fTauName);
   if(!fUseAOD) fTokPatTauName   = iC.consumes<pat::TauCollection>   (fTauName);
@@ -125,21 +126,17 @@ FillerTau::FillerTau(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     edm::EDGetTokenT<reco::PFTauDiscriminator>  lTokTauHandles = iC.consumes<reco::PFTauDiscriminator>(fMyTauDiscHandles[idisc]->name);
     fTokTauHandles.push_back(lTokTauHandles);
   }
-  // Get raw value and category of "MVA5" electron rejection discriminator
-  std::string lTokMVA5EleRejRaw              = "hpsPFTauDiscriminationByMVA5rawElectronRejection";
-  std::string lTokMVA5EleRejCat              = "hpsPFTauDiscriminationByMVA5rawElectronRejection:category";
+  // Get raw value and category of "MVA6" electron rejection discriminator
+  std::string lTokMVA6EleRejRaw              = "hpsPFTauDiscriminationByMVA6rawElectronRejection";
+  std::string lTokMVA6EleRejCat              = "hpsPFTauDiscriminationByMVA6rawElectronRejection:category";
   std::string lTokMVAMuonRejRaw              = "hpsPFTauDiscriminationByMVArawMuonRejection";
   std::string lTokCombIsoDBSumPtCorr3HitsRaw = "hpsPFTauDiscriminationByRawCombinedIsolationDBSumPtCorr3Hits";
-  std::string lTokIsoMVA3oldwRaw             = "hpsPFTauDiscriminationByIsolationMVA3oldDMwLTraw";
-  std::string lTokIsoMVA3newwoRaw            = "hpsPFTauDiscriminationByIsolationMVA3newDMwoLTraw";
-  std::string lTokIsoMVA3newwRaw             = "hpsPFTauDiscriminationByIsolationMVA3newDMwLTraw";
+  std::string lTokIsoMVA3newwRaw             = "hpsPFTauDiscriminationByIsolationMVArun2v1DBnewDMwLTraw";
 
-  fTokMVA5EleRejRaw              = iC.consumes<reco::PFTauDiscriminator>(lTokMVA5EleRejRaw);
-  fTokMVA5EleRejCat              = iC.consumes<reco::PFTauDiscriminator>(lTokMVA5EleRejCat);
+  fTokMVA6EleRejRaw              = iC.consumes<reco::PFTauDiscriminator>(lTokMVA6EleRejRaw);
+  fTokMVA6EleRejCat              = iC.consumes<reco::PFTauDiscriminator>(lTokMVA6EleRejCat);
   fTokMVAMuonRejRaw              = iC.consumes<reco::PFTauDiscriminator>(lTokMVAMuonRejRaw);
   fTokCombIsoDBSumPtCorr3HitsRaw = iC.consumes<reco::PFTauDiscriminator>(lTokCombIsoDBSumPtCorr3HitsRaw);
-  fTokIsoMVA3oldwRaw             = iC.consumes<reco::PFTauDiscriminator>(lTokIsoMVA3oldwRaw);
-  fTokIsoMVA3newwoRaw            = iC.consumes<reco::PFTauDiscriminator>(lTokIsoMVA3newwoRaw);
   fTokIsoMVA3newwRaw             = iC.consumes<reco::PFTauDiscriminator>(lTokIsoMVA3newwRaw);
   fTokPuppiName                  = iC.consumes<reco::PFCandidateCollection>(fPuppiName);
   fTokPuppiNoLepName             = iC.consumes<reco::PFCandidateCollection>(fPuppiNoLepName);
@@ -177,11 +174,11 @@ void FillerTau::fill(TClonesArray *array,
     iEvent.getByToken(fTokTauHandles[idisc], fMyTauDiscHandles[idisc]->handle);
   }
 
-   // Get raw value and category of "MVA5" electron rejection discriminator
-  edm::Handle<reco::PFTauDiscriminator> hMVA5EleRejRaw;
-  iEvent.getByToken(fTokMVA5EleRejRaw,hMVA5EleRejRaw);
-  edm::Handle<reco::PFTauDiscriminator> hMVA5EleRejCat;
-  iEvent.getByToken(fTokMVA5EleRejCat,hMVA5EleRejCat);
+   // Get raw value and category of "MVA6" electron rejection discriminator
+  edm::Handle<reco::PFTauDiscriminator> hMVA6EleRejRaw;
+  iEvent.getByToken(fTokMVA6EleRejRaw,hMVA6EleRejRaw);
+  edm::Handle<reco::PFTauDiscriminator> hMVA6EleRejCat;
+  iEvent.getByToken(fTokMVA6EleRejCat,hMVA6EleRejCat);
   
   // Get raw value of new mva anti-muon raw value
   edm::Handle<reco::PFTauDiscriminator> hMVAMuonRejRaw;
@@ -192,10 +189,10 @@ void FillerTau::fill(TClonesArray *array,
   iEvent.getByToken(fTokCombIsoDBSumPtCorr3HitsRaw,hCombIsoDBSumPtCorr3HitsRaw);
   //edm::Handle<reco::PFTauDiscriminator> hIsoMVA3oldwoRaw;
   //iEvent.getByLabel("hpsPFTauDiscriminationByIsolationMVA3oldDMwoLTraw",hIsoMVA3oldwoRaw);
-  edm::Handle<reco::PFTauDiscriminator> hIsoMVA3oldwRaw;
-  iEvent.getByToken(fTokIsoMVA3oldwRaw,hIsoMVA3oldwRaw);
-  edm::Handle<reco::PFTauDiscriminator> hIsoMVA3newwoRaw;
-  iEvent.getByToken(fTokIsoMVA3newwoRaw,hIsoMVA3newwoRaw);
+  //edm::Handle<reco::PFTauDiscriminator> hIsoMVA3oldwRaw;
+  //iEvent.getByToken(fTokIsoMVA3oldwRaw,hIsoMVA3oldwRaw);
+  //edm::Handle<reco::PFTauDiscriminator> hIsoMVA3newwoRaw;
+  //iEvent.getByToken(fTokIsoMVA3newwoRaw,hIsoMVA3newwoRaw);
   edm::Handle<reco::PFTauDiscriminator> hIsoMVA3newwRaw;
   iEvent.getByToken(fTokIsoMVA3newwRaw,hIsoMVA3newwRaw);
 
@@ -260,8 +257,8 @@ void FillerTau::fill(TClonesArray *array,
     //pTau->ringIso2    = fRingIso2.isInitialized() ? fRingIso2.mvaValue(*itTau, *hRho) : -1;
     pTau->rawIso3Hits = hCombIsoDBSumPtCorr3HitsRaw.isValid() ? (*hCombIsoDBSumPtCorr3HitsRaw)[tauRef] : 0;
     //pTau->rawIsoMVA3oldDMwoLT = hIsoMVA3oldwoRaw.isValid() ? (*hIsoMVA3oldwoRaw)[tauRef] : 0;
-    pTau->rawIsoMVA3oldDMwLT  = hIsoMVA3oldwRaw.isValid()  ? (*hIsoMVA3oldwRaw)[tauRef]  : 0;
-    pTau->rawIsoMVA3newDMwoLT = hIsoMVA3newwoRaw.isValid() ? (*hIsoMVA3newwoRaw)[tauRef] : 0;
+    //pTau->rawIsoMVA3oldDMwLT  = hIsoMVA3oldwRaw.isValid()  ? (*hIsoMVA3oldwRaw)[tauRef]  : 0;
+    //pTau->rawIsoMVA3newDMwoLT = hIsoMVA3newwoRaw.isValid() ? (*hIsoMVA3newwoRaw)[tauRef] : 0;
     pTau->rawIsoMVA3newDMwLT  = hIsoMVA3newwRaw.isValid()  ? (*hIsoMVA3newwRaw)[tauRef]  : 0;
     if(fUsePuppi) { 
       const std::vector<reco::PFCandidatePtr> pCands = itTau->signalPFCands();
@@ -291,8 +288,8 @@ void FillerTau::fill(TClonesArray *array,
       }
     }
     
-    pTau->antiEleMVA5      = hMVA5EleRejRaw.isValid() ? (*hMVA5EleRejRaw)[tauRef] : 0;
-    pTau->antiEleMVA5Cat   = hMVA5EleRejCat.isValid() ? (*hMVA5EleRejCat)[tauRef] : 0;
+    pTau->antiEleMVA6      = hMVA6EleRejRaw.isValid() ? (*hMVA6EleRejRaw)[tauRef] : 0;
+    pTau->antiEleMVA6Cat   = hMVA6EleRejCat.isValid() ? (*hMVA6EleRejCat)[tauRef] : 0;
     pTau->rawMuonRejection = hMVAMuonRejRaw.isValid() ? (*hMVAMuonRejRaw)[tauRef] : 0;
     
     pTau->hltMatchBits = TriggerTools::matchHLT(pTau->eta, pTau->phi, triggerRecords, triggerEvent);
@@ -367,9 +364,9 @@ void FillerTau::fill(TClonesArray *array,
     //pTau->ringIso2    = fRingIso2.isInitialized() ? fRingIso2.mvaValue(*itTau, *hRho) : -1;
     pTau->rawIso3Hits         = itTau->tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits");
     //pTau->rawIsoMVA3oldDMwoLT = itTau->tauID("byIsolationMVA3oldDMwoLTraw");
-    pTau->rawIsoMVA3oldDMwLT  = itTau->tauID("byIsolationMVA3oldDMwLTraw");
+    //pTau->rawIsoMVA3oldDMwLT  = itTau->tauID("byIsolationMVA3oldDMwLTraw");
     //pTau->rawIsoMVA3newDMwoLT = itTau->tauID("byIsolationMVA3newDMwoLTraw");
-    pTau->rawIsoMVA3newDMwLT  = itTau->tauID("byIsolationMVA3newDMwLTraw");
+    pTau->rawIsoMVA3newDMwLT  = itTau->tauID("byIsolationMVArun2v1DBnewDMwLTraw");
     
     if(fUsePuppi) { 
       const std::vector<reco::PFCandidatePtr> pCands = itTau->signalPFCands();
@@ -399,8 +396,8 @@ void FillerTau::fill(TClonesArray *array,
       }
     }
 
-    pTau->antiEleMVA5      = itTau->tauID("againstElectronMVA5raw");
-    pTau->antiEleMVA5Cat   = itTau->tauID("againstElectronMVA5category");
+    pTau->antiEleMVA6      = itTau->tauID("againstElectronMVA6Raw");
+    pTau->antiEleMVA6Cat   = itTau->tauID("againstElectronMVA6category");
     //pTau->rawMuonRejection = itTau->tauID("againstMuonMVAraw");
     pTau->hltMatchBits = TriggerTools::matchHLT(pTau->eta, pTau->phi, triggerRecords, triggerObjects);
   }

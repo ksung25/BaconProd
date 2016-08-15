@@ -81,12 +81,13 @@ namespace baconhep
       edm::EDGetTokenT<edm::ValueMap<float> >        fTokChHadIsoMapTag;
       edm::EDGetTokenT<edm::ValueMap<float> >        fTokNeuHadIsoMapTag;
       edm::EDGetTokenT<edm::ValueMap<float> >        fTokGammaIsoMapTag;
+      edm::EDGetTokenT<edm::ValueMap<float> >        fTokPhoMVAMapTag;
       
       // isolation info (EGM recommendation currently not in AOD/MINIAOD)
       edm::InputTag fChHadIsoMapTag;
       edm::InputTag fNeuHadIsoMapTag;
       edm::InputTag fGammaIsoMapTag;
-
+      edm::InputTag fPhoMVAMapTag;
       bool fUseAOD;
 
 //      PhotonMVACalculator *fPhotonMVA; 

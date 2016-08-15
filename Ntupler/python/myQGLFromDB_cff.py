@@ -1,9 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 from JetMETCorrections.Configuration.JetCorrectorsAllAlgos_cff  import *
 from CondCore.DBCommon.CondDBSetup_cfi import *
+#from CondCore.CondDB.CondDB_cfi import *
 
-
-qgDatabaseVersion = 'v1' # check https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
+qgDatabaseVersion = 'v2b' # check https://twiki.cern.ch/twiki/bin/viewauth/CMS/QGDataBaseVersion
 
 QGPoolDBESSource = cms.ESSource("PoolDBESSource",
       CondDBSetup,

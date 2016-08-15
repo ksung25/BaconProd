@@ -60,7 +60,7 @@ namespace baconhep
       std::string fBSName;
       std::string fCaloMETName;
       std::string fMETName;
-      std::string fPFMETName;
+      edm::InputTag fPFMETName;
       std::string fPFMETCName;
       std::string fMVAMETName;
       std::string fPUPPETName;
@@ -77,9 +77,11 @@ namespace baconhep
     edm::EDGetTokenT<reco::CaloMETCollection>     fTokCaloMETName    ;
     edm::EDGetTokenT<reco::PFMETCollection>       fTokPFMETName      ;
     edm::EDGetTokenT<reco::PFMETCollection>       fTokPFMETCName     ;
+    edm::EDGetTokenT<pat::METCollection>          fTokPFMETPATName     ;
     edm::EDGetTokenT<reco::PFMETCollection>       fTokMVAMETName     ;
     edm::EDGetTokenT<reco::PFMETCollection>       fTokPUPPETName     ;
     edm::EDGetTokenT<reco::PFMETCollection>       fTokPUPPETCName    ;
+    edm::EDGetTokenT<pat::METCollection>          fTokPUPPETPATName     ;
     edm::EDGetTokenT<reco::PFMETCollection>       fTokALPACAMETName  ;
     edm::EDGetTokenT<reco::PFMETCollection>       fTokPALPACAMETName ;
     edm::EDGetTokenT<reco::VertexCollection>      fTokPVName         ;

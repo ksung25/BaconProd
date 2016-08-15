@@ -86,12 +86,12 @@ namespace baconhep
       edm::EDGetTokenT<pat::TauCollection>                  fTokPatTauName; 
       edm::EDGetTokenT<reco::PFCandidateCollection>         fTokPuppiName;
       edm::EDGetTokenT<reco::PFCandidateCollection>         fTokPuppiNoLepName;
-      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokMVA5EleRejRaw;
-      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokMVA5EleRejCat;
+      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokMVA6EleRejRaw;
+      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokMVA6EleRejCat;
       edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokMVAMuonRejRaw;
       edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokCombIsoDBSumPtCorr3HitsRaw;
-      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3oldwRaw;
-      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3newwoRaw;
+    //edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3oldwRaw;
+    //edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3newwoRaw;
       edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3newwRaw;
       bool fUsePuppi;
       bool fUseAOD;
