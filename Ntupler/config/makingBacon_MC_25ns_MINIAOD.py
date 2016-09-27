@@ -129,11 +129,12 @@ process.puppi.useExistingWeights      = False
 process.puppinolep.useExistingWeights = False
 process.puppinolep.useWeightsNoLep    = True
 process.load('CommonTools/PileupAlgos/PhotonPuppi_cff')
-process.puppiPhoton.candName    = 'puppi'
-process.puppiPhoton.weightsName = 'puppi'
 process.load('RecoMET.METProducers.PFMET_cfi')
 process.pfMet.src = cms.InputTag('packedPFCandidates')
 process.puppiForMET = cms.EDProducer("CandViewMerger",src = cms.VInputTag( 'pfCandNoLep','pfCandLep'))
+process.puppiPhoton.candName    = 'puppiForMET'
+process.puppiPhoton.weightsName = 'puppiForMET'
+process.puppiPhoton.useRefs     = False
 process.pfMetPuppi = process.pfMet.clone()
 process.pfMetPuppi.src = cms.InputTag('puppiPhoton')
 process.load("BaconProd/Ntupler/myPFMETCorrections_cff")

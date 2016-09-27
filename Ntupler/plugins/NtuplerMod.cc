@@ -473,7 +473,7 @@ void NtuplerMod::beginJob()
   if(fIsActivePF) { fEventTree->Branch("PFPart", &fPFParArr); }
   if(fIsActiveRH) { fEventTree->Branch("RHPart", &fRHParArr); }
   // Triggers
-  if(fUseTrigger) setTriggers();
+  setTriggers(fUseTrigger);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -495,10 +495,11 @@ void NtuplerMod::endJob()
 }
 
 //--------------------------------------------------------------------------------------------------
-void NtuplerMod::setTriggers()
+void NtuplerMod::setTriggers(bool iUseTrigger)
 {
   std::string cmssw_base_src = getenv("CMSSW_BASE"); cmssw_base_src+="/src/";
-  fTrigger = new baconhep::TTrigger(cmssw_base_src + fHLTFile);
+  if(iUseTrigger) fTrigger = new baconhep::TTrigger(cmssw_base_src + fHLTFile);
+  if(!iUseTrigger)  fTrigger = new baconhep::TTrigger("");
 }
 
 //--------------------------------------------------------------------------------------------------

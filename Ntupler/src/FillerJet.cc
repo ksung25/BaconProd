@@ -18,6 +18,7 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include "fastjet/contrib/SoftDrop.hh"
 #include "fastjet/contrib/EnergyCorrelator.hh"
 #include <fastjet/JetDefinition.hh>
 #include <TClonesArray.h>
@@ -119,6 +120,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fTokSubJets            = iC.consumes<reco::PFJetCollection>   (lSubJets);
     fTokCMSTTJetProduct    = iC.consumes<reco::BasicJetCollection>(lTopTag);
     fTokCMSTTSubJetProduct = iC.consumes<reco::PFJetCollection>   (lTopTagSubJet);
+    fECF = new EnergyCorrelations();
   }
 }
 
@@ -625,10 +627,12 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
     fastjet::PseudoJet   pPart(pfcand->px(),pfcand->py(),pfcand->pz(),pfcand->energy());                                                                                                      
     lClusterParticles.push_back(pPart);                                                                                                                                                       
   }                                                                           
+  std::sort(lClusterParticles.begin(),lClusterParticles.end(),JetTools::orderPseudoJet);
   if(fShowerDeco != 0) pAddJet->topchi2 = fShowerDeco->chi(itJet.pt(),lClusterParticles);
   fastjet::JetDefinition lCJet_def(fastjet::cambridge_algorithm, 2.0);
   fastjet::ClusterSequence lCClust_seq(lClusterParticles, lCJet_def);
   std::vector<fastjet::PseudoJet> inclusive_jets = lCClust_seq.inclusive_jets(0);
+  /*
   fastjet::contrib::EnergyCorrelatorDoubleRatio C2beta0 (2,0. ,fastjet::contrib::EnergyCorrelator::pt_R);
   fastjet::contrib::EnergyCorrelatorDoubleRatio C2beta02(2,0.2,fastjet::contrib::EnergyCorrelator::pt_R);
   fastjet::contrib::EnergyCorrelatorDoubleRatio C2beta05(2,0.5,fastjet::contrib::EnergyCorrelator::pt_R);
@@ -639,17 +643,26 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   pAddJet->c2_0P5 = C2beta05(inclusive_jets[0]);
   pAddJet->c2_1P0 = C2beta10(inclusive_jets[0]);
   pAddJet->c2_2P0 = C2beta20(inclusive_jets[0]);
-  fastjet::contrib::EnergyCorrelator::Measure measure = fastjet::contrib::EnergyCorrelator::pt_R;
+  */
+  //fastjet::contrib::EnergyCorrelator::Measure measure = fastjet::contrib::EnergyCorrelator::pt_R;
   double beta=1;
-  pAddJet->e2_b1      = float(JetTools::e2_func(beta, measure, inclusive_jets[0]));
-  pAddJet->e3_b1      = float(JetTools::e3_vn_func(3, beta, measure, inclusive_jets[0]));
-  pAddJet->e3_v1_b1   = float(JetTools::e3_vn_func(1, beta, measure, inclusive_jets[0]));
-  pAddJet->e3_v2_b1   = float(JetTools::e3_vn_func(2, beta, measure, inclusive_jets[0]));
+  int nFilter = TMath::Min(100,(int)lClusterParticles.size());
+  std::vector<fastjet::PseudoJet> lFiltered(lClusterParticles.begin(),lClusterParticles.begin()+nFilter);
+  fECF->calcECFN(beta,lFiltered,true);
+  pAddJet->e2_b1      = float(fECF->manager->ecfns["2_2"]);
+  pAddJet->e3_b1      = float(fECF->manager->ecfns["3_3"]);
+  pAddJet->e3_v1_b1   = float(fECF->manager->ecfns["3_1"]);
+  pAddJet->e3_v2_b1   = float(fECF->manager->ecfns["3_2"]);
+  pAddJet->e4_v1_b1   = float(fECF->manager->ecfns["4_1"]);
+  pAddJet->e4_v2_b1   = float(fECF->manager->ecfns["4_2"]);
   beta=2;
-  pAddJet->e2_b2      = float(JetTools::e2_func(beta, measure, inclusive_jets[0]));
-  pAddJet->e3_b2      = float(JetTools::e3_vn_func(3, beta, measure, inclusive_jets[0]));
-  pAddJet->e3_v1_b2   = float(JetTools::e3_vn_func(1, beta, measure, inclusive_jets[0]));
-  pAddJet->e3_v2_b2   = float(JetTools::e3_vn_func(2, beta, measure, inclusive_jets[0]));
+  fECF->calcECFN(beta,lFiltered);
+  pAddJet->e2_b2      = float(fECF->manager->ecfns["2_2"]);
+  pAddJet->e3_b2      = float(fECF->manager->ecfns["3_3"]);
+  pAddJet->e3_v1_b2   = float(fECF->manager->ecfns["3_1"]);
+  pAddJet->e3_v2_b2   = float(fECF->manager->ecfns["3_2"]);
+  pAddJet->e4_v1_b2   = float(fECF->manager->ecfns["4_1"]);
+  pAddJet->e4_v2_b2   = float(fECF->manager->ecfns["4_2"]);
 
   double pCorr=1;
   const reco::BasicJet* matchJet = 0;
@@ -673,28 +686,29 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   if(matchJet) {
     //pCorr = correction(pP1Jet,*hRho);
     pAddJet->mass_sd0  = matchJet->mass()*pCorr;
-
-    std::vector<reco::CandidatePtr> pfConstituents = matchJet->getJetConstituents();
-    std::vector<fastjet::PseudoJet>   lClusterParticles;                                                                                                                                     
-    for(unsigned int ic=0; ic<pfConstituents.size(); ic++) {                                                                                                                                         
-      reco::CandidatePtr pfcand = pfConstituents[ic];                                                                                                                                  
-      fastjet::PseudoJet   pPart(pfcand->px(),pfcand->py(),pfcand->pz(),pfcand->energy());                                                                                                      
-      lClusterParticles.push_back(pPart);                                                                                                                                                       
-    }                                                                           
-    fastjet::JetDefinition lCJet_def(fastjet::cambridge_algorithm, 2.0);
-    fastjet::ClusterSequence lCClust_seq(lClusterParticles, lCJet_def);
-    std::vector<fastjet::PseudoJet> inclusive_jets = lCClust_seq.inclusive_jets(0);
-    fastjet::contrib::EnergyCorrelator::Measure measure = fastjet::contrib::EnergyCorrelator::pt_R;
+    fastjet::contrib::SoftDrop sd(0.,0.1,2.0);
+    fastjet::PseudoJet sd_jet = sd(inclusive_jets[0]);
+    //fastjet::contrib::EnergyCorrelator::Measure measure = fastjet::contrib::EnergyCorrelator::pt_R;
     double beta=1;
-    pAddJet->e2_sdb1      = float(JetTools::e2_func(beta, measure, inclusive_jets[0]));
-    pAddJet->e3_sdb1      = float(JetTools::e3_vn_func(3, beta, measure, inclusive_jets[0]));
-    pAddJet->e3_v1_sdb1   = float(JetTools::e3_vn_func(1, beta, measure, inclusive_jets[0]));
-    pAddJet->e3_v2_sdb1   = float(JetTools::e3_vn_func(2, beta, measure, inclusive_jets[0]));
+    std::vector<fastjet::PseudoJet> lSDClusterParticles = sd_jet.constituents();
+    std::sort(lSDClusterParticles.begin(),lSDClusterParticles.end(),JetTools::orderPseudoJet);
+    nFilter = TMath::Min(100,(int)lSDClusterParticles.size());
+    std::vector<fastjet::PseudoJet> lSDFiltered(lSDClusterParticles.begin(),lSDClusterParticles.begin()+nFilter);
+    fECF->calcECFN(beta,lSDFiltered,true);
+    pAddJet->e2_sdb1      = float(fECF->manager->ecfns["2_2"]);
+    pAddJet->e3_sdb1      = float(fECF->manager->ecfns["3_3"]);
+    pAddJet->e3_v1_sdb1   = float(fECF->manager->ecfns["3_1"]);
+    pAddJet->e3_v2_sdb1   = float(fECF->manager->ecfns["3_2"]);
+    pAddJet->e4_v1_sdb1   = float(fECF->manager->ecfns["4_1"]);
+    pAddJet->e4_v2_sdb1   = float(fECF->manager->ecfns["4_2"]);
     beta=2;
-    pAddJet->e2_sdb2      = float(JetTools::e2_func(beta, measure, inclusive_jets[0]));
-    pAddJet->e3_sdb2      = float(JetTools::e3_vn_func(3, beta, measure, inclusive_jets[0]));
-    pAddJet->e3_v1_sdb2   = float(JetTools::e3_vn_func(1, beta, measure, inclusive_jets[0]));
-    pAddJet->e3_v2_sdb2   = float(JetTools::e3_vn_func(2, beta, measure, inclusive_jets[0]));
+    fECF->calcECFN(beta,lSDFiltered);
+    pAddJet->e2_sdb2      = float(fECF->manager->ecfns["2_2"]);
+    pAddJet->e3_sdb2      = float(fECF->manager->ecfns["3_3"]);
+    pAddJet->e3_v1_sdb2   = float(fECF->manager->ecfns["3_1"]);
+    pAddJet->e3_v2_sdb2   = float(fECF->manager->ecfns["3_2"]);
+    pAddJet->e4_v1_sdb2   = float(fECF->manager->ecfns["4_1"]);
+    pAddJet->e4_v2_sdb2   = float(fECF->manager->ecfns["4_2"]);
   }
   /*
   // Q-Jets
@@ -1054,6 +1068,23 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent, con
 }
 
 //--------------------------------------------------------------------------------------------------
+const reco::PFJet* FillerJet::matchPF( const reco::PFJet *iJet,const reco::PFJetCollection *jets ) { 
+  int lId = -1;
+  double dRmin = 999.;
+  for ( unsigned int i=0; i< jets->size(); ++i ) {
+    const reco::PFJet* jet = &(*jets)[i];
+    float dR = deltaR( iJet->eta(), iJet->phi(), jet->eta(), jet->phi() );
+    if(dR > fConeSize) continue;
+    if ( dR < dRmin ) {
+      dRmin = dR;
+      lId = i;
+    }
+  }
+  const reco::PFJet* lJet = 0; 
+  if(lId != -1) lJet = &((*jets)[lId]);
+  return lJet;
+}
+
 const reco::BasicJet* FillerJet::match( const reco::PFJet *iJet,const reco::BasicJetCollection *jets ) { 
   int lId = -1;
   double dRmin = 999.;

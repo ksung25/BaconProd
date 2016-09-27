@@ -4,6 +4,7 @@
 #include "BaconProd/Utils/interface/TriggerTools.hh"
 #include "BaconProd/Utils/interface/JetPUIDMVACalculator.hh"
 #include "BaconProd/Utils/interface/ShowerDeco.hh"
+#include "BaconProd/Utils/interface/EnergyCorrelations.h"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/BasicJet.h"
@@ -65,6 +66,7 @@ namespace baconhep
       void  addJet(TAddJet *pAddJet, const edm::Event &iEvent, const reco::PFJet &itJet, const reco::JetBaseRef &jetBaseRef);
       void  addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent, const pat::Jet &itJet);
 
+      const reco::PFJet*    matchPF(const reco::PFJet *jet, const reco::PFJetCollection *jets);
       const reco::BasicJet* match(const reco::PFJet *jet, const reco::BasicJetCollection *jets);
       const reco::BasicJet* match(const pat::Jet *iJet,   const reco::BasicJetCollection *jets);
       const reco::GenJet*   match(const reco::PFJet *jet, const reco::GenJetCollection *jets);
@@ -115,6 +117,8 @@ namespace baconhep
       JetCorrectionUncertainty *fJetUnc;
 
       bool fUseAOD;
+      EnergyCorrelations* fECF;
+
     edm::EDGetTokenT<reco::PFJetCollection>  fTokJetName;
     edm::EDGetTokenT<pat::JetCollection>     fTokPatJetName;
     edm::EDGetTokenT<reco::GenJetCollection> fTokGenJetName;

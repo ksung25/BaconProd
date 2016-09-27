@@ -1175,3 +1175,7 @@ double JetTools::e3_vn_func(unsigned int n, double beta,fastjet::contrib::Energy
   }
   return temp;
 }
+bool JetTools::orderPseudoJet(fastjet::PseudoJet j1, fastjet::PseudoJet j2) {
+  // to be used to order pseudojets in decreasing pT order
+  return j1.perp2() > j2.perp2();
+}

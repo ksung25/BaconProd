@@ -58,7 +58,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     virtual void endLuminosityBlock  (const edm::LuminosityBlock &iLumi, const edm::EventSetup &iSetup);
     virtual void respondToOpenInputFile(edm::FileBlock const& fb);
     // specify trigger paths of interest
-    void setTriggers();
+    void setTriggers(bool iUseTriggers);
     
     // initialization from HLT menu; needs to be called on every change in HLT menu
     void initHLT(const edm::TriggerResults&, const edm::TriggerNames&);

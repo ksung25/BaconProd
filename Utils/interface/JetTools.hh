@@ -92,6 +92,7 @@ namespace baconhep {
       static double e2_func(double beta, fastjet::contrib::EnergyCorrelator::Measure measurelist, fastjet::PseudoJet myjet );
       static double e3_func(double beta, fastjet::contrib::EnergyCorrelator::Measure measurelist, fastjet::PseudoJet myjet );
       static double e3_vn_func(unsigned int n, double beta,fastjet::contrib::EnergyCorrelator::Measure measurelist, fastjet::PseudoJet myjet );
+      static bool   orderPseudoJet(fastjet::PseudoJet j1, fastjet::PseudoJet j2);
   };
 }
 #endif
