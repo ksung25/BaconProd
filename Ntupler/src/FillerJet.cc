@@ -628,7 +628,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
 
   //Compute b-tagging with Subjet b-tagging
   
-  reco::BoostedDoubleSVTagInfo reco * bdsvTagInfo = dynamic_cast<reco::BoostedDoubleSVTagInfo *>(itJet.tagInfo("?"));
+  reco::BoostedDoubleSVTagInfo reco * bdsvTagInfo = dynamic_cast<reco::BoostedDoubleSVTagInfo *>(itJet.tagInfo("pfBoostedDoubleSVAK8"));
   const reco::TaggingVariableList vars = bdsvTagInfo->taggingVariables();
 
   float SubJet_csv =  FIXME;
