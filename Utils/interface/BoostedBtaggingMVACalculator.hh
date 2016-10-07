@@ -43,7 +43,7 @@ namespace baconhep {
       std::string fMethodTag;
       // input variables to compute MVA value
       //
-      float _SubeJet_csv,_z_ratio,_trackSipdSig_3,_trackSipdSig_2,_trackSipdSig_1,_trackSipdSig_0,_trackSipdSig_1_0,_trackSipdSig_0_0,_trackSipdSig_1_1,_trackSipdSig_0_1,_trackSip2dSigAboveCharm_0,_trackSip2dSigAboveBottom_0,_trackSip2dSigAboveBottom_1,_tau0_trackEtaRel_0,_tau0_trackEtaRel_1,_tau0_trackEtaRel_2,_tau1_trackEtaRel_0,_tau1_trackEtaRel_1,_tau1_trackEtaRel_2,_tau_vertexMass_0,_tau_vertexEnergyRatio_0,_tau_vertexDeltaR_0,_tau_flightDistance2dSig_0,_tau_vertexMass_1,_tau_vertexEnergyRatio_1,_tau_flightDistance2dSig_1,_massPruned,_flavour,_ptPruned,_etaPruned;
+      float _SubJet_csv, _z_ratio , _trackSipdSig_3 ,_trackSipdSig_2,_trackSipdSig_1,_trackSipdSig_0,_trackSipdSig_1_0,_trackSipdSig_0_0,_trackSipdSig_1_1,_trackSipdSig_0_1,_trackSip2dSigAboveCharm_0,_trackSip2dSigAboveBottom_0,_trackSip2dSigAboveBottom_1,_tau0_trackEtaRel_0,_tau0_trackEtaRel_1,_tau0_trackEtaRel_2,_tau1_trackEtaRel_0,_tau1_trackEtaRel_1,_tau1_trackEtaRel_2,_tau_vertexMass_0,_tau_vertexEnergyRatio_0,_tau_vertexDeltaR_0,_tau_flightDistance2dSig_0,_tau_vertexMass_1,_tau_vertexEnergyRatio_1,_tau_flightDistance2dSig_1,_massPruned,_flavour,_ptPruned,_etaPruned;
       int _jetNTracks,_nSV, _nbHadrons;
   };
 }

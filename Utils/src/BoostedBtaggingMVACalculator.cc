@@ -9,7 +9,7 @@ using namespace baconhep;
 BoostedBtaggingMVACalculator::BoostedBtaggingMVACalculator():
   fIsInitialized(false),
   fReader(0),
-  fMethodTag(""),
+  fMethodTag("")
 {}
 
 //--------------------------------------------------------------------------------------------------
@@ -19,9 +19,9 @@ BoostedBtaggingMVACalculator::~BoostedBtaggingMVACalculator() {
 }
 
 //--------------------------------------------------------------------------------------------------
-void BoostedBtaggingMVACalculator::initialize(
-                                      const std::string MethodTag, const std::string WeightFile)
-  fMethodTag  = MethodTag;
+void BoostedBtaggingMVACalculator::initialize(const std::string MethodTag, const std::string WeightFile)
+{
+   fMethodTag  = MethodTag;
   
   if(WeightFile.length()>0) {
     if(fReader !=0) delete fReader;
@@ -34,32 +34,32 @@ void BoostedBtaggingMVACalculator::initialize(
     fReader->AddSpectator("etaPruned",&_etaPruned);
     fReader->AddVariable("SubJet_csv",&_SubJet_csv);
     fReader->AddVariable("z_ratio",&_z_ratio);
-    fReader->AddVariable("trackSipdSig_3",&_trackSip3dSig_3);
-    fReader->AddVariable("trackSipdSig_2",&_trackSip3dSig_2);
-    fReader->AddVariable("trackSipdSig_1",&_trackSip3dSig_1);
-    fReader->AddVariable("trackSipdSig_0",&_trackSip3dSig_0);
-    fReader->AddVariable("trackSipdSig_1_0",&_tau2_trackSip3dSig_0);
-    fReader->AddVariable("trackSipdSig_0_0",&_tau1_trackSip3dSig_0);
-    fReader->AddVariable("trackSipdSig_1_1",&_tau2_trackSip3dSig_1);
-    fReader->AddVariable("trackSipdSig_0_1",&_tau1_trackSip3dSig_1);
-    fReader->AddVariable("trackSip2dSigAboveCharm_0",&_trackSip2dSigAboveCharm);
+    fReader->AddVariable("trackSipdSig_3",&_trackSipdSig_3);
+    fReader->AddVariable("trackSipdSig_2",&_trackSipdSig_2);
+    fReader->AddVariable("trackSipdSig_1",&_trackSipdSig_1);
+    fReader->AddVariable("trackSipdSig_0",&_trackSipdSig_0);
+    fReader->AddVariable("trackSipdSig_1_0",&_trackSipdSig_1_0);
+    fReader->AddVariable("trackSipdSig_0_0",&_trackSipdSig_0_0);
+    fReader->AddVariable("trackSipdSig_1_1",&_trackSipdSig_1_1);
+    fReader->AddVariable("trackSipdSig_0_1",&_trackSipdSig_0_1);
+    fReader->AddVariable("trackSip2dSigAboveCharm_0",&_trackSip2dSigAboveCharm_0);
     fReader->AddVariable("trackSip2dSigAboveBottom_0",&_trackSip2dSigAboveBottom_0);
     fReader->AddVariable("trackSip2dSigAboveBottom_1",&_trackSip2dSigAboveBottom_1);
-    fReader->AddVariable("tau1_trackEtaRel_0",&_tau2_trackEtaRel_0);
-    fReader->AddVariable("tau1_trackEtaRel_1",&_tau2_trackEtaRel_1);
-    fReader->AddVariable("tau1_trackEtaRel_2",&_tau2_trackEtaRel_2);
-    fReader->AddVariable("tau0_trackEtaRel_0",&_tau1_trackEtaRel_0);
-    fReader->AddVariable("tau0_trackEtaRel_1",&_tau1_trackEtaRel_1);
-    fReader->AddVariable("tau0_trackEtaRel_2",&_tau1_trackEtaRel_2);
-    fReader->AddVariable("tau_vertexMass_0",&_tau1_vertexMass);
-    fReader->AddVariable("tau_vertexEnergyRatio_0",&_tau1_vertexEnergyRatio);
-    fReader->AddVariable("tau_vertexDeltaR_0",&_tau1_vertexDeltaR);
-    fReader->AddVariable("tau_flightDistance2dSig_0",&_tau1_flightDistance2dSig);
-    fReader->AddVariable("tau_vertexMass_1",&_tau2_vertexMass);
-    fReader->AddVariable("tau_vertexEnergyRatio_1",&_tau2_vertexEnergyRatio);
-    fReader->AddVariable("tau_flightDistance2dSig_1",&_tau2_flightDistance2dSig);
+    fReader->AddVariable("tau1_trackEtaRel_0",&_tau1_trackEtaRel_0);
+    fReader->AddVariable("tau1_trackEtaRel_1",&_tau1_trackEtaRel_1);
+    fReader->AddVariable("tau1_trackEtaRel_2",&_tau1_trackEtaRel_2);
+    fReader->AddVariable("tau0_trackEtaRel_0",&_tau0_trackEtaRel_0);
+    fReader->AddVariable("tau0_trackEtaRel_1",&_tau0_trackEtaRel_1);
+    fReader->AddVariable("tau0_trackEtaRel_2",&_tau0_trackEtaRel_2);
+    fReader->AddVariable("tau_vertexMass_0",&_tau_vertexMass_0);
+    fReader->AddVariable("tau_vertexEnergyRatio_0",&_tau_vertexEnergyRatio_0);
+    fReader->AddVariable("tau_vertexDeltaR_0",&_tau_vertexDeltaR_0);
+    fReader->AddVariable("tau_flightDistance2dSig_0",&_tau_flightDistance2dSig_0);
+    fReader->AddVariable("tau_vertexMass_1",&_tau_vertexMass_1);
+    fReader->AddVariable("tau_vertexEnergyRatio_1",&_tau_vertexEnergyRatio_1);
+    fReader->AddVariable("tau_flightDistance2dSig_1",&_tau_flightDistance2dSig_1);
     fReader->AddVariable("jetNTracks",&_jetNTracks);
-    fReader->AddVariable("nSV",&_jetNSecondaryVertices);
+    fReader->AddVariable("nSV",&_nSV);
 
 
 
@@ -88,32 +88,32 @@ float BoostedBtaggingMVACalculator::mvaValue(
 	_ptPruned=ptPruned;
 	_etaPruned=etaPruned;
 	_z_ratio=z_ratio;
-	_trackSipdSig_3=trackSip3dSig_3;
-	_trackSipdSig_2=trackSip3dSig_2;
-	_trackSipdSig_1=trackSip3dSig_1;
-	_trackSipdSig_0=trackSip3dSig_0;
-	_trackSipdSig_1_0=tau2_trackSip3dSig_0;
-	_trackSipdSig_0_0=tau1_trackSip3dSig_0;
-	_trackSipdSig_1_1=tau2_trackSip3dSig_1;
-	_trackSipdSig_0_1=tau1_trackSip3dSig_1;
-	_trackSip2dSigAboveCharm_0=trackSip2dSigAboveCharm;
+	_trackSipdSig_3=trackSipdSig_3;
+	_trackSipdSig_2=trackSipdSig_2;
+	_trackSipdSig_1=trackSipdSig_1;
+	_trackSipdSig_0=trackSipdSig_0;
+	_trackSipdSig_1_0=trackSipdSig_1_0;
+	_trackSipdSig_0_0=trackSipdSig_0_0;
+	_trackSipdSig_1_1=trackSipdSig_1_1;
+	_trackSipdSig_0_1=trackSipdSig_0_1;
+	_trackSip2dSigAboveCharm_0=trackSip2dSigAboveCharm_0;
 	_trackSip2dSigAboveBottom_0=trackSip2dSigAboveBottom_0;
 	_trackSip2dSigAboveBottom_1=trackSip2dSigAboveBottom_1;
-	_tau1_trackEtaRel_0=tau2_trackEtaRel_0;
-	_tau1_trackEtaRel_1=tau2_trackEtaRel_1;
-	_tau1_trackEtaRel_2=tau2_trackEtaRel_2;
-	_tau0_trackEtaRel_0=tau1_trackEtaRel_0;
-	_tau0_trackEtaRel_1=tau1_trackEtaRel_1;
-	_tau0_trackEtaRel_2=tau1_trackEtaRel_2;
-	_tau_vertexMass_0=tau1_vertexMass;
-	_tau_vertexEnergyRatio_0=tau1_vertexEnergyRatio;
-	_tau_vertexDeltaR_0=tau1_vertexDeltaR;
-	_tau_flightDistance2dSig_0=tau1_flightDistance2dSig;
-	_tau_vertexMass_1=tau2_vertexMass;
-	_tau_vertexEnergyRatio_1=tau2_vertexEnergyRatio;
-	_tau_flightDistance2dSig_1=tau2_flightDistance2dSig;
+	_tau1_trackEtaRel_0=tau1_trackEtaRel_0;
+	_tau1_trackEtaRel_1=tau1_trackEtaRel_1;
+	_tau1_trackEtaRel_2=tau1_trackEtaRel_2;
+	_tau0_trackEtaRel_0=tau0_trackEtaRel_0;
+	_tau0_trackEtaRel_1=tau0_trackEtaRel_1;
+	_tau0_trackEtaRel_2=tau0_trackEtaRel_2;
+	_tau_vertexMass_0=tau_vertexMass_0;
+	_tau_vertexEnergyRatio_0=tau_vertexEnergyRatio_0;
+	_tau_vertexDeltaR_0=tau_vertexDeltaR_0;
+	_tau_flightDistance2dSig_0=tau_flightDistance2dSig_0;
+	_tau_vertexMass_1=tau_vertexMass_1;
+	_tau_vertexEnergyRatio_1=tau_vertexEnergyRatio_1;
+	_tau_flightDistance2dSig_1=tau_flightDistance2dSig_1;
 	_jetNTracks=jetNTracks;
-	_nSV=jetNSecondaryVertices;
+	_nSV=nSV;
 
 
 
