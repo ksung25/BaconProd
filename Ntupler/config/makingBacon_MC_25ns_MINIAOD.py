@@ -514,6 +514,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     # ORDERD list of pileup jet ID input files
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
+    jetBoostedBtaggingFiles = cms.untracked.vstring('', 'BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
 
     # names of various jet-related collections
     jetName            = cms.untracked.string('CA15PFJetsCHS'),
@@ -549,6 +550,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     # ORDERD list of pileup jet ID input files
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
+    jetBoostedBtaggingFiles = cms.untracked.vstring('', 'BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
     showerDecoConf     = cms.untracked.string(''),
     # names of various jet-related collections
     jetName            = cms.untracked.string('CA15PFJetsPuppi'),
