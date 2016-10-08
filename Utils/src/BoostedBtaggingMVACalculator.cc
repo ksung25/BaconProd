@@ -27,11 +27,6 @@ void BoostedBtaggingMVACalculator::initialize(const std::string MethodTag, const
     if(fReader !=0) delete fReader;
     fReader = new TMVA::Reader();
 
-    fReader->AddSpectator("massPruned",&_massPruned);
-    fReader->AddSpectator("flavour",&_flavour);
-    fReader->AddSpectator("nbHadrons",&_nbHadrons);
-    fReader->AddSpectator("ptPruned",&_ptPruned);
-    fReader->AddSpectator("etaPruned",&_etaPruned);
     fReader->AddVariable("SubJet_csv",&_SubJet_csv);
     fReader->AddVariable("z_ratio",&_z_ratio);
     fReader->AddVariable("trackSipdSig_3",&_trackSipdSig_3);
@@ -40,17 +35,17 @@ void BoostedBtaggingMVACalculator::initialize(const std::string MethodTag, const
     fReader->AddVariable("trackSipdSig_0",&_trackSipdSig_0);
     fReader->AddVariable("trackSipdSig_1_0",&_trackSipdSig_1_0);
     fReader->AddVariable("trackSipdSig_0_0",&_trackSipdSig_0_0);
-    fReader->AddVariable("trackSipdSig_1_1",&_trackSipdSig_1_1);
-    fReader->AddVariable("trackSipdSig_0_1",&_trackSipdSig_0_1);
+//    fReader->AddVariable("trackSipdSig_1_1",&_trackSipdSig_1_1);
+//    fReader->AddVariable("trackSipdSig_0_1",&_trackSipdSig_0_1);
     fReader->AddVariable("trackSip2dSigAboveCharm_0",&_trackSip2dSigAboveCharm_0);
     fReader->AddVariable("trackSip2dSigAboveBottom_0",&_trackSip2dSigAboveBottom_0);
     fReader->AddVariable("trackSip2dSigAboveBottom_1",&_trackSip2dSigAboveBottom_1);
-    fReader->AddVariable("tau1_trackEtaRel_0",&_tau1_trackEtaRel_0);
-    fReader->AddVariable("tau1_trackEtaRel_1",&_tau1_trackEtaRel_1);
-    fReader->AddVariable("tau1_trackEtaRel_2",&_tau1_trackEtaRel_2);
     fReader->AddVariable("tau0_trackEtaRel_0",&_tau0_trackEtaRel_0);
     fReader->AddVariable("tau0_trackEtaRel_1",&_tau0_trackEtaRel_1);
     fReader->AddVariable("tau0_trackEtaRel_2",&_tau0_trackEtaRel_2);
+    fReader->AddVariable("tau1_trackEtaRel_0",&_tau1_trackEtaRel_0);
+    fReader->AddVariable("tau1_trackEtaRel_1",&_tau1_trackEtaRel_1);
+    fReader->AddVariable("tau1_trackEtaRel_2",&_tau1_trackEtaRel_2);
     fReader->AddVariable("tau_vertexMass_0",&_tau_vertexMass_0);
     fReader->AddVariable("tau_vertexEnergyRatio_0",&_tau_vertexEnergyRatio_0);
     fReader->AddVariable("tau_vertexDeltaR_0",&_tau_vertexDeltaR_0);
@@ -60,6 +55,13 @@ void BoostedBtaggingMVACalculator::initialize(const std::string MethodTag, const
     fReader->AddVariable("tau_flightDistance2dSig_1",&_tau_flightDistance2dSig_1);
     fReader->AddVariable("jetNTracks",&_jetNTracks);
     fReader->AddVariable("nSV",&_nSV);
+
+    fReader->AddSpectator("massPruned",&_massPruned);
+    fReader->AddSpectator("flavour",&_flavour);
+    fReader->AddSpectator("nbHadrons",&_nbHadrons);
+    fReader->AddSpectator("ptPruned",&_ptPruned);
+    fReader->AddSpectator("etaPruned",&_etaPruned);
+
 
 
 
@@ -72,14 +74,14 @@ fIsInitialized = true;
 
 //--------------------------------------------------------------------------------------------------
 float BoostedBtaggingMVACalculator::mvaValue(
-		const float massPruned, const float flavour, const int nbHadrons, const float ptPruned, const float etaPruned,
+		const float massPruned, const float flavour, const float nbHadrons, const float ptPruned, const float etaPruned,
 		const float SubJet_csv,const float z_ratio, const float trackSipdSig_3, const float trackSipdSig_2, const float trackSipdSig_1,
 		const float trackSipdSig_0, const float trackSipdSig_1_0, const float trackSipdSig_0_0, const float trackSipdSig_1_1,
 		const float trackSipdSig_0_1, const float trackSip2dSigAboveCharm_0, const float trackSip2dSigAboveBottom_0,
 		const float trackSip2dSigAboveBottom_1, const float tau0_trackEtaRel_0, const float tau0_trackEtaRel_1, const float tau0_trackEtaRel_2,
 		const float tau1_trackEtaRel_0, const float tau1_trackEtaRel_1, const float tau1_trackEtaRel_2, const float tau_vertexMass_0,
 		const float tau_vertexEnergyRatio_0, const float tau_vertexDeltaR_0, const float tau_flightDistance2dSig_0, const float tau_vertexMass_1,
-		const float tau_vertexEnergyRatio_1, const float tau_flightDistance2dSig_1, const int jetNTracks, const int nSV,
+		const float tau_vertexEnergyRatio_1, const float tau_flightDistance2dSig_1, const float jetNTracks, const float nSV,
 		const bool printDebug)
 {
 	_massPruned=massPruned;

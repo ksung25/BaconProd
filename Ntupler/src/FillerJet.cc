@@ -50,7 +50,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fMVAbtagName        (iConfig.getUntrackedParameter<std::string>("mvaBTagName","AK4PFCombinedMVAV2BJetTagsCHS")),
   fCSVbtagName        (iConfig.getUntrackedParameter<std::string>("csvBTagName","combinedInclusiveSecondaryVertexV2BJetTags")),
   fCSVbtagSubJetName  (iConfig.getUntrackedParameter<std::string>("csvBTagSubJetName","AK4CombinedInclusiveSecondaryVertexV2BJetTagsSJCHS")),
-  fCSVDoubleBtagName  (iConfig.getUntrackedParameter<std::string>("csvDoubleBTagName","AK4PFBoostedDoubleSecondaryVertexBJetTagsCHS")),
+  fCSVDoubleBtagName  (iConfig.getUntrackedParameter<std::string>("csvDoubleBTagName","AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS")),
   fJettinessName      (iConfig.getUntrackedParameter<std::string>("jettiness","AK4NjettinessCHS")),
   fQGLikelihood       (iConfig.getUntrackedParameter<std::string>("qgLikelihood","QGLikelihood")),
   fQGLikelihoodSubJets(iConfig.getUntrackedParameter<std::string>("qgLikelihoodSubjet","QGLikelihood")),
@@ -77,10 +77,11 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
       fHighPtWeightFile = (puIDFiles[1].length()>0) ? (cmssw_base_src + puIDFiles[1]) : "";
       initPUJetId();
     }
- 
-   std::vector<std::string> BoostedBtaggingFiles = iConfig.getUntrackedParameter< std::vector<std::string> >("jetBoostedBtaggingFiles",empty_vstring);
-   assert(BoostedBtaggingFiles.size()==2);
-   fWeightFile  = (BoostedBtaggingFiles[0].length()>0) ? (cmssw_base_src + BoostedBtaggingFiles[0]) : "";
+
+   std::string empty_string; 
+   std::string BoostedBtaggingFiles = iConfig.getUntrackedParameter< std::string >("jetBoostedBtaggingFiles",empty_string);
+   fWeightFile  =  (cmssw_base_src + "BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml");//BoostedBtaggingFiles) ;
+   std::cout<<"here: "<< fWeightFile <<std::endl;
    initBoostedBtaggingJetId();
  
 
