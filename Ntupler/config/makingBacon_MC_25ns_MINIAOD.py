@@ -439,7 +439,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
 
   CA8CHS = cms.untracked.PSet(
     isActive             = cms.untracked.bool(False),
-    useAOD               = cms.untracked.bool(True),
+    useAOD               = cms.untracked.bool(False),
     minPt                = cms.untracked.double(180),
     coneSize             = cms.untracked.double(0.8),
     doComputeFullJetInfo = cms.untracked.bool(False),
