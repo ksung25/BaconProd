@@ -7,6 +7,7 @@
 #include "BaconProd/Utils/interface/ShowerDeco.hh"
 #include "BaconProd/Utils/interface/EnergyCorrelations.h"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
+#include "DataFormats/BTauReco/interface/BoostedDoubleSVTagInfo.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/BasicJet.h"
 #include "DataFormats/JetReco/interface/JetCollection.h"
@@ -25,6 +26,9 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+
+//typedef std::vector<reco::BoostedDoubleSVTagInfo>  BoostedDoubleSVTagInfoCollection;
+
 class TClonesArray;
 class FactorizedJetCorrector;
 class JetCorrectionUncertainty;

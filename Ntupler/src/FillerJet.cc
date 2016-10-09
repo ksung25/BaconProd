@@ -868,7 +868,6 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   if( matchTI != hBoostedDoubleSVTagInfo->end() ) {
       
   const reco::TaggingVariableList vars = matchTI->taggingVariables();
-
   float SubJet_csv_ =  std::min( pAddJet->sj2_csv , pAddJet->sj1_csv) ;
   float z_ratio_ = vars.get(reco::btau::z_ratio);
   float trackSipdSig_3_ = vars.get(reco::btau::trackSip3dSig_3);
@@ -902,7 +901,6 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   float nbHadrons_ = -1;//itJet.hadronFlavor(); // 
   float ptPruned_ =itJet.pt();
   float etaPruned_ =itJet.eta();
-
   //std::cout<< tau_flightDistance2dSig_0_ << "   "<<jetNTracks_ <<"  "<< nSV_ <<"  "<<SubJet_csv_ <<"  "<< z_ratio_ << "  "<<trackSipdSig_3_<<std::endl;
   pAddJet->Double_sub = fJetBoostedBtaggingMVACalc.mvaValue(massPruned_, flavour_, nbHadrons_, ptPruned_, etaPruned_,SubJet_csv_,z_ratio_,trackSipdSig_3_,trackSipdSig_2_,trackSipdSig_1_,trackSipdSig_0_,trackSipdSig_1_0_,trackSipdSig_0_0_,trackSipdSig_1_1_,trackSipdSig_0_1_,trackSip2dSigAboveCharm_0_,trackSip2dSigAboveBottom_0_,trackSip2dSigAboveBottom_1_,tau0_trackEtaRel_0_,tau0_trackEtaRel_1_,tau0_trackEtaRel_2_,tau1_trackEtaRel_0_,tau1_trackEtaRel_1_,tau1_trackEtaRel_2_,tau_vertexMass_0_,tau_vertexEnergyRatio_0_,tau_vertexDeltaR_0_,tau_flightDistance2dSig_0_,tau_vertexMass_1_,tau_vertexEnergyRatio_1_,tau_flightDistance2dSig_1_,jetNTracks_,nSV_);
 
@@ -1011,7 +1009,8 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent, con
 
   //Bosted b tagging for CA15
 
-  reco::BoostedDoubleSVTagInfo const *bdsvTagInfo = itJet.tagInfoBoostedDoubleSV();//dynamic_cast<reco::BoostedDoubleSVTagInfo const *>(itJet.tagInfo("pfBoostedDoubleSVCA15"));
+  //reco::BoostedDoubleSVTagInfo const *bdsvTagInfo = itJet.tagInfoBoostedDoubleSV();//dynamic_cast<reco::BoostedDoubleSVTagInfo const *>(itJet.tagInfo("pfBoostedDoubleSVCA15"));
+  reco::BoostedDoubleSVTagInfo const *bdsvTagInfo = dynamic_cast<reco::BoostedDoubleSVTagInfo const *>(itJet.tagInfo("pfBoostedDoubleSVCA15"));
   const reco::TaggingVariableList vars = bdsvTagInfo->taggingVariables();
   
   float SubJet_csv_ =  std::min( pAddJet->sj2_csv , pAddJet->sj1_csv) ;
