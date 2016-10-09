@@ -496,7 +496,6 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     pJet->beta     = JetTools::beta(*itJet, pv);
     pJet->betaStar = JetTools::betaStar(*itJet, pv, pvCol);
     pJet->dR2Mean  = JetTools::dR2Mean(*itJet);
-
     pJet->mva = itJet->userFloat("pileupJetId:fullDiscriminant");
 
     TVector2 lPull    = JetTools::jetPull(*itJet,0);
