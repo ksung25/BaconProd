@@ -3,6 +3,7 @@
 
 #include "BaconProd/Utils/interface/TriggerTools.hh"
 #include "BaconProd/Utils/interface/JetPUIDMVACalculator.hh"
+#include "BaconProd/Utils/interface/BoostedBtaggingMVACalculator.hh"
 #include "BaconProd/Utils/interface/ShowerDeco.hh"
 #include "BaconProd/Utils/interface/EnergyCorrelations.h"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
@@ -58,6 +59,7 @@ namespace baconhep
                 const std::vector<TriggerRecord>             &triggerRecords,   // list of trigger names and objects
                 const pat::TriggerObjectStandAloneCollection &triggerObjects);  // event trigger objects
      void  initPUJetId();
+     void initBoostedBtaggingJetId();
 
     protected:
       void initJetCorr(const std::vector<std::string> &jecFiles, 
@@ -95,18 +97,22 @@ namespace baconhep
       std::string fCSVbtagName;
       std::string fCSVbtagSubJetName;
       std::string fCSVDoubleBtagName;
+      std::string fBoostedDoubleSVTagInfoName;
       std::string fJettinessName;
       std::string fQGLikelihood;
       std::string fQGLikelihoodSubJets;
       std::string fTopTaggerName;
       std::string fLowPtWeightFile;
       std::string fHighPtWeightFile;
+      std::string fWeightFile;
       std::string fShowerDecoConf;
       double      fConeSize;
       bool        fComputeFullJetInfo;
       
       // Jet ID MVA
       JetPUIDMVACalculator fJetPUIDMVACalc;
+      BoostedBtaggingMVACalculator fJetBoostedBtaggingMVACalc;
+      
       ShowerDeco*          fShowerDeco;
 
       // Random number generator for Q-jet volatility
@@ -145,6 +151,7 @@ namespace baconhep
     edm::EDGetTokenT<reco::PFJetCollection>    fTokSubJets         ;
     edm::EDGetTokenT<reco::BasicJetCollection> fTokCMSTTJetProduct ;
     edm::EDGetTokenT<reco::PFJetCollection>    fTokCMSTTSubJetProduct;
+    edm::EDGetTokenT<reco::BoostedDoubleSVTagInfoCollection>  fTokBoostedDoubleSVTagInfo;
     edm::EDGetTokenT<double>                   fTokRhoTag;
   };
 }
