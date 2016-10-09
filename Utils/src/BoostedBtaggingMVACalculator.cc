@@ -27,6 +27,7 @@ void BoostedBtaggingMVACalculator::initialize(const std::string MethodTag, const
     if(fReader !=0) delete fReader;
     fReader = new TMVA::Reader();
 
+
     fReader->AddVariable("SubJet_csv",&_SubJet_csv);
     fReader->AddVariable("z_ratio",&_z_ratio);
     fReader->AddVariable("trackSipdSig_3",&_trackSipdSig_3);
@@ -35,8 +36,8 @@ void BoostedBtaggingMVACalculator::initialize(const std::string MethodTag, const
     fReader->AddVariable("trackSipdSig_0",&_trackSipdSig_0);
     fReader->AddVariable("trackSipdSig_1_0",&_trackSipdSig_1_0);
     fReader->AddVariable("trackSipdSig_0_0",&_trackSipdSig_0_0);
-//    fReader->AddVariable("trackSipdSig_1_1",&_trackSipdSig_1_1);
-//    fReader->AddVariable("trackSipdSig_0_1",&_trackSipdSig_0_1);
+    fReader->AddVariable("trackSipdSig_1_1",&_trackSipdSig_1_1);
+    fReader->AddVariable("trackSipdSig_0_1",&_trackSipdSig_0_1);
     fReader->AddVariable("trackSip2dSigAboveCharm_0",&_trackSip2dSigAboveCharm_0);
     fReader->AddVariable("trackSip2dSigAboveBottom_0",&_trackSip2dSigAboveBottom_0);
     fReader->AddVariable("trackSip2dSigAboveBottom_1",&_trackSip2dSigAboveBottom_1);
@@ -84,6 +85,8 @@ float BoostedBtaggingMVACalculator::mvaValue(
 		const float tau_vertexEnergyRatio_1, const float tau_flightDistance2dSig_1, const float jetNTracks, const float nSV,
 		const bool printDebug)
 {
+
+
 	_massPruned=massPruned;
 	_flavour=flavour;
 	_nbHadrons=nbHadrons;
