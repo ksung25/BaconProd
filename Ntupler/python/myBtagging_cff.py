@@ -68,21 +68,32 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
                 ))
      #double b-tagging
         if cone < 1.0:
+ 	    setattr(process, head+'PFBoostedDoubleSVTagInfos'+tail,
+                    pfBoostedDoubleSVAK8TagInfos.clone(
+                    svTagInfos = cms.InputTag(head+'PFInclusiveSecondaryVertexFinderTagInfos'+tail)
+                    )) 
             setattr(process, head+'PFBoostedDoubleSecondaryVertexBJetTags'+tail,
                     pfBoostedDoubleSecondaryVertexAK8BJetTags.clone(
-                    tagInfos = cms.VInputTag(cms.InputTag(head+"PFImpactParameterTagInfos"+tail), 
-                                             cms.InputTag(head+"PFInclusiveSecondaryVertexFinderTagInfos"+tail) )
+                    tagInfos = cms.VInputTag(cms.InputTag(head+"PFBoostedDoubleSVTagInfos"+tail))
+                    #tagInfos = cms.VInputTag(
+#cms.InputTag(head+"PFImpactParameterTagInfos"+tail), 
                     ))    
         else:
+  	    setattr(process, head+'PFBoostedDoubleSVTagInfos'+tail,
+                   pfBoostedDoubleSVCA15TagInfos.clone(
+                   svTagInfos = cms.InputTag(head+'PFInclusiveSecondaryVertexFinderTagInfos'+tail)
+             	    ))
             setattr(process, head+'PFBoostedDoubleSecondaryVertexBJetTags'+tail,
                     pfBoostedDoubleSecondaryVertexCA15BJetTags.clone(
-                    tagInfos = cms.VInputTag(cms.InputTag(head+"PFImpactParameterTagInfos"+tail), 
-                                             cms.InputTag(head+"PFInclusiveSecondaryVertexFinderTagInfos"+tail) )
+                    tagInfos = cms.VInputTag(
+#cms.InputTag(head+"PFImpactParameterTagInfos"+tail), #pfImpactParameterAK8TagInfos
+                                             cms.InputTag(head+"PFBoostedDoubleSVTagInfos"+tail) )
                     ))    
     process.btagging *= getattr(process,head+'PFImpactParameterTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFSecondaryVertexTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFInclusiveSecondaryVertexFinderTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFInclusiveSecondaryVertexFinderCvsLTagInfos'+tail)
+    process.btagging *= getattr(process,head+'PFBoostedDoubleSVTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFSoftPFMuonsTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFSoftPFElectronsTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFSoftPFMuonBJetTags'+tail)
