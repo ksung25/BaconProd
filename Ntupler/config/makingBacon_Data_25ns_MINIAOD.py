@@ -215,10 +215,14 @@ runMetCorAndUncFromMiniAOD(process,
 #--------------------------------------------------------------------------------
 # input settings
 #================================================================================
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(58000) )
 process.source = cms.Source("PoolSource",
-                            fileNames  = cms.untracked.vstring('/store/data/Run2016B/MET/MINIAOD/PromptReco-v2/000/274/990/00000/90BD31FA-0B33-E611-BB67-02163E014761.root')
-)
+                            fileNames  = cms.untracked.vstring(
+                                                               '/store/data/Run2016G/JetHT/MINIAOD/PromptReco-v1/000/278/986/00000/829620EE-E366-E611-A5DF-02163E013945.root',
+                                                               '/store/data/Run2016G/JetHT/MINIAOD/PromptReco-v1/000/278/986/00000/E8A8F43B-EA66-E611-9653-FA163E44A048.root'),
+                            #skipEvents = cms.untracked.uint32(0) 
+                            skipEvents = cms.untracked.uint32(58150) 
+                            )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
 

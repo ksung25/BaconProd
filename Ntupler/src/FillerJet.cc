@@ -71,20 +71,18 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     std::string cmssw_base_src = getenv("CMSSW_BASE");
     cmssw_base_src += "/src/";
 
-    if(fUseAOD) {
+
+   std::string empty_string; 
+   std::string BoostedBtaggingFiles = iConfig.getUntrackedParameter< std::string >("jetBoostedBtaggingFiles",empty_string);
+   fWeightFile  =  (cmssw_base_src + "BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml");//BoostedBtaggingFiles) ;
+   std::cout<<"here: "<< fWeightFile <<std::endl;
+   if(fUseAOD) {
       std::vector<std::string> puIDFiles = iConfig.getUntrackedParameter< std::vector<std::string> >("jetPUIDFiles",empty_vstring);
       assert(puIDFiles.size()==2);
       fLowPtWeightFile  = (puIDFiles[0].length()>0) ? (cmssw_base_src + puIDFiles[0]) : "";
       fHighPtWeightFile = (puIDFiles[1].length()>0) ? (cmssw_base_src + puIDFiles[1]) : "";
       initPUJetId();
     }
-
-   std::string empty_string; 
-   std::string BoostedBtaggingFiles = iConfig.getUntrackedParameter< std::string >("jetBoostedBtaggingFiles",empty_string);
-   fWeightFile  =  (cmssw_base_src + "BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml");//BoostedBtaggingFiles) ;
-   std::cout<<"here: "<< fWeightFile <<std::endl;
-   initBoostedBtaggingJetId();
- 
 
   fRand = new TRandom2();
   if(fShowerDecoConf.size() > 0) { 
@@ -148,11 +146,10 @@ void FillerJet::initPUJetId() {
   fJetPUIDMVACalc.initialize(baconhep::JetPUIDMVACalculator::k53,
 			     "BDT",fLowPtWeightFile,
 			     "BDT",fHighPtWeightFile);
-  
+  initBoostedBtaggingJetId();
 }
 
 void FillerJet::initBoostedBtaggingJetId(){
-
   fJetBoostedBtaggingMVACalc.initialize(
                              "BDT",fWeightFile);
 
@@ -903,7 +900,6 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   float etaPruned_ =itJet.eta();
   //std::cout<< tau_flightDistance2dSig_0_ << "   "<<jetNTracks_ <<"  "<< nSV_ <<"  "<<SubJet_csv_ <<"  "<< z_ratio_ << "  "<<trackSipdSig_3_<<std::endl;
   pAddJet->Double_sub = fJetBoostedBtaggingMVACalc.mvaValue(massPruned_, flavour_, nbHadrons_, ptPruned_, etaPruned_,SubJet_csv_,z_ratio_,trackSipdSig_3_,trackSipdSig_2_,trackSipdSig_1_,trackSipdSig_0_,trackSipdSig_1_0_,trackSipdSig_0_0_,trackSipdSig_1_1_,trackSipdSig_0_1_,trackSip2dSigAboveCharm_0_,trackSip2dSigAboveBottom_0_,trackSip2dSigAboveBottom_1_,tau0_trackEtaRel_0_,tau0_trackEtaRel_1_,tau0_trackEtaRel_2_,tau1_trackEtaRel_0_,tau1_trackEtaRel_1_,tau1_trackEtaRel_2_,tau_vertexMass_0_,tau_vertexEnergyRatio_0_,tau_vertexDeltaR_0_,tau_flightDistance2dSig_0_,tau_vertexMass_1_,tau_vertexEnergyRatio_1_,tau_flightDistance2dSig_1_,jetNTracks_,nSV_);
-
   }
   else std::cout<< "   not found matched double-b tag info  "<<std::endl;	
 
