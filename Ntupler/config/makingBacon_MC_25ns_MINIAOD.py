@@ -217,7 +217,8 @@ runMetCorAndUncFromMiniAOD(process,
 #================================================================================
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring('/store/mc/RunIISpring16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/30000/FE262C6A-F61A-E611-8C9C-001E672489EE.root')
+                            fileNames = cms.untracked.vstring('root://stormgf1.pi.infn.it:1094//store/mc/RunIISpring16MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext4-v1/00000/E8090432-8628-E611-8713-001EC9ADFDC9.root')
+#/store/mc/RunIISpring16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext1-v1/30000/FE262C6A-F61A-E611-8C9C-001E672489EE.root')
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -376,6 +377,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     # ORDERD list of pileup jet ID input files
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
+    jetBoostedBtaggingFiles = cms.untracked.string('BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
     # names of various jet-related collections
     jetName            = cms.untracked.string('AK4PFJetsPuppi'),
     genJetName         = cms.untracked.string('AK4GenJetsCHS'),
@@ -390,6 +392,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     cvbcTagName        = cms.untracked.string('AK4PFCombinedCvsBJetTagsPuppi'),
     csvBTagSubJetName  = cms.untracked.string('AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi'),
     csvDoubleBTagName  = cms.untracked.string('AK4PFBoostedDoubleSecondaryVertexBJetTagsPuppi'),
+    boostedDoubleSVTagInfoName = cms.untracked.string('AK4PFBoostedDoubleSVTagInfosPuppi'), 
     jettiness          = cms.untracked.string('AK4NjettinessPuppi'),
     qgLikelihood       = cms.untracked.string('AK4QGTaggerPuppi'),
     qgLikelihoodSubjet = cms.untracked.string('AK4QGTaggerSubJetsPuppi'),
@@ -406,6 +409,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     showerDecoConf       = cms.untracked.string(''),
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
+    jetBoostedBtaggingFiles = cms.untracked.string('BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
 
     edmPVName   = cms.untracked.string('offlineSlimmedPrimaryVertices'),
     jecFiles    = ak8CHSJEC,
@@ -427,15 +431,16 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     cvbcTagName          = cms.untracked.string('AK8PFCombinedCvsBJetTagsCHS'),
     csvBTagSubJetName    = cms.untracked.string('AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS'),
     csvDoubleBTagName    = cms.untracked.string('AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS'),
+    boostedDoubleSVTagInfoName = cms.untracked.string('AK8PFBoostedDoubleSVTagInfosCHS'),
+    jettiness          = cms.untracked.string('AK8NjettinessCHS'),
     qgLikelihood         = cms.untracked.string('AK8QGTaggerCHS'),
     qgLikelihoodSubjet   = cms.untracked.string('AK8QGTaggerSubJetsCHS'),
-    jettiness            = cms.untracked.string('AK8NjettinessCHS'),
     topTaggerName        = cms.untracked.string('')
   ),
 
   CA8CHS = cms.untracked.PSet(
     isActive             = cms.untracked.bool(False),
-    useAOD               = cms.untracked.bool(False),
+    useAOD               = cms.untracked.bool(True),
     minPt                = cms.untracked.double(180),
     coneSize             = cms.untracked.double(0.8),
     doComputeFullJetInfo = cms.untracked.bool(False),
@@ -452,7 +457,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     subJetName           = cms.untracked.string('SoftDrop'),
     csvBTagName          = cms.untracked.string('CA8PFCombinedInclusiveSecondaryVertexV2BJetTags'),
     csvDoubleBTagName    = cms.untracked.string('CA8PFBoostedDoubleSecondaryVertexBJetTagsCHS'),
-    qgLikelihood         = cms.untracked.string('QGTagger'),
+    boostedDoubleSVTagInfoName = cms.untracked.string('CA8PFBoostedDoubleSVTagInfosCHS'),
+    qgLikelihood         = cms.untracked.string('CA8QGTaggerCHS'),
     prunedJetName        = cms.untracked.string('CA8PFJetsCHSPruned'),
     trimmedJetName       = cms.untracked.string('CA8PFJetsCHSTrimmed'),
     softdropJetName      = cms.untracked.string('CA8PFJetsCHSSoftDrop'),
@@ -478,6 +484,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     # ORDERD list of pileup jet ID input files
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
+    jetBoostedBtaggingFiles = cms.untracked.string('BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
     
     # names of various jet-related collections
     jetName            = cms.untracked.string('AK8PFJetsPuppi'),
@@ -493,6 +500,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     cvbcTagName        = cms.untracked.string('AK8PFCombinedCvsBJetTagsPuppi'),
     csvBTagSubJetName  = cms.untracked.string('AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi'),
     csvDoubleBTagName  = cms.untracked.string('AK8PFBoostedDoubleSecondaryVertexBJetTagsPuppi'),
+    boostedDoubleSVTagInfoName = cms.untracked.string('AK8PFBoostedDoubleSVTagInfosPuppi'),
     jettiness          = cms.untracked.string('AK8NjettinessPuppi'),
     qgLikelihood       = cms.untracked.string('AK8QGTaggerPuppi'),
     qgLikelihoodSubjet = cms.untracked.string('AK8QGTaggerSubJetsPuppi'),
@@ -514,7 +522,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     # ORDERD list of pileup jet ID input files
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
-    jetBoostedBtaggingFiles = cms.untracked.vstring('', 'BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
+    jetBoostedBtaggingFiles = cms.untracked.string('BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
 
     # names of various jet-related collections
     jetName            = cms.untracked.string('CA15PFJetsCHS'),
@@ -530,6 +538,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     cvbcTagName        = cms.untracked.string('CA15PFCombinedCvsBJetTagsCHS'),
     csvBTagSubJetName  = cms.untracked.string('CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS'),
     csvDoubleBTagName  = cms.untracked.string('CA15PFBoostedDoubleSecondaryVertexBJetTagsCHS'),
+    boostedDoubleSVTagInfoName = cms.untracked.string('CA15PFBoostedDoubleSVTagInfosCHS'),
     jettiness          = cms.untracked.string('CA15NjettinessCHS'),
     qgLikelihood       = cms.untracked.string('CA15QGTaggerCHS'),
     qgLikelihoodSubjet = cms.untracked.string('CA15QGTaggerSubJetsCHS'),
@@ -550,7 +559,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     # ORDERD list of pileup jet ID input files
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
-    jetBoostedBtaggingFiles = cms.untracked.vstring('', 'BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
+    jetBoostedBtaggingFiles = cms.untracked.string('BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
     showerDecoConf     = cms.untracked.string(''),
     # names of various jet-related collections
     jetName            = cms.untracked.string('CA15PFJetsPuppi'),
@@ -566,6 +575,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     cvbcTagName        = cms.untracked.string('CA15PFCombinedCvsBJetTagsPuppi'),
     csvBTagSubJetName  = cms.untracked.string('CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi'),
     csvDoubleBTagName  = cms.untracked.string('CA15PFBoostedDoubleSecondaryVertexBJetTagsPuppi'),
+    boostedDoubleSVTagInfoName = cms.untracked.string('CA15PFBoostedDoubleSVTagInfosPuppi'),
+
     jettiness          = cms.untracked.string('CA15NjettinessPuppi'),
     qgLikelihood       = cms.untracked.string('CA15QGTaggerPuppi'),
     qgLikelihoodSubjet = cms.untracked.string('CA15QGTaggerSubJetsPuppi'),

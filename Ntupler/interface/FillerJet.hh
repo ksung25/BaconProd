@@ -97,6 +97,7 @@ namespace baconhep
       std::string fCSVbtagName;
       std::string fCSVbtagSubJetName;
       std::string fCSVDoubleBtagName;
+      std::string fBoostedDoubleSVTagInfoName;
       std::string fJettinessName;
       std::string fQGLikelihood;
       std::string fQGLikelihoodSubJets;
@@ -150,6 +151,7 @@ namespace baconhep
     edm::EDGetTokenT<reco::PFJetCollection>    fTokSubJets         ;
     edm::EDGetTokenT<reco::BasicJetCollection> fTokCMSTTJetProduct ;
     edm::EDGetTokenT<reco::PFJetCollection>    fTokCMSTTSubJetProduct;
+    edm::EDGetTokenT<reco::BoostedDoubleSVTagInfoCollection>  fTokBoostedDoubleSVTagInfo;
     edm::EDGetTokenT<double>                   fTokRhoTag;
   };
 }
