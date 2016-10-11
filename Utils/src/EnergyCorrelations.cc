@@ -100,10 +100,11 @@ void EnergyCorrelations::calcECF(double beta, std::vector<fastjet::PseudoJet> &c
   }
 
   // cleanup
-  delete pTs;
+  delete[] pTs;
   for (unsigned int iC=0; iC!=nC; ++iC) {
-    delete dRs[iC];
+    delete[] dRs[iC];
   }
+  delete[] dRs;
 }
 void EnergyCorrelations::calcECFN(double beta, std::vector<fastjet::PseudoJet> &constituents, bool iClear, bool useMin) {
   unsigned int nC = constituents.size();
@@ -256,9 +257,10 @@ void EnergyCorrelations::calcECFN(double beta, std::vector<fastjet::PseudoJet> &
     manager->ecfns["4_3"] = 0;
   }
   // cleanup
-  delete pTs;
+  delete[] pTs;
   for (unsigned int iC=0; iC!=nC; ++iC) {
-    delete dRs[iC];
+    delete[] dRs[iC];
   }
+  delete[] dRs;
 }
 
