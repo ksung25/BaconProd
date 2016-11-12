@@ -120,8 +120,8 @@ AK8jetsequencePuppiData = cms.Sequence(
 
 def setMiniAODAK8Puppi(process) :
     process.AK8PFImpactParameterTagInfosPuppi.primaryVertex                    = cms.InputTag("offlineSlimmedPrimaryVertices")
-    process.AK8PFImpactParameterTagInfosPuppi.candidates                       = cms.InputTag("puppi")
+    process.AK8PFImpactParameterTagInfosPuppi.candidates                       = cms.InputTag("packedPFCandidates")
     process.AK8PFInclusiveSecondaryVertexFinderTagInfosPuppi.extSVCollection   = cms.InputTag('slimmedSecondaryVertices')
     process.AK8PFImpactParameterTagInfosSJPuppi.primaryVertex                  = cms.InputTag("offlineSlimmedPrimaryVertices")
-    process.AK8PFImpactParameterTagInfosSJPuppi.candidates                     = cms.InputTag("puppi")
+    process.AK8PFImpactParameterTagInfosSJPuppi.candidates                     = cms.InputTag("packedPFCandidates")
     process.AK8PFInclusiveSecondaryVertexFinderTagInfosSJPuppi.extSVCollection = cms.InputTag('slimmedSecondaryVertices')

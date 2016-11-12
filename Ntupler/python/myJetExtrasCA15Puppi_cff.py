@@ -120,8 +120,8 @@ CA15jetsequencePuppiData = cms.Sequence(
 
 def setMiniAODCA15Puppi(process) :
     process.CA15PFImpactParameterTagInfosPuppi.primaryVertex                    = cms.InputTag("offlineSlimmedPrimaryVertices")
-    process.CA15PFImpactParameterTagInfosPuppi.candidates                       = cms.InputTag("puppi")
+    process.CA15PFImpactParameterTagInfosPuppi.candidates                       = cms.InputTag("packedPFCandidates")
     process.CA15PFInclusiveSecondaryVertexFinderTagInfosPuppi.extSVCollection   = cms.InputTag('slimmedSecondaryVertices')
     process.CA15PFImpactParameterTagInfosSJPuppi.primaryVertex                  = cms.InputTag("offlineSlimmedPrimaryVertices")
-    process.CA15PFImpactParameterTagInfosSJPuppi.candidates                     = cms.InputTag("puppi")
+    process.CA15PFImpactParameterTagInfosSJPuppi.candidates                     = cms.InputTag("packedPFCandidates")
     process.CA15PFInclusiveSecondaryVertexFinderTagInfosSJPuppi.extSVCollection = cms.InputTag('slimmedSecondaryVertices')
