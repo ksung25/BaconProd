@@ -119,23 +119,26 @@ float BoostedBtaggingMVACalculator::mvaValue(
 	_tau_flightDistance2dSig_1=tau_flightDistance2dSig_1;
 	_jetNTracks=jetNTracks;
 	_nSV=nSV;
+	_SubJet_csv=SubJet_csv;
 
 
 
-	double val = -2;
-	val = (fReader  ? fReader->EvaluateMVA(fMethodTag)   : -2); 
+        double val = -2;
+        val = (fReader  ? fReader->EvaluateMVA(fMethodTag)   : -2);
 
-	if(printDebug) {
-		std::cout << "[BoostedBtaggingMVACalculator]" << std::endl;
-		/*   std::cout << "Inputs: nvtx= " << _nvtx;
-		     std::cout << "  jetPt= " << _jetPt << "  jetEta= " << _jetEta << "  jetPhi= " << _jetPhi;
-		     std::cout << "  |d0|= " << _d0 << "  |dZ|= " << _dZ;
-		     std::cout << "  beta= " << _beta << "  betaStar= " << _betaStar;
-		     std::cout << "  nCharged= " << _nCharged << "  nNeutrals= " << nNeutrals;
-		     std::cout << "  dRMean= " << _dRMean << "  dR2Mean= " << _dR2Mean << "  ptD= " << _ptD;
-		     std::cout << "  frac01= " << _frac01 << "  frac02= " << _frac02 << "  frac03= " << _frac03 << "  frac04= " << _frac04 << "  frac05= " << _frac05;
-		     */  std::cout << std::endl;
-		std::cout << " > MVA value = " << val << std::endl;
+        if(printDebug) {
+                std::cout << "[BoostedBtaggingMVACalculator]" << std::endl;
+                   std::cout << "Inputs: nvtx= " << _nSV;
+                     std::cout << "  jetNTracks= " << _jetNTracks << "  tau_flightDistance2dSig_1= " << _tau_flightDistance2dSig_1 << "  tau_vertexEnergyRatio_1= " << _tau_vertexEnergyRatio_1;
+                     std::cout << "  trackSipdSig_3= " << _trackSipdSig_3 << "  trackSipdSig_2= " << _trackSipdSig_2<< "  trackSipdSig_1=  "<<_trackSipdSig_1<<"   trackSipdSig_0   "<<_trackSipdSig_0;
+                     std::cout << "  trackSipdSig_1_0= "<<_trackSipdSig_1_0 <<" trackSipdSig_1_1 "<< _trackSipdSig_1_1<< " trackSipdSig_0_0= "<<_trackSipdSig_0_0<<" trackSipdSig_0_1 "<<_trackSipdSig_0_1;
+                     std::cout << "  trackSip2dSigAboveCharm_0= " << _trackSip2dSigAboveCharm_0 << "  z_ratio= " << _z_ratio;
+                     std::cout << "  trackSip2dSigAboveBottom_1= " << _trackSip2dSigAboveBottom_1 << "  trackSip2dSigAboveBottom_0= " << trackSip2dSigAboveBottom_0;
+                     std::cout << "  tau0_trackEtaRel_2= " << _tau0_trackEtaRel_2 << "  tau0_trackEtaRel_1= " << _tau0_trackEtaRel_1 << "  tau0_trackEtaRel_0= " << _tau0_trackEtaRel_0;
+                     std::cout << "  tau1_trackEtaRel_2= " << _tau1_trackEtaRel_2 << "  tau1_trackEtaRel_1= " << _tau1_trackEtaRel_1 << "  tau1_trackEtaRel_0= " << _tau1_trackEtaRel_0;
+                     std::cout << "  tau_vertexMass_1= " << _tau_vertexMass_1 << "  tau_flightDistance2dSig_0= " << _tau_flightDistance2dSig_0 << "  tau_vertexDeltaR_0= " << _tau_vertexDeltaR_0 << "  tau_vertexEnergyRatio_0= " << _tau_vertexEnergyRatio_0 << "  tau_vertexMass_0= " << _tau_vertexMass_0;
+                     std::cout << std::endl;
+		     std::cout << " > MVA value = " << val << std::endl;
 	}
 
 	return val;
