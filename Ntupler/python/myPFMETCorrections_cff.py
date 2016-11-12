@@ -31,12 +31,9 @@ pfJetMETcorr = cms.EDProducer("PFJetMETcorrInputProducer",
 # use MET corrections to produce Type 1 corrected PFMET objects
 pfType1CorrectedMet = cms.EDProducer("CorrectedPFMETProducer",
     src = cms.InputTag('pfMet'),
-    applyType0Corrections = cms.bool(False),
-    applyType1Corrections = cms.bool(True),
     srcCorrections = cms.VInputTag(
 	cms.InputTag('pfJetMETcorr', 'type1')
         ),
-    applyType2Corrections = cms.bool(False)
 )   
 #--------------------------------------------------------------------------------
 

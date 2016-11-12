@@ -71,19 +71,18 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     std::string cmssw_base_src = getenv("CMSSW_BASE");
     cmssw_base_src += "/src/";
 
-    if(fUseAOD) {
+
+   std::string empty_string; 
+   std::string BoostedBtaggingFiles = iConfig.getUntrackedParameter< std::string >("jetBoostedBtaggingFiles",empty_string);
+   fWeightFile  =  (cmssw_base_src + "BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml");//BoostedBtaggingFiles) ;
+   std::cout<<"here: "<< fWeightFile <<std::endl;
+   if(fUseAOD) {
       std::vector<std::string> puIDFiles = iConfig.getUntrackedParameter< std::vector<std::string> >("jetPUIDFiles",empty_vstring);
       assert(puIDFiles.size()==2);
       fLowPtWeightFile  = (puIDFiles[0].length()>0) ? (cmssw_base_src + puIDFiles[0]) : "";
       fHighPtWeightFile = (puIDFiles[1].length()>0) ? (cmssw_base_src + puIDFiles[1]) : "";
       initPUJetId();
     }
-
-   std::string empty_string; 
-   std::string BoostedBtaggingFiles = iConfig.getUntrackedParameter< std::string >("jetBoostedBtaggingFiles",empty_string);
-   fWeightFile  =  (cmssw_base_src + "BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml");//BoostedBtaggingFiles) ;
-   std::cout<<"here: "<< fWeightFile <<std::endl;
- 
 
   fRand = new TRandom2();
   if(fShowerDecoConf.size() > 0) { 
@@ -147,11 +146,10 @@ void FillerJet::initPUJetId() {
   fJetPUIDMVACalc.initialize(baconhep::JetPUIDMVACalculator::k53,
 			     "BDT",fLowPtWeightFile,
 			     "BDT",fHighPtWeightFile);
-  
+  initBoostedBtaggingJetId();
 }
 
 void FillerJet::initBoostedBtaggingJetId(){
-
   fJetBoostedBtaggingMVACalc.initialize(
                              "BDT",fWeightFile);
 
@@ -520,7 +518,6 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     pJet->beta     = JetTools::beta(*itJet, pv);
     pJet->betaStar = JetTools::betaStar(*itJet, pv, pvCol);
     pJet->dR2Mean  = JetTools::dR2Mean(*itJet);
-
     pJet->mva = itJet->userFloat("pileupJetId:fullDiscriminant");
 
     TVector2 lPull    = JetTools::jetPull(*itJet,0);
@@ -1014,7 +1011,8 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent, con
 
   //Bosted b tagging for CA15
 
-  reco::BoostedDoubleSVTagInfo const *bdsvTagInfo = itJet.tagInfoBoostedDoubleSV();//dynamic_cast<reco::BoostedDoubleSVTagInfo const *>(itJet.tagInfo("pfBoostedDoubleSVCA15"));
+  //reco::BoostedDoubleSVTagInfo const *bdsvTagInfo = itJet.tagInfoBoostedDoubleSV();//dynamic_cast<reco::BoostedDoubleSVTagInfo const *>(itJet.tagInfo("pfBoostedDoubleSVCA15"));
+  reco::BoostedDoubleSVTagInfo const *bdsvTagInfo = dynamic_cast<reco::BoostedDoubleSVTagInfo const *>(itJet.tagInfo("pfBoostedDoubleSVCA15"));
   const reco::TaggingVariableList vars = bdsvTagInfo->taggingVariables();
   
   float SubJet_csv_ =  std::min( pAddJet->sj2_csv , pAddJet->sj1_csv) ;

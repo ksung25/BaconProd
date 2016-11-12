@@ -85,6 +85,13 @@ AK4NjettinessCHS = Njettiness.clone(
     Njets = cms.vuint32(1,2,3,4)
   )
 
+from RecoJets.JetProducers.PileupJetID_cfi  import *
+AK4PUJetIdCHS = pileupJetId.clone(
+  jets=cms.InputTag('ak4PFJetsCHS'),
+  inputIsCorrected=False,
+  applyJec=True,
+  vertexes=cms.InputTag("offlinePrimaryVertices")
+  )
 #
 # Define sequences
 #
@@ -108,7 +115,8 @@ AK4jetsequenceCHS = cms.Sequence(
     ak4PFCHSL1FastL2L3CorrectorChain*
     AK4QGTaggerCHS*
     AK4QGTaggerSubJetsCHS*                
-    AK4NjettinessCHS
+    AK4NjettinessCHS*
+    AK4PUJetIdCHS
   )
 
 AK4jetsequenceCHSData = cms.Sequence(
@@ -131,9 +139,21 @@ AK4jetsequenceCHSData = cms.Sequence(
 
 def setMiniAODAK4CHS(process) :
     process.load("RecoJets/JetProducers/QGTagger_cfi")
-    process.QGTagger.srcJets          = cms.InputTag('slimmedJets')
-    process.QGTagger.jetsLabel        = cms.string('QGL_AK4PFchs')
-    process.QGTagger.jec              = cms.InputTag('')
-    process.QGTagger.systematicsLabel = cms.string('')
-    process.AK4FlavorCHS.jets         = cms.InputTag('slimmedJets')
-    
+    process.QGTagger.srcJets               = cms.InputTag('slimmedJets')
+    process.QGTagger.jetsLabel             = cms.string('QGL_AK4PFchs')
+    process.QGTagger.jec                   = cms.InputTag('')
+    process.QGTagger.systematicsLabel      = cms.string('')
+    process.AK4FlavorCHS.jets              = cms.InputTag('slimmedJets')
+    process.AK4PUJetIdCHS.jets             = cms.InputTag("slimmedJets")
+    process.AK4PUJetIdCHS.inputIsCorrected = True
+    process.AK4PUJetIdCHS.vertexes         = cms.InputTag("offlineSlimmedPrimaryVertices")
+    process.load("PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff")
+    process.patJetCorrFactorsReapplyJEC = process.updatedPatJetCorrFactors.clone(
+        src = cms.InputTag("slimmedJets"),
+        levels = ['L1FastJet', 'L2Relative', 'L3Absolute'] 
+        )
+    process.updatedJets = process.updatedPatJets.clone(
+        jetSource = cms.InputTag("slimmedJets"),
+        jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJEC"))
+        )
+    process.updatedJets.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']
