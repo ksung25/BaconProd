@@ -9,6 +9,11 @@ hlt_filename  = "BaconAna/DataFormats/data/HLTFile_25ns"   # list of relevant tr
 do_alpaca     = False
 
 cmssw_base = os.environ['CMSSW_BASE']
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+if is_data_flag:
+  process.GlobalTag.globaltag = cms.string('80X_dataRun2_2016SeptRepro_v6')
+else:
+  process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_TrancheIV_v7')
 
 #JEC
 JECTag='Spring16_23Sep2016V2_MC'
@@ -21,7 +26,6 @@ if is_data_flag:
   process.jec.connect = cms.string('sqlite:////'+cmssw_base+'/src/BaconProd/Utils/data/'+JECTag+'.db')
 else:
   process.jec.connect = cms.string('sqlite:////'+cmssw_base+'/src/BaconProd/Utils/data/'+JECTag+'.db')
-
 #process.load('BaconProd/Ntupler/myQGLFromDB_cff')
 #--------------------------------------------------------------------------------
 # Import of standard configurations
@@ -37,12 +41,6 @@ process.pfNoPileUpJME = cms.EDFilter("CandPtrSelector", src = cms.InputTag("pack
 process.load('BaconProd/Ntupler/myPUPPICorrections_cff')
 process.load('BaconProd/Ntupler/myCHSCorrections_cff')
 process.load('BaconProd/Ntupler/myCorrections_cff')
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff")
-if is_data_flag:
-  process.GlobalTag.globaltag = cms.string('80X_dataRun2_2016SeptRepro_v6')
-else:
-  process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_TrancheIV_v7')
-
 
 #--------------------------------------------------------------------------------
 # Import custom configurations
@@ -110,9 +108,6 @@ process.chs = cms.EDFilter("CandPtrSelector",
                            src = cms.InputTag('packedPFCandidates'),
                            cut = cms.string('fromPV')
                            )
-# PF MET corrections
-from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
-
 if is_data_flag:
   process.AK4QGTaggerCHS.jec  = cms.InputTag("ak4chsL1FastL2L3ResidualCorrector")
   process.CA8QGTaggerCHS.jec  = cms.InputTag("ca8chsL1FastL2L3ResidualCorrector")
@@ -131,11 +126,24 @@ my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.mvaPhotonID_Spr
 for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection)
 
+# PF MET corrections
+from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+runMetCorAndUncFromMiniAOD(process,
+                           isData=is_data_flag,
+                           manualJetConfig=True,
+                           jetCorLabelL3="ak4chsL1FastL2L3Corrector",
+                           jetCorLabelRes="ak4chsL1FastL2L3ResidualCorrector",
+                           reclusterJets=True,
+                           recoMetFromPFCs=True,
+                           postfix="V2"
+                           )
+
 # PUPPI Woof Woof
 from PhysicsTools.PatAlgos.slimming.puppiForMET_cff import makePuppiesFromMiniAOD
 makePuppiesFromMiniAOD (process, True )
 runMetCorAndUncFromMiniAOD(process,
                            isData=is_data_flag,
+                           manualJetConfig=True,
                            metType="Puppi",
                            pfCandColl=cms.InputTag("puppiForMET"),
                            recoMetFromPFCs=True,
@@ -145,22 +153,6 @@ runMetCorAndUncFromMiniAOD(process,
                            reclusterJets=True,
                            postfix="Puppi"
                            )
-#Some dumb crap to get the MET to work
-process.load('PhysicsTools.PatAlgos.producersLayer1.jetProducer_cff')
-process.patJetCorrFactors.primaryVertices = cms.InputTag("offlineSlimmedPrimaryVertices")
-process.patJets.discriminatorSources      = cms.VInputTag()
-process.patJets.addBTagInfo               = False
-process.patJets.addDiscriminators         = False
-process.patJets.addAssociatedTracks       = False
-process.patJets.addJetCharge              = False
-process.patJets.jetChargeSource           = ''
-process.patJets.addGenPartonMatch         = False
-process.patJets.embedGenPartonMatch       = False
-process.patJets.addGenJetMatch            = False
-process.patJets.embedGenJetMatch          = False
-process.patJets.getJetMCFlavour           = False
-process.patJets.addJetFlavourInfo         = False
-process.makePatJets = cms.Sequence(process.patJetCorrections*process.patJets)
 
 if is_data_flag:
   process.AK4QGTaggerPuppi.jec           = cms.InputTag("ak4PuppiL1FastL2L3ResidualCorrector")
@@ -177,14 +169,6 @@ alpacaPuppiMet = ''
 if do_alpaca: 
   alpacaMet      = ('pfMetAlpacaData'        if is_data_flag else 'pfMetAlpacaMC' )
   alpacaPuppiMet = ('pfMetPuppiAlpacaData'   if is_data_flag else 'pfMetPuppiAlpacaMC' ) 
-
-runMetCorAndUncFromMiniAOD(process,
-                           isData=is_data_flag,
-                           jetCorLabelL3="ak4chsL1FastL2L3Corrector",
-                           jetCorLabelRes="ak4chsL1FastL2L3ResidualCorrector",
-                           reclusterJets=True,
-                           recoMetFromPFCs=True
-                           )
 
 #--------------------------------------------------------------------------------
 # input settings
@@ -226,7 +210,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     #edmPileupInfoName    = cms.untracked.string('addPileupInfo'),
     edmBeamspotName      = cms.untracked.string('offlineBeamSpot'),
     edmMETName           = cms.untracked.string('slimmedMETs'),
-    edmPFMETName         = cms.untracked.InputTag('slimmedMETs','','MakingBacon'),
+    edmPFMETName         = cms.untracked.InputTag('slimmedMETsV2','','MakingBacon'),
     edmMVAMETName        = cms.untracked.string(''),
     edmPuppETName        = cms.untracked.InputTag('slimmedMETsPuppi','','MakingBacon'),
     edmAlpacaMETName     = cms.untracked.string(alpacaMet),
@@ -571,14 +555,13 @@ process.baconSequence = cms.Sequence(
                                      process.ak8chsL1FastL2L3ResidualChain*
                                      process.ak4PuppiL1FastL2L3ResidualChain*
                                      process.ak8PuppiL1FastL2L3ResidualChain*
+                                     process.ak4chsL1FastL2L3Corrector*
+                                     process.ak4PuppiL1FastL2L3Corrector*
                                      process.QGTagger                 *
-                                     process.chs                      *
-                                     process.ak4PFJetsCHS             *
+                                     process.pfNoPileUpJME            *
                                      process.electronMVAValueMapProducer *
                                      process.egmGsfElectronIDs        *
                                      process.egmPhotonIDSequence      *
-                                     process.pfNoPileUpJME            *
-                                     process.makePatJets              *
                                      process.puppiMETSequence         *
                                      process.AK4jetsequencePuppiData  *
                                      process.AK8jetsequenceCHSData    *
@@ -586,7 +569,7 @@ process.baconSequence = cms.Sequence(
                                      process.AK8jetsequencePuppiData  *
                                      process.CA15jetsequencePuppiData *
                                      process.btagging                 *
-                                     process.fullPatMetSequence       *
+                                     process.fullPatMetSequenceV2     *
                                      process.fullPatMetSequencePuppi  *
                                      process.ntupler)
 

@@ -32,7 +32,7 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig, const bool us
   fTokPUInfoName     = iC.consumes< std::vector<PileupSummaryInfo> > (fPUInfoName);
   fTokBSName         = iC.consumes<reco::BeamSpot>                   (fBSName);
   fTokCaloMETName    = iC.consumes<reco::CaloMETCollection>          (fCaloMETName);
-  fTokCaloMETPATName = iC.consumes<pat::METCollection>               (fCaloMETName);
+  fTokCaloMETPATName = iC.consumes<pat::METCollection>               (fMETName);
   fTokPFMETName      = iC.consumes<reco::PFMETCollection>            (fPFMETName);
   fTokPFMETPATName   = iC.consumes<pat::METCollection>               (fPFMETName);
   fTokPFMETCName     = iC.consumes<reco::PFMETCollection>            (fPFMETCName);
@@ -558,12 +558,15 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     evtInfo->pfMETCphijrsup = inMET.shiftedP4(pat::MET::PhotonEnUp).phi();
     evtInfo->pfMETCphijrsdn = inMET.shiftedP4(pat::MET::PhotonEnDown).phi();
     //Calo MET
-    evtInfo->caloMET      = inMET.caloMETPt();
-    evtInfo->caloMETphi   = inMET.caloMETPhi();
+    edm::Handle<pat::METCollection> hCaloMETProduct;
+    iEvent.getByToken(fTokPFMETPATName,hCaloMETProduct);
+    assert(hCaloMETProduct.isValid());
+    const pat::MET &inCaloMET = hCaloMETProduct->front();
+    evtInfo->caloMET      = inCaloMET.caloMETPt();
+    evtInfo->caloMETphi   = inCaloMET.caloMETPhi();
     //evtInfo->caloMETCov00 = inCaloMET.getSignificanceMatrix()(0,0);
     //evtInfo->caloMETCov01 = inCaloMET.getSignificanceMatrix()(0,1);
     //evtInfo->caloMETCov11 = inCaloMET.getSignificanceMatrix()(1,1);
-
     // MVA MET
     /*
     if(fMVAMETName.size() > 0) { 
