@@ -72,6 +72,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     
     // variables to handle triggers
     edm::ParameterSetID fTriggerNamesID;
+    std::string         fHLTEnd;
     edm::InputTag	fHLTTag;
     edm::InputTag       fHLTObjTag;
     std::string         fHLTFile;
@@ -79,6 +80,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     // Collection names
     std::string fPVName;
     std::string fGenRunInfoName;
+    bool        fUseRunInfo;
     edm::EDGetTokenT<GenRunInfoProduct>      fTokGenRunInfo;
     edm::EDGetTokenT<edm::TriggerResults>    fTokTrgRes       ;
     edm::EDGetTokenT<trigger::TriggerEvent>    fTokTrgEvt       ;

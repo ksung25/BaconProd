@@ -6,6 +6,7 @@
 #include "DataFormats/TauReco/interface/PFTauDiscriminator.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 
 #include <vector>
 #include <string>
@@ -66,6 +67,10 @@ namespace baconhep
     void computeIso(double &iEta,double &iPhi,const std::vector<reco::PFCandidatePtr>& iCands, const double extRadius,
 		    const reco::PFCandidateCollection    &puppi,
 		    float &out_chHadIso, float &out_gammaIso, float &out_neuHadIso) const;
+
+    void computeIso(double &iEta,double &iPhi,const std::vector<reco::PFCandidatePtr>& iCands, const double extRadius,
+		    const pat::PackedCandidateCollection    &puppi,
+		    float &out_chHadIso, float &out_gammaIso, float &out_neuHadIso) const;
       // Tau cuts
       double fMinPt;
             
@@ -86,11 +91,13 @@ namespace baconhep
       edm::EDGetTokenT<pat::TauCollection>                  fTokPatTauName; 
       edm::EDGetTokenT<reco::PFCandidateCollection>         fTokPuppiName;
       edm::EDGetTokenT<reco::PFCandidateCollection>         fTokPuppiNoLepName;
+      edm::EDGetTokenT<pat::PackedCandidateCollection>      fTokPuppiPATName;
+      edm::EDGetTokenT<pat::PackedCandidateCollection>      fTokPuppiNoLepPATName;
       edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokMVA6EleRejRaw;
       edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokMVA6EleRejCat;
       edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokMVAMuonRejRaw;
       edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokCombIsoDBSumPtCorr3HitsRaw;
-    //edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3oldwRaw;
+      edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3oldwRaw;
     //edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3newwoRaw;
       edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3newwRaw;
       bool fUsePuppi;

@@ -63,7 +63,7 @@ namespace baconhep
       edm::InputTag fPFMETName;
       std::string fPFMETCName;
       std::string fMVAMETName;
-      std::string fPUPPETName;
+      edm::InputTag fPUPPETName;
       std::string fPUPPETCName;
       std::string fALPACAMETName;
       std::string fPALPACAMETName;
@@ -75,6 +75,7 @@ namespace baconhep
     edm::EDGetTokenT<std::vector<PileupSummaryInfo> >  fTokPUInfoName;
     edm::EDGetTokenT<reco::BeamSpot>              fTokBSName         ;
     edm::EDGetTokenT<reco::CaloMETCollection>     fTokCaloMETName    ;
+    edm::EDGetTokenT<pat::METCollection>          fTokCaloMETPATName ;
     edm::EDGetTokenT<reco::PFMETCollection>       fTokPFMETName      ;
     edm::EDGetTokenT<reco::PFMETCollection>       fTokPFMETCName     ;
     edm::EDGetTokenT<pat::METCollection>          fTokPFMETPATName     ;
@@ -98,6 +99,8 @@ namespace baconhep
     edm::EDGetTokenT<bool>                        fTokManystripClus53X             ;
     edm::EDGetTokenT<bool>                        fTokTooManyStripClus53X          ;
     edm::EDGetTokenT<bool>                        fToklogErrorTooManyClusters      ;
+    edm::EDGetTokenT<bool>                        fTokBadChCand                    ;
+    edm::EDGetTokenT<bool>                        fTokBadPFMuon                    ;
     edm::EDGetTokenT<edm::TriggerResults>         fTokMetFiltersTag                ;
   };
 }

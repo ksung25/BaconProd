@@ -9,6 +9,7 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
@@ -61,6 +62,10 @@ namespace baconhep
     void computeIso(double &iEta,double &iPhi, const double extRadius,
 		    const reco::PFCandidateCollection    &puppi,
 		    float &out_chHadIso, float &out_gammaIso, float &out_neuHadIso) const;    
+
+    void computeIso(double &iEta,double &iPhi, const double extRadius,
+		    const pat::PackedCandidateCollection    &puppi,
+		    float &out_chHadIso, float &out_gammaIso, float &out_neuHadIso) const;    
   
       // Electron cuts
       double fMinPt;
@@ -88,6 +93,8 @@ namespace baconhep
       edm::EDGetTokenT<reco::PFCandidateCollection>  fTokPFCandName;
       edm::EDGetTokenT<reco::PFCandidateCollection>  fTokPuppiName;
       edm::EDGetTokenT<reco::PFCandidateCollection>  fTokPuppiNoLepName;
+      edm::EDGetTokenT<pat::PackedCandidateCollection>  fTokPuppiPATName;
+      edm::EDGetTokenT<pat::PackedCandidateCollection>  fTokPuppiNoLepPATName;
       edm::EDGetTokenT<reco::TrackCollection>        fTokTrackName;
       edm::EDGetTokenT<reco::ConversionCollection>   fTokConvName;
       edm::EDGetTokenT<reco::SuperClusterCollection> fTokSCName;

@@ -4,6 +4,8 @@
 #include "BaconProd/Utils/interface/JetTools.hh"
 #include "BaconAna/DataFormats/interface/TJet.hh"
 #include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "SimDataFormats/JetMatching/interface/JetFlavourInfoMatching.h"
 #include "DataFormats/Common/interface/Handle.h"
@@ -17,6 +19,8 @@
 //#include "DataFormats/JetReco/interface/HTTTopJetTagInfo.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "JetMETCorrections/JetCorrector/interface/JetCorrector.h"
+#include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
@@ -39,6 +43,8 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fPVName             (iConfig.getUntrackedParameter<std::string>("edmPVName","offlinePrimaryVertices")),
   fRhoName            (iConfig.getUntrackedParameter<std::string>("edmRhoName","fixedGridRhoFastjetAll")),
   fJetName            (iConfig.getUntrackedParameter<std::string>("jetName","ak4PFJetsCHS")),
+  fJECName            (iConfig.getUntrackedParameter<std::string>("jecName","")),
+  fJECUName           (iConfig.getUntrackedParameter<std::string>("jecUncName","")),
   fGenJetName         (iConfig.getUntrackedParameter<std::string>("genJetName","AK4GenJetsCHS")),
   fJetFlavorName      (iConfig.getUntrackedParameter<std::string>("jetFlavorName","AK4byValAlgoCHS")),
   fPrunedJetName      (iConfig.getUntrackedParameter<std::string>("prunedJetName","AK4caPFJetsPrunedCHS")),
@@ -65,9 +71,10 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fUseAOD             (useAOD)
 {
     std::vector<std::string> empty_vstring;
+    /* ===> Switching to DB
     initJetCorr(iConfig.getUntrackedParameter< std::vector<std::string> >("jecFiles",empty_vstring),
                 iConfig.getUntrackedParameter< std::vector<std::string> >("jecUncFiles",empty_vstring));
-
+    */
     std::string cmssw_base_src = getenv("CMSSW_BASE");
     cmssw_base_src += "/src/";
 
@@ -75,7 +82,8 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
    std::string empty_string; 
    std::string BoostedBtaggingFiles = iConfig.getUntrackedParameter< std::string >("jetBoostedBtaggingFiles",empty_string);
    fWeightFile  =  (cmssw_base_src + "BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml");//BoostedBtaggingFiles) ;
-   std::cout<<"here: "<< fWeightFile <<std::endl;
+   if(fConeSize < 1.0)   fWeightFile  =  (cmssw_base_src + "BaconProd/Utils/data/BoostedDoubleSV_AK8_BDT_v4.weights.xml");
+   std::cout<<"Double B-tag: "<< fWeightFile <<std::endl;
    if(fUseAOD) {
       std::vector<std::string> puIDFiles = iConfig.getUntrackedParameter< std::vector<std::string> >("jetPUIDFiles",empty_vstring);
       assert(puIDFiles.size()==2);
@@ -91,6 +99,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fTokRhoTag        = iC.consumes<double>               (fRhoName);
   if(fUseAOD)  fTokJetName       = iC.consumes<reco::PFJetCollection>(fJetName);
   if(!fUseAOD) fTokPatJetName    = iC.consumes<pat::JetCollection>   (fJetName);
+  fTokJECName       = iC.consumes<reco::JetCorrector>(fJECName);
   fTokGenJetName    = iC.consumes<reco::GenJetCollection>(fGenJetName);
   fTokJetFlavorName = iC.consumes<reco::JetFlavourInfoMatchingCollection>(fJetFlavorName);
   fTokPVName        = iC.consumes<reco::VertexCollection>(fPVName);
@@ -150,8 +159,7 @@ void FillerJet::initPUJetId() {
 }
 
 void FillerJet::initBoostedBtaggingJetId(){
-  fJetBoostedBtaggingMVACalc.initialize(
-                             "BDT",fWeightFile);
+  fJetBoostedBtaggingMVACalc.initialize("BDT",fWeightFile,fWeightFile.find("Subjet") < std::string::npos);
 
 }
 //--------------------------------------------------------------------------------------------------
@@ -195,6 +203,19 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
   iEvent.getByToken(fTokJetName,hJetProduct);
   assert(hJetProduct.isValid());
   const reco::PFJetCollection *jetCol = hJetProduct.product();
+
+  // Get JEC collection
+  edm::Handle<reco::JetCorrector> hJetCorrector;
+  iEvent.getByToken(fTokJECName,hJetCorrector);
+  assert(hJetCorrector.isValid());
+  const reco::JetCorrector *jetCorr = hJetCorrector.product();
+
+  // Get JEC Unc collection
+  edm::ESHandle<JetCorrectorParametersCollection> hJetCorrectorParsCol;
+  iSetup.get<JetCorrectionsRecord>().get(fJECUName,hJetCorrectorParsCol);
+  assert(hJetCorrectorParsCol.isValid());
+  const JetCorrectorParameters    jetPars = (*hJetCorrectorParsCol)["Uncertainty"];
+  JetCorrectionUncertainty       *jetUnc  = new JetCorrectionUncertainty(jetPars);
 
   // Get gen jet collection
   edm::Handle<reco::GenJetCollection> hGenJetProduct;
@@ -263,10 +284,11 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
   TClonesArray &rExtraArray = *iExtraArray;
   for(reco::PFJetCollection::const_iterator itJet = jetCol->begin(); itJet!=jetCol->end(); ++itJet) {
     const double ptRaw = itJet->pt();
-
+    if(ptRaw < fMinPt) continue;
     // input to jet corrections
     double jetcorr = 1;
     if(fabs(itJet->eta()) < 5.191 && fApplyJEC) {
+      /* Switching to DB 
       fJetCorr->setJetPt(ptRaw);
       fJetCorr->setJetEta(itJet->eta());
       fJetCorr->setJetPhi(itJet->phi());
@@ -275,14 +297,16 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
       fJetCorr->setJetA(itJet->jetArea());
       fJetCorr->setJetEMF(-99.0);
       jetcorr = fJetCorr->getCorrection();
+      */
+      jetcorr = jetCorr->correction(*itJet);
     }
 
     // jet pT cut (BOTH raw AND corrected pT must exceed threshold)
     if(ptRaw*jetcorr < fMinPt || ptRaw < fMinPt) continue;
+    jetUnc->setJetPt ( ptRaw*jetcorr  );
+    jetUnc->setJetEta( itJet->eta() );
+    double jetunc = jetUnc->getUncertainty(true);
     
-    fJetUnc->setJetPt ( ptRaw  );
-    fJetUnc->setJetEta( itJet->eta() );
-    double jetunc = fJetUnc->getUncertainty(true);
     bool passLoose = JetTools::passPFLooseID(*itJet);
     // construct object and place in array
     assert(rArray.GetEntries() < rArray.GetSize());
@@ -412,6 +436,19 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
   assert(hJetProduct.isValid());
   const pat::JetCollection *jetCol = hJetProduct.product();
 
+  // Get JEC collection
+  edm::Handle<reco::JetCorrector> hJetCorrector;
+  iEvent.getByToken(fTokJECName,hJetCorrector);
+  assert(hJetCorrector.isValid());
+  const reco::JetCorrector *jetCorr = hJetCorrector.product();
+
+  // Get JEC Unc collection
+  edm::ESHandle<JetCorrectorParametersCollection> hJetCorrectorParsCol;
+  iSetup.get<JetCorrectionsRecord>().get(fJECUName,hJetCorrectorParsCol);
+  assert(hJetCorrectorParsCol.isValid());
+  const JetCorrectorParameters    jetPars = (*hJetCorrectorParsCol)["Uncertainty"];
+  JetCorrectionUncertainty       *jetUnc  = new JetCorrectionUncertainty(jetPars);
+
   // Get vertex collection
   edm::Handle<reco::VertexCollection> hVertexProduct;
   iEvent.getByToken(fTokPVName,hVertexProduct);
@@ -456,10 +493,11 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     edm::RefToBase<pat::Jet> jetBaseRef( edm::Ref<pat::JetCollection>(hJetProduct, itJet - jetCol->begin()) );
 
     double ptRaw = itJet->pt()*itJet->jecFactor("Uncorrected");
-
+    if(ptRaw < fMinPt) continue;
     // input to jet corrections
     double jetcorr = 1;
     if(fabs(itJet->eta()) < 5.191 && fApplyJEC) {
+      /* Switching to DB 
       fJetCorr->setJetPt(ptRaw);
       fJetCorr->setJetEta(itJet->eta());
       fJetCorr->setJetPhi(itJet->phi());
@@ -468,12 +506,14 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
       fJetCorr->setJetA(itJet->jetArea());
       fJetCorr->setJetEMF(-99.0);
       jetcorr = fJetCorr->getCorrection();
+      */
+      jetcorr = jetCorr->correction(*itJet);
     }	
     // jet pT cut (BOTH raw AND corrected pT must exceed threshold)
     if(ptRaw*jetcorr < fMinPt || ptRaw < fMinPt) continue;
-    fJetUnc->setJetPt ( ptRaw  );
-    fJetUnc->setJetEta( itJet->eta() );
-    double jetunc = fJetUnc->getUncertainty(true);
+    jetUnc->setJetPt ( ptRaw*jetcorr  );
+    jetUnc->setJetEta( itJet->eta() );
+    double jetunc = jetUnc->getUncertainty(true);
 
     // construct object and place in array
     assert(rArray.GetEntries() < rArray.GetSize());
@@ -853,19 +893,16 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   //match to jet 
   bool matched ;
   reco::BoostedDoubleSVTagInfoCollection::const_iterator matchTI = hBoostedDoubleSVTagInfo->end();
-  for( reco::BoostedDoubleSVTagInfoCollection::const_iterator itTI = hBoostedDoubleSVTagInfo->begin(); itTI != hBoostedDoubleSVTagInfo->end(); ++itTI )
-    {
+  for( reco::BoostedDoubleSVTagInfoCollection::const_iterator itTI = hBoostedDoubleSVTagInfo->begin(); itTI != hBoostedDoubleSVTagInfo->end(); ++itTI ) {
       matched =false;
       const reco::JetBaseRef jetTI = itTI->jet();
 
-      if( jetTI->px() ==  jetBaseRef->px()  && jetTI->pz() ==  jetBaseRef->pz() )
-      {
-        std::cout<< jetTI->px() << "   "<<jetBaseRef->px()  << "   "<<jetTI->pz() <<"   "<<jetBaseRef->pz() <<std::endl;
+      if( jetTI->px() ==  jetBaseRef->px()  && jetTI->pz() ==  jetBaseRef->pz() ) {
         matchTI = itTI;
         matched = true;
         break;
       }
-   }
+  }
   if( matchTI != hBoostedDoubleSVTagInfo->end() && matched) {
 
   const reco::TaggingVariableList vars = matchTI->taggingVariables();

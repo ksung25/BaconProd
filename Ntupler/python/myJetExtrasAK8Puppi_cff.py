@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 # take the default AK4 GenJet producer and modify accordingly for cone size and clustering algorithm
 from RecoJets.Configuration.RecoGenJets_cff import ak4GenJetsNoNu
 AK8GenJetsPuppi = ak4GenJetsNoNu.clone(
-    jetAlgorithm = cms.string("CambridgeAachen"),
+    jetAlgorithm = cms.string("AntiKt"),
     rParam       = cms.double(0.8)
   )
 
@@ -15,7 +15,7 @@ AK8FlavorPuppi = cms.EDProducer("JetFlavourClustering",
     bHadrons                 = cms.InputTag("selectedHadronsAndPartons","bHadrons"),
     cHadrons                 = cms.InputTag("selectedHadronsAndPartons","cHadrons"),
     partons                  = cms.InputTag("selectedHadronsAndPartons","algorithmicPartons"),
-    jetAlgorithm             = cms.string("CambridgeAachen"),
+    jetAlgorithm             = cms.string("AntiKt"),
     rParam                   = cms.double(0.8),
     ghostRescaling           = cms.double(1e-18),
     hadronFlavourHasPriority = cms.bool(True)
@@ -35,7 +35,7 @@ AK8caPFJetsPrunedPuppi = AK8PFJetsPuppi.clone(
     cms.PSet(nFilt = cms.int32(2),
              zcut = cms.double(0.1),
              rcut_factor = cms.double(0.5)),
-    jetAlgorithm        = cms.string("CambridgeAachen"),
+    jetAlgorithm        = cms.string("AntiKt"),
     usePruning          = cms.bool(True),
     useExplicitGhosts   = cms.bool(True),
     writeCompound       = cms.bool(True),
@@ -103,6 +103,7 @@ AK8jetsequencePuppi = cms.Sequence(
     AK8QGTaggerPuppi*
     AK8QGTaggerSubJetsPuppi*                
     AK8NjettinessPuppi*
+    #AK8GenJetsPuppi*
     AK8FlavorPuppi
     )
 

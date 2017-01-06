@@ -55,11 +55,13 @@
 NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fSkipOnHLTFail     (iConfig.getUntrackedParameter<bool>("skipOnHLTFail",false)),
   fUseAOD            (iConfig.getUntrackedParameter<bool>("useAOD",true)),
-  fHLTTag            ("TriggerResults","","HLT"),
+  fHLTEnd            (iConfig.getUntrackedParameter<std::string>("HLTEnd","HLT")),
+  fHLTTag            ("TriggerResults","",fHLTEnd),
   fHLTObjTag         (iConfig.getUntrackedParameter<std::string>("TriggerObject","hltTriggerSummaryAOD")),
-  fHLTFile           (iConfig.getUntrackedParameter<std::string>("TriggerFile","HLT")),
+  fHLTFile           (iConfig.getUntrackedParameter<std::string>("TriggerFile",fHLTEnd)),
   fPVName            (iConfig.getUntrackedParameter<std::string>("edmPVName","offlinePrimaryVertices")),
   fGenRunInfoName    (iConfig.getUntrackedParameter<std::string>("edmGenRunInfoName","generator")),
+  fUseRunInfo        (iConfig.getUntrackedParameter<bool>("useRunInfo",true)),
   fFillLHEWgt        (false),
   fUseAODJet           (true),
   fUseAODFatJet        (true),
@@ -706,7 +708,7 @@ void NtuplerMod::fillDescriptions(edm::ConfigurationDescriptions& descriptions) 
   descriptions.addDefault(desc);
 }
 void NtuplerMod::endRun  (const edm::Run& iRun, const edm::EventSetup& iSetup){
-  if(fIsActiveGenInfo) { 
+  if(fIsActiveGenInfo && fUseRunInfo) { 
     // Get generator event information
     edm::Handle<GenRunInfoProduct> hGenRunInfoProduct;
     iRun.getByToken(fTokGenRunInfo,hGenRunInfoProduct);

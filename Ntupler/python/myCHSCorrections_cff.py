@@ -1,23 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from JetMETCorrections.Configuration.JetCorrectorsAllAlgos_cff  import *
 
-#puppijec =  cms.ESSource("PoolDBESSource",
-#                         DBParameters = cms.PSet(messageLevel = cms.untracked.int32(0)),
-#                         timetype = cms.string('runnumber'),
-#                         toGet = cms.VPSet(
-#                           cms.PSet(record  = cms.string('JetCorrectionsRecord'),
-#                                    tag     = cms.string('JetCorrectorParametersCollection_PY8_RunIISpring15DR74_bx50_MC_AK4PFchs'),
-#                                    label   = cms.untracked.string('AK4puppi')
-#                                    ),
-#                           cms.PSet(record  = cms.string('JetCorrectionsRecord'),
-#                                    tag     = cms.string('JetCorrectorParametersCollection_PY8_RunIISpring15DR74_bx50_MC_AK8PFchs'),
-#                                    label   = cms.untracked.string('AK8puppi')
-#                                    )
-#                           ),
-                         #connect = cms.string('sqlite:PY8_RunIISpring15DR74_bx50_MC.dbX'),
-                         #connect = cms.string('sqlite:///BaconProd/Utils/data/PY8_RunIISpring15DR74_bx50_MC.db'),
-#                         )                                        
-
 #chs Sequence AK4
 chslabel='PFchs'
 ak4chsL1FastjetCorrector  = ak4PFCHSL1FastjetCorrector.clone (algorithm   = cms.string('AK4'+chslabel))

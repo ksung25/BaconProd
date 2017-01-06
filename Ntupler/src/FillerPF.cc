@@ -207,7 +207,7 @@ float FillerPF::depthDeltaR(const reco::PFCandidate *iPF,const reco::PFRecHitCol
    //Get Calo Depth of PF Clusters in a cylinder using deltar R
   float lEta     = iPF->positionAtECALEntrance().eta();
   float lPhi     = iPF->positionAtECALEntrance().phi();
-  float lRhoE    = iPF->positionAtECALEntrance().rho();
+  //float lRhoE    = iPF->positionAtECALEntrance().rho();
   float lTotRho  = 0; 
   float lTotE    = 0;
   for(unsigned int i0 = 0; i0 < iPFCol.size(); i0++) { 

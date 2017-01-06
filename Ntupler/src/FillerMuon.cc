@@ -23,15 +23,17 @@ FillerMuon::FillerMuon(const edm::ParameterSet &iConfig, const bool useAOD,edm::
   fSaveTracks    (iConfig.getUntrackedParameter<bool>("doSaveTracks",false)),
   fTrackMinPt    (iConfig.getUntrackedParameter<double>("minTrackPt",20)),
   fPuppiName     (iConfig.getUntrackedParameter<std::string>("edmPuppiName","puppi")),
-  fPuppiNoLepName(iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppinolep")),
+  fPuppiNoLepName(iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppiNoLep")),
   fUsePuppi      (iConfig.getUntrackedParameter<bool>("usePuppi",true)),
   fUseAOD        (useAOD)
 {
   if(fUseAOD)  fTokMuonName       = iC.consumes<reco::MuonCollection>       (fMuonName);
   if(!fUseAOD) fTokPatMuonName    = iC.consumes<pat::MuonCollection>        (fMuonName);
   fTokPFCandName     = iC.consumes<reco::PFCandidateCollection>(fPFCandName);
-  fTokPuppiName      = iC.consumes<reco::PFCandidateCollection>(fPuppiName);
-  fTokPuppiNoLepName = iC.consumes<reco::PFCandidateCollection>(fPuppiNoLepName);
+  if(fUseAOD)  fTokPuppiName      = iC.consumes<reco::PFCandidateCollection>(fPuppiName);
+  if(fUseAOD)  fTokPuppiNoLepName = iC.consumes<reco::PFCandidateCollection>(fPuppiNoLepName);
+  if(!fUseAOD) fTokPuppiPATName      = iC.consumes<pat::PackedCandidateCollection>(fPuppiName);
+  if(!fUseAOD) fTokPuppiNoLepPATName = iC.consumes<pat::PackedCandidateCollection>(fPuppiNoLepName);
   fTokTrackName      = iC.consumes<reco::TrackCollection>      (fTrackName);
 }
 
@@ -334,18 +336,18 @@ void FillerMuon::fill(TClonesArray *array,
 {
   assert(array);
 
-  const reco::PFCandidateCollection *pfPuppi      = 0;
-  const reco::PFCandidateCollection *pfPuppiNoLep = 0;
+  const pat::PackedCandidateCollection *pfPuppi      = 0;
+  const pat::PackedCandidateCollection *pfPuppiNoLep = 0;
   if(fUsePuppi) { 
     // Get Puppi-candidates collection woof woof
-    edm::Handle<reco::PFCandidateCollection> hPuppiProduct;
-    iEvent.getByToken(fTokPuppiName,hPuppiProduct);
+    edm::Handle<pat::PackedCandidateCollection> hPuppiProduct;
+    iEvent.getByToken(fTokPuppiPATName,hPuppiProduct);
     assert(hPuppiProduct.isValid());
-    pfPuppi      = hPuppiProduct.product();
-
+    pfPuppi = hPuppiProduct.product();
+    
     // Get Puppi-no lep candidates collection arf arf
-    edm::Handle<reco::PFCandidateCollection> hPuppiNoLepProduct;
-    iEvent.getByToken(fTokPuppiNoLepName,hPuppiNoLepProduct);
+    edm::Handle<pat::PackedCandidateCollection> hPuppiNoLepProduct;
+    iEvent.getByToken(fTokPuppiNoLepPATName,hPuppiNoLepProduct);
     assert(hPuppiNoLepProduct.isValid());
     pfPuppiNoLep = hPuppiNoLepProduct.product();
   }
@@ -510,6 +512,42 @@ void FillerMuon::computeIso(double &iEta,double &iPhi, const double extRadius,
       if     (pfcand.particleId() == reco::PFCandidate::h)                             { chHadIso  += pfcand.pt(); }
       else if(pfcand.particleId() == reco::PFCandidate::gamma && pfcand.pt() > ptMin) { gammaIso  += pfcand.pt(); }
       else if(pfcand.particleId() == reco::PFCandidate::h0    && pfcand.pt() > ptMin) { neuHadIso += pfcand.pt(); }
+    }
+  }
+  // compute PU iso
+  out_chHadIso  = chHadIso;
+  out_gammaIso  = gammaIso;
+  out_neuHadIso = neuHadIso;
+}
+void FillerMuon::computeIso(double &iEta,double &iPhi, const double extRadius,
+			    const pat::PackedCandidateCollection    &puppi,
+                            float &out_chHadIso, float &out_gammaIso, float &out_neuHadIso) const
+{
+  // Muon PF isolation with delta-beta PU correction:
+  // https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId#Muon_Isolation
+  
+  double chHadIso=0, gammaIso=0, neuHadIso=0;
+  
+  const double ptMin           = 0.1;  
+  //const double intRadiusChHad  = 0.0001;
+  //const double intRadiusGamma  = 0.01;
+  //const double intRadiusNeuHad = 0.01;
+  double intRadius = 0;
+  
+  for(unsigned int ipf=0; ipf<puppi.size(); ipf++) {
+    const pat::PackedCandidate pfcand = puppi.at(ipf);    
+    bool pPass = true;
+    double dr = reco::deltaR(pfcand.eta(), pfcand.phi(), iEta, iPhi);
+    if(dr < 0.0001) pPass = false; //Use this to avoid float/double bullshit
+    if(pPass) { 
+      if     (abs(pfcand.pdgId()) == 211)     { intRadius = 0;}//intRadiusChHad; }
+      else if(abs(pfcand.pdgId()) == 22)      { intRadius = 0;}//intRadiusGamma;  }
+      else if(abs(pfcand.pdgId()) == 130)     { intRadius = 0;}//intRadiusNeuHad; }
+            
+      if(dr>=extRadius || dr<intRadius) continue;
+      if     (abs(pfcand.pdgId()) == 211)                        { chHadIso  += pfcand.pt(); }
+      else if(abs(pfcand.pdgId()) == 22  && pfcand.pt() > ptMin) { gammaIso  += pfcand.pt(); }
+      else if(abs(pfcand.pdgId()) == 130 && pfcand.pt() > ptMin) { neuHadIso += pfcand.pt(); }      
     }
   }
   // compute PU iso

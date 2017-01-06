@@ -9,6 +9,8 @@
 <use name="DataFormats/JetReco"/>
 <use name="DataFormats/HepMCCandidate"/>
 <use name="DataFormats/PatCandidates"/>
+<use name="JetMETCorrections/JetCorrector"/>
+<use name="JetMETCorrections/Objects"/>
 <use name="fastjet"/>
 <use name="fastjet-contrib"/>
 <flags CXXFLAGS="-g -Wall"/>

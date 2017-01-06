@@ -13,6 +13,7 @@
 #include "DataFormats/JetReco/interface/JetCollection.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/JetReco/interface/GenJetCollection.h"
+#include "JetMETCorrections/JetCorrector/interface/JetCorrector.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -89,6 +90,8 @@ namespace baconhep
       std::string fPVName;
       std::string fRhoName;
       std::string fJetName;
+      std::string fJECName;
+      std::string fJECUName;
       std::string fGenJetName;
       std::string fJetFlavorName;
       std::string fPrunedJetName;
@@ -130,6 +133,7 @@ namespace baconhep
       EnergyCorrelations* fECF;
 
     edm::EDGetTokenT<reco::PFJetCollection>  fTokJetName;
+    edm::EDGetTokenT<reco::JetCorrector>     fTokJECName;
     edm::EDGetTokenT<pat::JetCollection>     fTokPatJetName;
     edm::EDGetTokenT<reco::GenJetCollection> fTokGenJetName;
     edm::EDGetTokenT<reco::JetFlavourInfoMatchingCollection> fTokJetFlavorName;

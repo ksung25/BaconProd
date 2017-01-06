@@ -19,7 +19,7 @@ BoostedBtaggingMVACalculator::~BoostedBtaggingMVACalculator() {
 }
 
 //--------------------------------------------------------------------------------------------------
-void BoostedBtaggingMVACalculator::initialize(const std::string MethodTag, const std::string WeightFile)
+void BoostedBtaggingMVACalculator::initialize(const std::string MethodTag, const std::string WeightFile,bool iUseSubJet)
 {
    fMethodTag  = MethodTag;
   
@@ -27,8 +27,8 @@ void BoostedBtaggingMVACalculator::initialize(const std::string MethodTag, const
     if(fReader !=0) delete fReader;
     fReader = new TMVA::Reader();
 
-
-    fReader->AddVariable("SubJet_csv",&_SubJet_csv);
+    
+    if(iUseSubJet) fReader->AddVariable("SubJet_csv",&_SubJet_csv);
     fReader->AddVariable("z_ratio",&_z_ratio);
     fReader->AddVariable("trackSipdSig_3",&_trackSipdSig_3);
     fReader->AddVariable("trackSipdSig_2",&_trackSipdSig_2);

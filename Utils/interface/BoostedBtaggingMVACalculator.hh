@@ -18,7 +18,7 @@ namespace baconhep {
       ~BoostedBtaggingMVACalculator();
       
       void initialize(
-                      const std::string MethodTag, const std::string WeightFile);
+                      const std::string MethodTag, const std::string WeightFile,bool iUseSubJet=true);
       
       bool isInitialized() const {return fIsInitialized;}
       

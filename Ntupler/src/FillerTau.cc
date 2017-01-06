@@ -13,7 +13,7 @@ FillerTau::FillerTau(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fMinPt  (iConfig.getUntrackedParameter<double>("minPt",10)),
   fTauName(iConfig.getUntrackedParameter<std::string>("edmName","hpsPFTauProducer")),
   fPuppiName     (iConfig.getUntrackedParameter<std::string>("edmPuppiName","puppi")),
-  fPuppiNoLepName(iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppinolep")),
+  fPuppiNoLepName(iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppiNoLep")),
   fUsePuppi      (iConfig.getUntrackedParameter<bool>("usePuppi",true)),
   fUseAOD (useAOD)
 {
@@ -101,17 +101,17 @@ FillerTau::FillerTau(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byTightIsolationMVA3oldDMwoLT",kByTightIsolationMVA3oldDMwoLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVTightIsolationMVA3oldDMwoLT",kByVTightIsolationMVA3oldDMwoLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVVTightIsolationMVA3oldDMwoLT",kByVVTightIsolationMVA3oldDMwoLT));
-    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVLooseIsolationMVA3oldDMwLT",kByVLooseIsolationMVA3oldDMwLT));
-    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byLooseIsolationMVA3oldDMwLT",kByLooseIsolationMVA3oldDMwLT));
-    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byMediumIsolationMVA3oldDMwLT",kByMediumIsolationMVA3oldDMwLT));
-    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byTightIsolationMVA3oldDMwLT",kByTightIsolationMVA3oldDMwLT));
-    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVTightIsolationMVA3oldDMwLT",kByVTightIsolationMVA3oldDMwLT));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVLooseIsolationMVArun2v1DBoldDMwLT",kByVLooseIsolationMVA3oldDMwLT));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byLooseIsolationMVArun2v1DBoldDMwLT",kByLooseIsolationMVA3oldDMwLT));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byMediumIsolationMVArun2v1DBoldDMwLT",kByMediumIsolationMVA3oldDMwLT));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byTightIsolationMVArun2v1DBoldDMwLT",kByTightIsolationMVA3oldDMwLT));
+    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVTightIsolationMVArun2v1DBoldDMwLT",kByVTightIsolationMVA3oldDMwLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVVTightIsolationMVA3oldDMwLT",kByVVTightIsolationMVA3oldDMwLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVLooseIsolationMVA3newDMwoLT",kByVLooseIsolationMVA3newDMwoLT));
-    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byLooseIsolationMVA3newDMwoLT",kByLooseIsolationMVA3newDMwoLT));
-    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byMediumIsolationMVA3newDMwoLT",kByMediumIsolationMVA3newDMwoLT));
-    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byTightIsolationMVA3newDMwoLT",kByTightIsolationMVA3newDMwoLT));
-    //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVTightIsolationMVA3newDMwoLT",kByVTightIsolationMVA3newDMwoLT));
+    //    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byLooseIsolationMVA3newDMwoLT",kByLooseIsolationMVA3newDMwoLT));
+    //    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byMediumIsolationMVA3newDMwoLT",kByMediumIsolationMVA3newDMwoLT));
+    //    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byTightIsolationMVA3newDMwoLT",kByTightIsolationMVA3newDMwoLT));
+    //    fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVTightIsolationMVA3newDMwoLT",kByVTightIsolationMVA3newDMwoLT));
     //fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVVTightIsolationMVA3newDMwoLT",kByVVTightIsolationMVA3newDMwoLT));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("byVLooseIsolationMVArun2v1DBnewDMwLT",kByVLooseIsolationMVA3newDMwLT));
     fMyTauDiscHandles.push_back(new MyTauDiscHandle("byLooseIsolationMVArun2v1DBnewDMwLT",kByLooseIsolationMVA3newDMwLT));
@@ -132,15 +132,19 @@ FillerTau::FillerTau(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   std::string lTokMVAMuonRejRaw              = "hpsPFTauDiscriminationByMVArawMuonRejection";
   std::string lTokCombIsoDBSumPtCorr3HitsRaw = "hpsPFTauDiscriminationByRawCombinedIsolationDBSumPtCorr3Hits";
   std::string lTokIsoMVA3newwRaw             = "hpsPFTauDiscriminationByIsolationMVArun2v1DBnewDMwLTraw";
+  std::string lTokIsoMVA3oldwRaw             = "hpsPFTauDiscriminationByIsolationMVArun2v1DBoldDMwLTraw";
+
 
   fTokMVA6EleRejRaw              = iC.consumes<reco::PFTauDiscriminator>(lTokMVA6EleRejRaw);
   fTokMVA6EleRejCat              = iC.consumes<reco::PFTauDiscriminator>(lTokMVA6EleRejCat);
   fTokMVAMuonRejRaw              = iC.consumes<reco::PFTauDiscriminator>(lTokMVAMuonRejRaw);
   fTokCombIsoDBSumPtCorr3HitsRaw = iC.consumes<reco::PFTauDiscriminator>(lTokCombIsoDBSumPtCorr3HitsRaw);
   fTokIsoMVA3newwRaw             = iC.consumes<reco::PFTauDiscriminator>(lTokIsoMVA3newwRaw);
-  fTokPuppiName                  = iC.consumes<reco::PFCandidateCollection>(fPuppiName);
-  fTokPuppiNoLepName             = iC.consumes<reco::PFCandidateCollection>(fPuppiNoLepName);
-
+  fTokIsoMVA3oldwRaw             = iC.consumes<reco::PFTauDiscriminator>(lTokIsoMVA3oldwRaw);
+  if(fUseAOD)  fTokPuppiName      = iC.consumes<reco::PFCandidateCollection>(fPuppiName);
+  if(fUseAOD)  fTokPuppiNoLepName = iC.consumes<reco::PFCandidateCollection>(fPuppiNoLepName);
+  if(!fUseAOD) fTokPuppiPATName      = iC.consumes<pat::PackedCandidateCollection>(fPuppiName);
+  if(!fUseAOD) fTokPuppiNoLepPATName = iC.consumes<pat::PackedCandidateCollection>(fPuppiNoLepName);
   // event energy density for ring isolation
   //edm::Handle<double> hRho;
 
@@ -189,8 +193,8 @@ void FillerTau::fill(TClonesArray *array,
   iEvent.getByToken(fTokCombIsoDBSumPtCorr3HitsRaw,hCombIsoDBSumPtCorr3HitsRaw);
   //edm::Handle<reco::PFTauDiscriminator> hIsoMVA3oldwoRaw;
   //iEvent.getByLabel("hpsPFTauDiscriminationByIsolationMVA3oldDMwoLTraw",hIsoMVA3oldwoRaw);
-  //edm::Handle<reco::PFTauDiscriminator> hIsoMVA3oldwRaw;
-  //iEvent.getByToken(fTokIsoMVA3oldwRaw,hIsoMVA3oldwRaw);
+  edm::Handle<reco::PFTauDiscriminator> hIsoMVA3oldwRaw;
+  iEvent.getByToken(fTokIsoMVA3oldwRaw,hIsoMVA3oldwRaw);
   //edm::Handle<reco::PFTauDiscriminator> hIsoMVA3newwoRaw;
   //iEvent.getByToken(fTokIsoMVA3newwoRaw,hIsoMVA3newwoRaw);
   edm::Handle<reco::PFTauDiscriminator> hIsoMVA3newwRaw;
@@ -248,6 +252,8 @@ void FillerTau::fill(TClonesArray *array,
     //==============================
     const reco::PFCandidatePtr& leadChHad = itTau->leadPFChargedHadrCand();
     pTau->dzLeadChHad = (leadChHad.isNonnull() && leadChHad->trackRef().isNonnull()) ? leadChHad->trackRef()->dz(pv.position()) : -999.;    
+    pTau->d0LeadChHad = (leadChHad.isNonnull() && leadChHad->trackRef().isNonnull()) ? -leadChHad->trackRef()->dxy(pv.position()) : -999.;
+
 
    
     //
@@ -257,7 +263,7 @@ void FillerTau::fill(TClonesArray *array,
     //pTau->ringIso2    = fRingIso2.isInitialized() ? fRingIso2.mvaValue(*itTau, *hRho) : -1;
     pTau->rawIso3Hits = hCombIsoDBSumPtCorr3HitsRaw.isValid() ? (*hCombIsoDBSumPtCorr3HitsRaw)[tauRef] : 0;
     //pTau->rawIsoMVA3oldDMwoLT = hIsoMVA3oldwoRaw.isValid() ? (*hIsoMVA3oldwoRaw)[tauRef] : 0;
-    //pTau->rawIsoMVA3oldDMwLT  = hIsoMVA3oldwRaw.isValid()  ? (*hIsoMVA3oldwRaw)[tauRef]  : 0;
+    pTau->rawIsoMVA3oldDMwLT  = hIsoMVA3oldwRaw.isValid()  ? (*hIsoMVA3oldwRaw)[tauRef]  : 0;
     //pTau->rawIsoMVA3newDMwoLT = hIsoMVA3newwoRaw.isValid() ? (*hIsoMVA3newwoRaw)[tauRef] : 0;
     pTau->rawIsoMVA3newDMwLT  = hIsoMVA3newwRaw.isValid()  ? (*hIsoMVA3newwRaw)[tauRef]  : 0;
     if(fUsePuppi) { 
@@ -280,7 +286,7 @@ void FillerTau::fill(TClonesArray *array,
     //==============================               
     pTau->nSignalChHad = itTau->signalPFChargedHadrCands().size();
     pTau->nSignalGamma = itTau->signalPFGammaCands().size();
-
+    pTau->decaymode    = itTau->decayMode();
     pTau->hpsDisc=0;
     for(unsigned int idisc=0; idisc<fMyTauDiscHandles.size(); idisc++) {
       if(fMyTauDiscHandles[idisc]->value(tauRef)>0) {
@@ -310,18 +316,18 @@ void FillerTau::fill(TClonesArray *array,
   assert(hTauProduct.isValid());
   const pat::TauCollection *tauCol = hTauProduct.product();
 
-  const reco::PFCandidateCollection *pfPuppi      = 0;
-  const reco::PFCandidateCollection *pfPuppiNoLep = 0;
+  const pat::PackedCandidateCollection *pfPuppi      = 0;
+  const pat::PackedCandidateCollection *pfPuppiNoLep = 0;
   if(fUsePuppi) { 
     // Get Puppi-candidates collection woof woof
-    edm::Handle<reco::PFCandidateCollection> hPuppiProduct;
-    iEvent.getByToken(fTokPuppiName,hPuppiProduct);
+    edm::Handle<pat::PackedCandidateCollection> hPuppiProduct;
+    iEvent.getByToken(fTokPuppiPATName,hPuppiProduct);
     assert(hPuppiProduct.isValid());
     pfPuppi = hPuppiProduct.product();
     
     // Get Puppi-no lep candidates collection arf arf
-    edm::Handle<reco::PFCandidateCollection> hPuppiNoLepProduct;
-    iEvent.getByToken(fTokPuppiNoLepName,hPuppiNoLepProduct);
+    edm::Handle<pat::PackedCandidateCollection> hPuppiNoLepProduct;
+    iEvent.getByToken(fTokPuppiNoLepPATName,hPuppiNoLepProduct);
     assert(hPuppiNoLepProduct.isValid());
     pfPuppiNoLep = hPuppiNoLepProduct.product();
   }
@@ -355,6 +361,10 @@ void FillerTau::fill(TClonesArray *array,
     //==============================
     //const reco::CandidatePtr& leadChHad = itTau->leadChargedHadrCand();
     //pTau->dzLeadChHad = (leadChHad.isNonnull() && leadChHad->trackRef().isNonnull()) ? leadChHad->trackRef()->dz(pv.position()) : -999.;
+    pat::PackedCandidate const* packedLeadTauCand = dynamic_cast<pat::PackedCandidate const*>(itTau->leadChargedHadrCand().get());
+    pTau->dzLeadChHad = (packedLeadTauCand)?packedLeadTauCand->dz():-999;
+    pTau->d0LeadChHad = (packedLeadTauCand)?-packedLeadTauCand->dxy():-999;
+
 
 
     //
@@ -367,6 +377,8 @@ void FillerTau::fill(TClonesArray *array,
     //pTau->rawIsoMVA3oldDMwLT  = itTau->tauID("byIsolationMVA3oldDMwLTraw");
     //pTau->rawIsoMVA3newDMwoLT = itTau->tauID("byIsolationMVA3newDMwoLTraw");
     pTau->rawIsoMVA3newDMwLT  = itTau->tauID("byIsolationMVArun2v1DBnewDMwLTraw");
+    pTau->rawIsoMVA3oldDMwLT  = itTau->tauID("byIsolationMVArun2v1DBoldDMwLTraw");
+
     
     if(fUsePuppi) { 
       const std::vector<reco::PFCandidatePtr> pCands = itTau->signalPFCands();
@@ -388,6 +400,7 @@ void FillerTau::fill(TClonesArray *array,
     //==============================
     pTau->nSignalChHad = itTau->signalPFChargedHadrCands().size();
     pTau->nSignalGamma = itTau->signalPFGammaCands().size();
+    pTau->decaymode    = itTau->decayMode();
 
     pTau->hpsDisc=0;
     for(unsigned int idisc=0; idisc<fMyTauDiscHandles.size(); idisc++) {
@@ -435,6 +448,46 @@ void FillerTau::computeIso(double &iEta,double &iPhi,const std::vector<reco::PFC
       if     (pfcand.particleId() == reco::PFCandidate::h)                             { chHadIso  += pfcand.pt(); }
       else if(pfcand.particleId() == reco::PFCandidate::gamma && pfcand.pt() > ptMin) { gammaIso  += pfcand.pt(); }
       else if(pfcand.particleId() == reco::PFCandidate::h0    && pfcand.pt() > ptMin) { neuHadIso += pfcand.pt(); }
+    }
+  }
+  // compute PU iso
+  out_chHadIso  = chHadIso;
+  out_gammaIso  = gammaIso;
+  out_neuHadIso = neuHadIso;
+}
+void FillerTau::computeIso(double &iEta,double &iPhi,const std::vector<reco::PFCandidatePtr>& iCands, const double extRadius,
+			   const pat::PackedCandidateCollection    &puppi,
+			   float &out_chHadIso, float &out_gammaIso, float &out_neuHadIso) const
+{
+
+  
+  double chHadIso=0, gammaIso=0, neuHadIso=0;
+  
+  const double ptMin           = 0.1;  
+  //const double intRadiusChHad  = 0.0001;
+  //const double intRadiusGamma  = 0.01;
+  //const double intRadiusNeuHad = 0.01;
+  double intRadius = 0;
+  
+  for(unsigned int ipf=0; ipf<puppi.size(); ipf++) {
+    const pat::PackedCandidate pfcand = puppi.at(ipf);    
+    bool pPass = true;
+    for(unsigned int iTau=0; iTau<iCands.size(); iTau++) { 
+      const reco::PFCandidatePtr tauCand = iCands[iTau];
+      double dr = reco::deltaR(pfcand.eta(), pfcand.phi(), tauCand->eta(), tauCand->phi());
+      if(dr < 0.0001) pPass = false;  
+    }
+    if(pPass) { 
+      if     (abs(pfcand.pdgId()) == 211)     { intRadius = 0;}//intRadiusChHad; }
+      else if(abs(pfcand.pdgId()) == 22)      { intRadius = 0;}//intRadiusGamma;  }
+      else if(abs(pfcand.pdgId()) == 130)     { intRadius = 0;}//intRadiusNeuHad; }
+            
+      double dr = reco::deltaR(pfcand.eta(), pfcand.phi(), iEta, iPhi);
+      if(dr>=extRadius || dr<intRadius) continue;
+            
+      if     (abs(pfcand.pdgId()) == 211)                        { chHadIso  += pfcand.pt(); }
+      else if(abs(pfcand.pdgId()) == 22  && pfcand.pt() > ptMin) { gammaIso  += pfcand.pt(); }
+      else if(abs(pfcand.pdgId()) == 130 && pfcand.pt() > ptMin) { neuHadIso += pfcand.pt(); }
     }
   }
   // compute PU iso
