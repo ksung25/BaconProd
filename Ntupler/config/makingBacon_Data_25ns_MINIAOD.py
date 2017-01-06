@@ -142,6 +142,7 @@ runMetCorAndUncFromMiniAOD(process,
                            jetFlavor="AK4PFPuppi",
                            jetCorLabelL3="ak4PuppiL1FastL2L3Corrector",
                            jetCorLabelRes="ak4PuppiL1FastL2L3ResidualCorrector",
+                           reclusterJets=True,
                            postfix="Puppi"
                            )
 #Some dumb crap to get the MET to work
@@ -179,8 +180,10 @@ if do_alpaca:
 
 runMetCorAndUncFromMiniAOD(process,
                            isData=is_data_flag,
-                           jetCorLabelL3="ak4L1FastL2L3Corrector",
-                           jetCorLabelRes="ak4L1FastL2L3ResidualCorrector",
+                           jetCorLabelL3="ak4chsL1FastL2L3Corrector",
+                           jetCorLabelRes="ak4chsL1FastL2L3ResidualCorrector",
+                           reclusterJets=True,
+                           recoMetFromPFCs=True
                            )
 
 #--------------------------------------------------------------------------------

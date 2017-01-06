@@ -12,6 +12,7 @@ cmssw_base = os.environ['CMSSW_BASE']
 
 #JEC
 JECTag='Spring16_23Sep2016V2_MC'
+JECTag='Spring16_25nsV6_MC'
 if is_data_flag: 
   JECTag='Spring16_23Sep2016AllV2_DATA'
 
@@ -142,6 +143,7 @@ runMetCorAndUncFromMiniAOD(process,
                            jetFlavor="AK4PFPuppi",
                            jetCorLabelL3="ak4PuppiL1FastL2L3Corrector",
                            jetCorLabelRes="ak4PuppiL1FastL2L3ResidualCorrector",
+                           reclusterJets=True,
                            postfix="Puppi"
                            )
 #Some dumb crap to get the MET to work
@@ -179,8 +181,10 @@ if do_alpaca:
 
 runMetCorAndUncFromMiniAOD(process,
                            isData=is_data_flag,
-                           jetCorLabelL3="ak4L1FastL2L3Corrector",
-                           jetCorLabelRes="ak4L1FastL2L3ResidualCorrector",
+                           jetCorLabelL3="ak4chsL1FastL2L3Corrector",
+                           jetCorLabelRes="ak4chsL1FastL2L3ResidualCorrector",
+                           reclusterJets=True,
+                           recoMetFromPFCs=True
                            )
 
 #--------------------------------------------------------------------------------
