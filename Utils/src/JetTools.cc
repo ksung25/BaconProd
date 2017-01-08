@@ -48,11 +48,11 @@ double JetTools::beta(const pat::Jet &jet, const reco::Vertex &pv, const double 
   for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
     reco::Candidate const *cand = jet.daughter(ida);
     if(cand->numberOfDaughters()==0) {  // AK8 jets in MINIAOD are SUBJETS
-      constituents.push_back(cand);
+      constituents.emplace_back(cand);
     } else {
       for(unsigned int jda=0; jda<cand->numberOfDaughters(); jda++) {
         reco::Candidate const *cand2 = cand->daughter(jda);
-        constituents.push_back(cand2);
+        constituents.emplace_back(cand2);
       }
     }
   }
@@ -122,11 +122,11 @@ double JetTools::betaStar(const pat::Jet &jet, const reco::Vertex &pv, const rec
   for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
     reco::Candidate const *cand = jet.daughter(ida);
     if(cand->numberOfDaughters()==0) {  // AK8 jets in MINIAOD are SUBJETS
-      constituents.push_back(cand);
+      constituents.emplace_back(cand);
     } else {
       for(unsigned int jda=0; jda<cand->numberOfDaughters(); jda++) {
         reco::Candidate const *cand2 = cand->daughter(jda);
-        constituents.push_back(cand2);
+        constituents.emplace_back(cand2);
       }
     }
   }
@@ -202,11 +202,11 @@ double JetTools::dRMean(const pat::Jet &jet, const int pfType)
   for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
     reco::Candidate const *cand = jet.daughter(ida);
     if(cand->numberOfDaughters()==0) {  // AK8 jets in MINIAOD are SUBJETS
-      constituents.push_back(cand);
+      constituents.emplace_back(cand);
     } else {
       for(unsigned int jda=0; jda<cand->numberOfDaughters(); jda++) {
         reco::Candidate const *cand2 = cand->daughter(jda);
-        constituents.push_back(cand2);
+        constituents.emplace_back(cand2);
       }
     }
   }
@@ -278,11 +278,11 @@ double JetTools::dR2Mean(const pat::Jet &jet, const int pfType)
   for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
     reco::Candidate const *cand = jet.daughter(ida);
     if(cand->numberOfDaughters()==0) {  // AK8 jets in MINIAOD are SUBJETS
-      constituents.push_back(cand);
+      constituents.emplace_back(cand);
     } else {
       for(unsigned int jda=0; jda<cand->numberOfDaughters(); jda++) {
         reco::Candidate const *cand2 = cand->daughter(jda);
-        constituents.push_back(cand2);
+        constituents.emplace_back(cand2);
       }
     }
   }
@@ -361,11 +361,11 @@ double JetTools::frac(const pat::Jet &jet, const double dRMax, const int pfType)
   for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
     reco::Candidate const *cand = jet.daughter(ida);
     if(cand->numberOfDaughters()==0) {  // AK8 jets in MINIAOD are SUBJETS
-      constituents.push_back(cand);
+      constituents.emplace_back(cand);
     } else {
       for(unsigned int jda=0; jda<cand->numberOfDaughters(); jda++) {
         reco::Candidate const *cand2 = cand->daughter(jda);
-        constituents.push_back(cand2);
+        constituents.emplace_back(cand2);
       }
     }
   }
@@ -419,11 +419,11 @@ double JetTools::jetDz(const pat::Jet &jet, const reco::Vertex &pv)
   for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
     reco::Candidate const *cand = jet.daughter(ida);
     if(cand->numberOfDaughters()==0) {  // AK8 jets in MINIAOD are SUBJETS
-      constituents.push_back(cand);
+      constituents.emplace_back(cand);
     } else {
       for(unsigned int jda=0; jda<cand->numberOfDaughters(); jda++) {
         reco::Candidate const *cand2 = cand->daughter(jda);
-        constituents.push_back(cand2);
+        constituents.emplace_back(cand2);
       }
     }
   }
@@ -471,11 +471,11 @@ double JetTools::jetD0(const pat::Jet &jet, const reco::Vertex &pv)
   for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
     reco::Candidate const *cand = jet.daughter(ida);
     if(cand->numberOfDaughters()==0) {  // AK8 jets in MINIAOD are SUBJETS
-      constituents.push_back(cand);
+      constituents.emplace_back(cand);
     } else {
       for(unsigned int jda=0; jda<cand->numberOfDaughters(); jda++) {
         reco::Candidate const *cand2 = cand->daughter(jda);
-        constituents.push_back(cand2);
+        constituents.emplace_back(cand2);
       }
     }
   }
@@ -583,11 +583,11 @@ double JetTools::jetWidth(const pat::Jet &jet, const int varType, const int pfTy
   for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
     reco::Candidate const *cand = jet.daughter(ida);
     if(cand->numberOfDaughters()==0) {  // AK8 jets in MINIAOD are SUBJETS
-      constituents.push_back(cand);
+      constituents.emplace_back(cand);
     } else {
       for(unsigned int jda=0; jda<cand->numberOfDaughters(); jda++) {
         reco::Candidate const *cand2 = cand->daughter(jda);
-        constituents.push_back(cand2);
+        constituents.emplace_back(cand2);
       }
     }
   }
@@ -739,11 +739,11 @@ double JetTools::jetCharge(const pat::Jet &jet, const double kappa)
   for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
     reco::Candidate const *cand = jet.daughter(ida);
     if(cand->numberOfDaughters()==0) {  // AK8 jets in MINIAOD are SUBJETS
-      constituents.push_back(cand);
+      constituents.emplace_back(cand);
     } else {
       for(unsigned int jda=0; jda<cand->numberOfDaughters(); jda++) {
         reco::Candidate const *cand2 = cand->daughter(jda);
-        constituents.push_back(cand2);
+        constituents.emplace_back(cand2);
       }
     }
   }
@@ -883,11 +883,11 @@ TVector2 JetTools::jetPull(const pat::Jet &jet, const int type)
   for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
     reco::Candidate const *cand = jet.daughter(ida);
     if(cand->numberOfDaughters()==0) {  // AK8 jets in MINIAOD are SUBJETS
-      constituents.push_back(cand);
+      constituents.emplace_back(cand);
     } else {
       for(unsigned int jda=0; jda<cand->numberOfDaughters(); jda++) {
         reco::Candidate const *cand2 = cand->daughter(jda);
-        constituents.push_back(cand2);
+        constituents.emplace_back(cand2);
       }
     }
   }
@@ -999,7 +999,7 @@ double JetTools::qJetVolatility(std::vector <fastjet::PseudoJet> &iConstits, int
     fastjet::JetDefinition qjet_def(&qjet_plugin);
     fastjet::ClusterSequence qjet_seq(iConstits, qjet_def);
     std::vector<fastjet::PseudoJet> inclusive_jets2 = sorted_by_pt(qjet_seq.inclusive_jets(5.0));
-    if (inclusive_jets2.size()>0) { qjetmasses.push_back( inclusive_jets2[0].m() ); }
+    if (inclusive_jets2.size()>0) { qjetmasses.emplace_back( inclusive_jets2[0].m() ); }
   }
   // find RMS of a vector
   float qjetsRMS = findRMS( qjetmasses );
@@ -1073,11 +1073,11 @@ void JetTools::calcQGLVars(const pat::Jet &jet, float &out_axis2, float &out_ptD
   for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
     reco::Candidate const *cand = jet.daughter(ida);
     if(cand->numberOfDaughters()==0) {  // AK8 jets in MINIAOD are SUBJETS
-      constituents.push_back(cand);
+      constituents.emplace_back(cand);
     } else {
       for(unsigned int jda=0; jda<cand->numberOfDaughters(); jda++) {
         reco::Candidate const *cand2 = cand->daughter(jda);
-        constituents.push_back(cand2);
+        constituents.emplace_back(cand2);
       }
     }
   }

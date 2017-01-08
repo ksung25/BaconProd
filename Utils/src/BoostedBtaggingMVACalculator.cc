@@ -24,7 +24,7 @@ void BoostedBtaggingMVACalculator::initialize(const std::string MethodTag, const
    fMethodTag  = MethodTag;
   
   if(WeightFile.length()>0) {
-    if(fReader !=0) delete fReader;
+    delete fReader;
     fReader = new TMVA::Reader();
 
     

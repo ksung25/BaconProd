@@ -65,7 +65,6 @@ void FillerGenJets::fill(TClonesArray *array,TClonesArray *fatJetArray,
   const reco::GenParticleCollection genParticles = *(hGenParProduct.product());  
 
   // loop over GEN particles
-  std::vector<edm::Ptr<reco::GenParticle>> lMothers;
   TClonesArray &rArray = *array;
   for (reco::GenJetCollection::const_iterator itGenJ = genJets->begin(); itGenJ!=genJets->end(); ++itGenJ) {
     // construct object and place in array
@@ -122,7 +121,6 @@ void FillerGenJets::fill(TClonesArray *array,TClonesArray *fatJetArray,
   }
 
   if(genFatJets != 0) { 
-    std::vector<edm::Ptr<reco::GenParticle>> lMothers;
     TClonesArray &rArray = *fatJetArray;
     for (reco::GenJetCollection::const_iterator itGenJ = genFatJets->begin(); itGenJ!= genFatJets->end(); ++itGenJ) {
       // construct object and place in array
@@ -235,7 +233,7 @@ void FillerGenJets::trim(const reco::GenJet *iJet,float &iMTrim,float &iTau1,flo
   for(unsigned int ic=0; ic<genConstituents.size(); ic++) {
     const reco::GenParticle* gencand = genConstituents[ic];
     fastjet::PseudoJet   pPart(gencand->px(),gencand->py(),gencand->pz(),gencand->energy());
-    lClusterParticles.push_back(pPart);
+    lClusterParticles.emplace_back(pPart);
   }
   fClustering = new fastjet::ClusterSequenceArea(lClusterParticles, *fCAJetDef, *fAreaDefinition);
   std::vector<fastjet::PseudoJet>  lOutJets = fClustering->inclusive_jets(20.0);

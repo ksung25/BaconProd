@@ -418,12 +418,12 @@ NtuplerMod::~NtuplerMod()
 //--------------------------------------------------------------------------------------------------
 void NtuplerMod::respondToOpenInputFile(edm::FileBlock const&) 
 {  
-  if(fFillerJet            != 0) fFillerJet           ->initPUJetId();
-  if(fFillerFatJet         != 0) {fFillerFatJet        ->initPUJetId();  fFillerFatJet  ->initBoostedBtaggingJetId();}
-  if(fFillerFatterJet      != 0) {fFillerFatterJet     ->initPUJetId(); fFillerFatterJet ->initBoostedBtaggingJetId();}
-  if(fFillerPuppiJet       != 0) fFillerPuppiJet      ->initPUJetId();
-  if(fFillerFatPuppiJet    != 0) {fFillerFatPuppiJet   ->initPUJetId(); fFillerFatPuppiJet   ->initBoostedBtaggingJetId();}
-  if(fFillerFatterPuppiJet != 0) {fFillerFatterPuppiJet->initPUJetId();  fFillerFatterPuppiJet ->initBoostedBtaggingJetId();}
+  //if(fFillerJet            != 0) fFillerJet           ->initPUJetId();
+  if(fFillerFatJet         != 0) {fFillerFatJet  ->initBoostedBtaggingJetId();}//fFillerFatJet        ->initPUJetId();  
+  if(fFillerFatterJet      != 0) {fFillerFatterJet ->initBoostedBtaggingJetId();}//fFillerFatterJet     ->initPUJetId(); 
+  //if(fFillerPuppiJet       != 0) fFillerPuppiJet      ->initPUJetId();
+  if(fFillerFatPuppiJet    != 0) {fFillerFatPuppiJet   ->initBoostedBtaggingJetId();}//fFillerFatPuppiJet   ->initPUJetId(); 
+  if(fFillerFatterPuppiJet != 0) {fFillerFatterPuppiJet ->initBoostedBtaggingJetId();}//fFillerFatterPuppiJet->initPUJetId();  
 }
 //--------------------------------------------------------------------------------------------------
 void NtuplerMod::beginJob()

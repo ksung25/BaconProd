@@ -89,7 +89,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
       assert(puIDFiles.size()==2);
       fLowPtWeightFile  = (puIDFiles[0].length()>0) ? (cmssw_base_src + puIDFiles[0]) : "";
       fHighPtWeightFile = (puIDFiles[1].length()>0) ? (cmssw_base_src + puIDFiles[1]) : "";
-      initPUJetId();
+      //initPUJetId();
     }
 
   fRand = new TRandom2();
@@ -194,7 +194,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
 {
   assert(array);
   assert(!fComputeFullJetInfo || iExtraArray);
-  if(fUseAOD) { assert(fJetPUIDMVACalc.isInitialized()); }
+  //if(fUseAOD) { assert(fJetPUIDMVACalc.isInitialized()); }
   //assert(fJetBoostedBtaggingMVACalc.isInitialized()); 
   fRand->SetSeed(iEvent.id().event());
  
@@ -215,7 +215,8 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
   iSetup.get<JetCorrectionsRecord>().get(fJECUName,hJetCorrectorParsCol);
   assert(hJetCorrectorParsCol.isValid());
   const JetCorrectorParameters    jetPars = (*hJetCorrectorParsCol)["Uncertainty"];
-  JetCorrectionUncertainty       *jetUnc  = new JetCorrectionUncertainty(jetPars);
+  delete fJetUnc;
+  fJetUnc  = new JetCorrectionUncertainty(jetPars);
 
   // Get gen jet collection
   edm::Handle<reco::GenJetCollection> hGenJetProduct;
@@ -303,11 +304,11 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
 
     // jet pT cut (BOTH raw AND corrected pT must exceed threshold)
     if(ptRaw*jetcorr < fMinPt || ptRaw < fMinPt) continue;
-    jetUnc->setJetPt ( ptRaw*jetcorr  );
-    jetUnc->setJetEta( itJet->eta() );
-    double jetunc = jetUnc->getUncertainty(true);
+    fJetUnc->setJetPt ( ptRaw*jetcorr  );
+    fJetUnc->setJetEta( itJet->eta() );
+    double jetunc = fJetUnc->getUncertainty(true);
     
-    bool passLoose = JetTools::passPFLooseID(*itJet);
+    //bool passLoose = JetTools::passPFLooseID(*itJet);
     // construct object and place in array
     assert(rArray.GetEntries() < rArray.GetSize());
     const int index = rArray.GetEntries();
@@ -354,6 +355,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     pJet->betaStar = JetTools::betaStar(*itJet, pv, pvCol);
     pJet->dR2Mean  = JetTools::dR2Mean(*itJet);
     pJet->mva = -2;
+    /*
     if(passLoose) {
       double dRMean = JetTools::dRMean(*itJet);
       double frac01 = JetTools::frac(*itJet,0.1);
@@ -365,7 +367,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
                                            pJet->d0, pJet->dz, pJet->beta, pJet->betaStar, itJet->chargedMultiplicity(), itJet->neutralMultiplicity(),
 					   dRMean, pJet->dR2Mean, pJet->ptD, frac01, frac02, frac03, frac04, frac05);
     }
-
+    */
     TVector2 lPull = JetTools::jetPull(*itJet,0);
     pJet->pullY      = lPull.X();
     pJet->pullPhi    = lPull.Y();
@@ -447,7 +449,8 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
   iSetup.get<JetCorrectionsRecord>().get(fJECUName,hJetCorrectorParsCol);
   assert(hJetCorrectorParsCol.isValid());
   const JetCorrectorParameters    jetPars = (*hJetCorrectorParsCol)["Uncertainty"];
-  JetCorrectionUncertainty       *jetUnc  = new JetCorrectionUncertainty(jetPars);
+  delete fJetUnc;
+  fJetUnc  = new JetCorrectionUncertainty(jetPars);
 
   // Get vertex collection
   edm::Handle<reco::VertexCollection> hVertexProduct;
@@ -511,9 +514,9 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     }	
     // jet pT cut (BOTH raw AND corrected pT must exceed threshold)
     if(ptRaw*jetcorr < fMinPt || ptRaw < fMinPt) continue;
-    jetUnc->setJetPt ( ptRaw*jetcorr  );
-    jetUnc->setJetEta( itJet->eta() );
-    double jetunc = jetUnc->getUncertainty(true);
+    fJetUnc->setJetPt ( ptRaw*jetcorr  );
+    fJetUnc->setJetEta( itJet->eta() );
+    double jetunc = fJetUnc->getUncertainty(true);
 
     // construct object and place in array
     assert(rArray.GetEntries() < rArray.GetSize());
@@ -688,7 +691,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   for(unsigned int ic=0; ic<pfConstituents.size(); ic++) {                                                                                                                                         
     reco::CandidatePtr pfcand = pfConstituents[ic];                                                                                                                                  
     fastjet::PseudoJet   pPart(pfcand->px(),pfcand->py(),pfcand->pz(),pfcand->energy());                                                                                                      
-    lClusterParticles.push_back(pPart);                                                                                                                                                       
+    lClusterParticles.emplace_back(pPart);                                                                                                                                                       
   }                                                                           
   std::sort(lClusterParticles.begin(),lClusterParticles.end(),JetTools::orderPseudoJet);
   if(fShowerDeco != 0) pAddJet->topchi2 = fShowerDeco->chi(itJet.pt(),lClusterParticles);

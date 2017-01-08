@@ -134,6 +134,6 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, 
     }
     if(itGenP->numberOfMothers() == 0) { pGenPart->parent = -1; }
     edm::Ptr<reco::GenParticle> thePtr(hGenParProduct, itGenP - genParticles.begin());
-    lMothers.push_back(thePtr);
+    lMothers.emplace_back(thePtr);
   }
 }
