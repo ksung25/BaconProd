@@ -557,6 +557,7 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     evtInfo->pfMETCphiuncdn = inMET.shiftedP4(pat::MET::UnclusteredEnDown).phi();
     evtInfo->pfMETCphijrsup = inMET.shiftedP4(pat::MET::PhotonEnUp).phi();
     evtInfo->pfMETCphijrsdn = inMET.shiftedP4(pat::MET::PhotonEnDown).phi();
+
     //Calo MET
     edm::Handle<pat::METCollection> hCaloMETProduct;
     iEvent.getByToken(fTokPFMETPATName,hCaloMETProduct);
@@ -611,7 +612,6 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     const pat::MET &inPuppET = hPuppET.product()->front();
     evtInfo->puppET      = inPuppET.uncorPt();
     evtInfo->puppETphi   = inPuppET.uncorPhi();
-
     //Type1 PUPPI MET
     evtInfo->puppETC      = inPuppET.pt();
     evtInfo->puppETCphi   = inPuppET.phi();
@@ -627,7 +627,6 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
     evtInfo->puppETCuncdn = inPuppET.shiftedPt(pat::MET::METUncertainty::UnclusteredEnDown);
     evtInfo->puppETCjrsup = inPuppET.shiftedPt(pat::MET::METUncertainty::JetResUpSmear);
     evtInfo->puppETCjrsdn = inPuppET.shiftedPt(pat::MET::METUncertainty::JetResDownSmear);
-    
     evtInfo->puppETCphijerup = inPuppET.shiftedPhi(pat::MET::METUncertainty::JetResUp);
     evtInfo->puppETCphijerdn = inPuppET.shiftedPhi(pat::MET::METUncertainty::JetResDown);
     evtInfo->puppETCphijenup = inPuppET.shiftedPhi(pat::MET::METUncertainty::JetEnUp);

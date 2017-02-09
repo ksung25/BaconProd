@@ -16,9 +16,9 @@ else:
   process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_TrancheIV_v7')
 
 #JEC
-JECTag='Spring16_23Sep2016V2_MC'
+JECTag='Summer16_23Sep2016V4_MC'
 if is_data_flag: 
-  JECTag='Spring16_23Sep2016AllV2_DATA'
+  JECTag='Summer16_23Sep2016AllV4_DATA'
 
 from BaconProd.Ntupler.myJecFromDB_cff    import setupJEC
 setupJEC(process,is_data_flag,JECTag)
@@ -127,32 +127,32 @@ for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection)
 
 # PF MET corrections
-from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
-runMetCorAndUncFromMiniAOD(process,
-                           isData=is_data_flag,
-                           manualJetConfig=True,
-                           jetCorLabelL3="ak4chsL1FastL2L3Corrector",
-                           jetCorLabelRes="ak4chsL1FastL2L3ResidualCorrector",
-                           reclusterJets=True,
-                           recoMetFromPFCs=True,
-                           postfix="V2"
-                           )
+#from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+#runMetCorAndUncFromMiniAOD(process,
+#                           isData=is_data_flag,
+#                           manualJetConfig=True,
+#                           jetCorLabelL3="ak4chsL1FastL2L3Corrector",
+#                           jetCorLabelRes="ak4chsL1FastL2L3ResidualCorrector",
+#                           reclusterJets=True,
+#                           recoMetFromPFCs=True,
+#                           postfix="V2"
+#                           )
 
 # PUPPI Woof Woof
 from PhysicsTools.PatAlgos.slimming.puppiForMET_cff import makePuppiesFromMiniAOD
 makePuppiesFromMiniAOD (process, True )
-runMetCorAndUncFromMiniAOD(process,
-                           isData=is_data_flag,
-                           manualJetConfig=True,
-                           metType="Puppi",
-                           pfCandColl=cms.InputTag("puppiForMET"),
-                           recoMetFromPFCs=True,
-                           jetFlavor="AK4PFPuppi",
-                           jetCorLabelL3="ak4PuppiL1FastL2L3Corrector",
-                           jetCorLabelRes="ak4PuppiL1FastL2L3ResidualCorrector",
-                           reclusterJets=True,
-                           postfix="Puppi"
-                           )
+#runMetCorAndUncFromMiniAOD(process,
+#                           isData=is_data_flag,
+#                           manualJetConfig=True,
+#                           metType="Puppi",
+#                           pfCandColl=cms.InputTag("puppiForMET"),
+#                           recoMetFromPFCs=True,
+#                           jetFlavor="AK4PFPuppi",
+#                           jetCorLabelL3="ak4PuppiL1FastL2L3Corrector",
+#                           jetCorLabelRes="ak4PuppiL1FastL2L3ResidualCorrector",
+#                           reclusterJets=True,
+#                           postfix="Puppi"
+#                           )
 
 if is_data_flag:
   process.AK4QGTaggerPuppi.jec           = cms.InputTag("ak4PuppiL1FastL2L3ResidualCorrector")
@@ -175,7 +175,7 @@ if do_alpaca:
 #================================================================================
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring('/store/data/Run2016G/JetHT/MINIAOD/23Sep2016-v1/100000/FC673DBA-8086-E611-8882-6CC2173BBEF0.root')
+                            fileNames = cms.untracked.vstring('/store/data/Run2016F/SinglePhoton/MINIAOD/03Feb2017-v1/80000/EE72E7D2-98EA-E611-BA88-001E67F8F7E0.root')
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -210,9 +210,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     #edmPileupInfoName    = cms.untracked.string('addPileupInfo'),
     edmBeamspotName      = cms.untracked.string('offlineBeamSpot'),
     edmMETName           = cms.untracked.string('slimmedMETs'),
-    edmPFMETName         = cms.untracked.InputTag('slimmedMETsV2','','MakingBacon'),
+    edmPFMETName         = cms.untracked.InputTag('slimmedMETsMuEGClean'),
     edmMVAMETName        = cms.untracked.string(''),
-    edmPuppETName        = cms.untracked.InputTag('slimmedMETsPuppi','','MakingBacon'),
+    edmPuppETName        = cms.untracked.InputTag('slimmedMETsPuppi'),
     edmAlpacaMETName     = cms.untracked.string(alpacaMet),
     edmPupAlpacaMETName  = cms.untracked.string(alpacaPuppiMet),
     edmRhoForIsoName     = cms.untracked.string('fixedGridRhoFastjetAll'),
@@ -569,8 +569,8 @@ process.baconSequence = cms.Sequence(
                                      process.AK8jetsequencePuppiData  *
                                      process.CA15jetsequencePuppiData *
                                      process.btagging                 *
-                                     process.fullPatMetSequenceV2     *
-                                     process.fullPatMetSequencePuppi  *
+                                     #process.fullPatMetSequenceV2     *
+                                     #process.fullPatMetSequencePuppi  *
                                      process.ntupler)
 
 #--------------------------------------------------------------------------------

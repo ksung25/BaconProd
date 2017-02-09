@@ -16,9 +16,9 @@ else:
   process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_TrancheIV_v7')
 
 #JEC
-JECTag='Spring16_23Sep2016V2_MC'
+JECTag='Summer16_23Sep2016V4_MC'
 if is_data_flag: 
-  JECTag='Spring16_23Sep2016AllV2_DATA'
+  JECTag='Summer16_23Sep2016AllV4_DATA'
 
 from BaconProd.Ntupler.myJecFromDB_cff    import setupJEC
 setupJEC(process,is_data_flag,JECTag)
