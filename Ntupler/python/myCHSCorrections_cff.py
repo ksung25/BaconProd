@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from JetMETCorrections.Configuration.JetCorrectorsAllAlgos_cff  import *
 
 #chs Sequence AK4
-chslabel='PFchs'
+chslabel='chs'
 ak4chsL1FastjetCorrector  = ak4PFCHSL1FastjetCorrector.clone (algorithm   = cms.string('AK4'+chslabel))
 ak4chsL2RelativeCorrector = ak4PFCHSL2RelativeCorrector.clone(algorithm   = cms.string('AK4'+chslabel))
 ak4chsL3AbsoluteCorrector = ak4PFCHSL3AbsoluteCorrector.clone(algorithm   = cms.string('AK4'+chslabel))

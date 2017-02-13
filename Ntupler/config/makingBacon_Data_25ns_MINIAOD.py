@@ -11,7 +11,7 @@ do_alpaca     = False
 cmssw_base = os.environ['CMSSW_BASE']
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if is_data_flag:
-  process.GlobalTag.globaltag = cms.string('80X_dataRun2_2016SeptRepro_v6')
+  process.GlobalTag.globaltag = cms.string('80X_dataRun2_2016SeptRepro_v7')
 else:
   process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_TrancheIV_v7')
 

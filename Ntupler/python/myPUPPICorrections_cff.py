@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from JetMETCorrections.Configuration.JetCorrectorsAllAlgos_cff  import *
 
 #Puppi Sequence AK4
-puppilabel='PFPuppi'
+puppilabel='Puppi'
 ak4PuppiL1FastjetCorrector  = ak4PFCHSL1FastjetCorrector.clone (algorithm   = cms.string('AK4'+puppilabel))
 ak4PuppiL2RelativeCorrector = ak4PFCHSL2RelativeCorrector.clone(algorithm   = cms.string('AK4'+puppilabel))
 ak4PuppiL3AbsoluteCorrector = ak4PFCHSL3AbsoluteCorrector.clone(algorithm   = cms.string('AK4'+puppilabel))
