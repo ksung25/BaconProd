@@ -901,8 +901,41 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   float massPruned__ =pAddJet->mass_prun;
   float flavour__ = -1;//itJet.partonFlavor();   // they're spectator variables
   float nbHadrons__ = -1;//itJet.hadronFlavor(); // 
+
   float ptPruned__ = itJet.pt();
   float etaPruned__ =itJet.eta();
+
+  pAddJet->flavour =  flavour__;//itJet.partonFlavor();  
+  pAddJet->nbHadrons = nbHadrons__;//itJet.hadronFlavor(); //
+  pAddJet->nSV =nSV__;
+  pAddJet->jetNTracks=jetNTracks__;
+  pAddJet->tau_flightDistance2dSig_1=tau_flightDistance2dSig_1__;
+  pAddJet->SubJet_csv = SubJet_csv__  ;
+  pAddJet->z_ratio = z_ratio__;
+  pAddJet->trackSipdSig_3 = trackSipdSig_3__;
+  pAddJet->trackSipdSig_2 = trackSipdSig_2__;
+  pAddJet->trackSipdSig_1 = trackSipdSig_1__;
+  pAddJet->trackSipdSig_0 = trackSipdSig_0__;
+  pAddJet->trackSipdSig_1_0 = trackSipdSig_1_0__;
+  pAddJet->trackSipdSig_0_0 = trackSipdSig_0_0__;
+  pAddJet->trackSipdSig_1_1 = trackSipdSig_1_1__;
+  pAddJet->trackSipdSig_0_1 = trackSipdSig_0_1__;
+  pAddJet->trackSip2dSigAboveCharm_0 = trackSip2dSigAboveCharm_0__;
+  pAddJet->trackSip2dSigAboveBottom_0 = trackSip2dSigAboveBottom_0__;
+  pAddJet->trackSip2dSigAboveBottom_1 = trackSip2dSigAboveBottom_1__;
+  pAddJet->tau1_trackEtaRel_0 = tau1_trackEtaRel_0__;
+  pAddJet->tau1_trackEtaRel_1 = tau1_trackEtaRel_1__;
+  pAddJet->tau1_trackEtaRel_2 = tau1_trackEtaRel_2__;
+  pAddJet->tau0_trackEtaRel_0 = tau0_trackEtaRel_0__;
+  pAddJet->tau0_trackEtaRel_1 = tau0_trackEtaRel_1__;
+  pAddJet->tau0_trackEtaRel_2 = tau0_trackEtaRel_2__;
+  pAddJet->tau_vertexMass_0 = tau_vertexMass_0__;
+  pAddJet->tau_vertexEnergyRatio_0 = tau_vertexEnergyRatio_0__;
+  pAddJet->tau_vertexDeltaR_0 = tau_vertexDeltaR_0__;
+  pAddJet->tau_flightDistance2dSig_0  = tau_flightDistance2dSig_0__;
+  pAddJet->tau_vertexMass_1 = tau_vertexMass_1__;
+  pAddJet->tau_vertexEnergyRatio_1 = tau_vertexEnergyRatio_1__;
+ 
   
   pAddJet->Double_sub = fJetBoostedBtaggingMVACalc.mvaValue(massPruned__, flavour__, nbHadrons__, ptPruned__, etaPruned__,SubJet_csv__,z_ratio__,trackSipdSig_3__,trackSipdSig_2__,trackSipdSig_1__,trackSipdSig_0__,trackSipdSig_1_0__,trackSipdSig_0_0__,trackSipdSig_1_1__,trackSipdSig_0_1__,trackSip2dSigAboveCharm_0__,trackSip2dSigAboveBottom_0__,trackSip2dSigAboveBottom_1__,tau0_trackEtaRel_0__,tau0_trackEtaRel_1__,tau0_trackEtaRel_2__,tau1_trackEtaRel_0__,tau1_trackEtaRel_1__,tau1_trackEtaRel_2__,tau_vertexMass_0__,tau_vertexEnergyRatio_0__,tau_vertexDeltaR_0__,tau_flightDistance2dSig_0__,tau_vertexMass_1__,tau_vertexEnergyRatio_1__,tau_flightDistance2dSig_1__,jetNTracks__,nSV__,false);
   }
@@ -1010,9 +1043,9 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent, con
 
 
   //Bosted b tagging for CA15
-
+  
   //reco::BoostedDoubleSVTagInfo const *bdsvTagInfo = itJet.tagInfoBoostedDoubleSV();//dynamic_cast<reco::BoostedDoubleSVTagInfo const *>(itJet.tagInfo("pfBoostedDoubleSVCA15"));
-  reco::BoostedDoubleSVTagInfo const *bdsvTagInfo = dynamic_cast<reco::BoostedDoubleSVTagInfo const *>(itJet.tagInfo("pfBoostedDoubleSVCA15"));
+  reco::BoostedDoubleSVTagInfo const *bdsvTagInfo = dynamic_cast<reco::BoostedDoubleSVTagInfo const *>(itJet.tagInfo("pfBoostedDoubleSVAK8"));
   const reco::TaggingVariableList vars = bdsvTagInfo->taggingVariables();
   
   float SubJet_csv_ =  std::min( pAddJet->sj2_csv , pAddJet->sj1_csv) ;
@@ -1044,10 +1077,44 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent, con
   float jetNTracks_ = vars.get(reco::btau::jetNTracks);
   float nSV_ = vars.get(reco::btau::jetNSecondaryVertices);
   float massPruned_ =pAddJet->mass_prun;
-  float flavour_ = -1;//itJet.partonFlavor();   // they're spectator variables
-  float nbHadrons_ = -1;//itJet.hadronFlavor(); // 
+  float flavour_ = itJet.partonFlavour();   // they're spectator variables
+  float nbHadrons_ = itJet.hadronFlavour(); // 
   float ptPruned_ =itJet.pt();
   float etaPruned_ =itJet.eta();
+  
+  pAddJet->flavour =  flavour_;//itJet.partonFlavor();  
+  pAddJet->hadflavour = nbHadrons_;
+  pAddJet->nbHadrons = itJet.jetFlavourInfo().getbHadrons().size();//nbHadrons_;//itJet.hadronFlavor(); //
+  pAddJet->ncHadrons = itJet.jetFlavourInfo().getcHadrons().size();
+  pAddJet->nSV =nSV_;
+  pAddJet->jetNTracks=jetNTracks_;
+  pAddJet->tau_flightDistance2dSig_1=tau_flightDistance2dSig_1_;
+  pAddJet->SubJet_csv = SubJet_csv_  ;
+  pAddJet->z_ratio = z_ratio_;
+  pAddJet->trackSipdSig_3 = trackSipdSig_3_;
+  pAddJet->trackSipdSig_2 = trackSipdSig_2_;
+  pAddJet->trackSipdSig_1 = trackSipdSig_1_;
+  pAddJet->trackSipdSig_0 = trackSipdSig_0_;
+  pAddJet->trackSipdSig_1_0 = trackSipdSig_1_0_;
+  pAddJet->trackSipdSig_0_0 = trackSipdSig_0_0_;
+  pAddJet->trackSipdSig_1_1 = trackSipdSig_1_1_;
+  pAddJet->trackSipdSig_0_1 = trackSipdSig_0_1_;
+  pAddJet->trackSip2dSigAboveCharm_0 = trackSip2dSigAboveCharm_0_;
+  pAddJet->trackSip2dSigAboveBottom_0 = trackSip2dSigAboveBottom_0_;
+  pAddJet->trackSip2dSigAboveBottom_1 = trackSip2dSigAboveBottom_1_;
+  pAddJet->tau1_trackEtaRel_0 = tau1_trackEtaRel_0_;
+  pAddJet->tau1_trackEtaRel_1 = tau1_trackEtaRel_1_;
+  pAddJet->tau1_trackEtaRel_2 = tau1_trackEtaRel_2_;
+  pAddJet->tau0_trackEtaRel_0 = tau0_trackEtaRel_0_;
+  pAddJet->tau0_trackEtaRel_1 = tau0_trackEtaRel_1_;
+  pAddJet->tau0_trackEtaRel_2 = tau0_trackEtaRel_2_;
+  pAddJet->tau_vertexMass_0 = tau_vertexMass_0_;
+  pAddJet->tau_vertexEnergyRatio_0 = tau_vertexEnergyRatio_0_;
+  pAddJet->tau_vertexDeltaR_0 = tau_vertexDeltaR_0_;
+  pAddJet->tau_flightDistance2dSig_0  = tau_flightDistance2dSig_0_;
+  pAddJet->tau_vertexMass_1 = tau_vertexMass_1_;
+  pAddJet->tau_vertexEnergyRatio_1 = tau_vertexEnergyRatio_1_;
+
     
   pAddJet->Double_sub = fJetBoostedBtaggingMVACalc.mvaValue(massPruned_, flavour_, nbHadrons_, ptPruned_, etaPruned_,SubJet_csv_,z_ratio_,trackSipdSig_3_,trackSipdSig_2_,trackSipdSig_1_,trackSipdSig_0_,trackSipdSig_1_0_,trackSipdSig_0_0_,trackSipdSig_1_1_,trackSipdSig_0_1_,trackSip2dSigAboveCharm_0_,trackSip2dSigAboveBottom_0_,trackSip2dSigAboveBottom_1_,tau0_trackEtaRel_0_,tau0_trackEtaRel_1_,tau0_trackEtaRel_2_,tau1_trackEtaRel_0_,tau1_trackEtaRel_1_,tau1_trackEtaRel_2_,tau_vertexMass_0_,tau_vertexEnergyRatio_0_,tau_vertexDeltaR_0_,tau_flightDistance2dSig_0_,tau_vertexMass_1_,tau_vertexEnergyRatio_1_,tau_flightDistance2dSig_1_,jetNTracks_,nSV_, true);
 
