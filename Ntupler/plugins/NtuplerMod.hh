@@ -82,7 +82,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     std::string fGenRunInfoName;
     bool        fUseRunInfo;
     edm::EDGetTokenT<GenRunInfoProduct>      fTokGenRunInfo;
-    edm::EDGetTokenT<edm::TriggerResults>    fTokTrgRes       ;
+    //edm::EDGetTokenT<edm::TriggerResults>    fTokTrgRes       ;
     edm::EDGetTokenT<trigger::TriggerEvent>    fTokTrgEvt       ;
     edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection>    fTokTrgObj       ;
     bool fFillLHEWgt;
@@ -106,7 +106,6 @@ class NtuplerMod : public edm::EDAnalyzer {
     baconhep::FillerJet       *fFillerPuppiJet, *fFillerFatPuppiJet, *fFillerFatterPuppiJet;
     baconhep::FillerPF        *fFillerPF;    
     baconhep::FillerRH        *fFillerRH;    
-    
     baconhep::TTrigger        *fTrigger;
     
     bool fIsActiveEvtInfo;
@@ -135,6 +134,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     baconhep::TGenEventInfo *fGenEvtInfo;
     TClonesArray            *fLHEWgtArr;
     TClonesArray            *fGenParArr;
+    TClonesArray            *fGenVtxArr;
     TClonesArray            *fGenJetArr;
     TClonesArray            *fGenFatJetArr;
     TClonesArray	    *fEleArr;
@@ -149,4 +149,5 @@ class NtuplerMod : public edm::EDAnalyzer {
     TClonesArray	    *fAddPuppiJetArr, *fAddFatPuppiJetArr, *fAddFatterPuppiJetArr;
     TClonesArray	    *fPFParArr;
     TClonesArray	    *fRHParArr;
+    TClonesArray	    *fSVArr;
 };

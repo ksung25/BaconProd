@@ -70,7 +70,7 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig, const bool us
   fToklogErrorTooManyClusters            = iC.consumes<bool>                  (lLogError);
   fTokBadChCand                          = iC.consumes<bool>                  (lBadChCand);
   fTokBadPFMuon                          = iC.consumes<bool>                  (lBadPFMuon);
-  fTokMetFiltersTag                      = iC.consumes<edm::TriggerResults>   (lMetFilters);
+  //fTokMetFiltersTag                      = iC.consumes<edm::TriggerResults>   (lMetFilters);
 }
 //--------------------------------------------------------------------------------------------------
 FillerEventInfo::~FillerEventInfo(){}
@@ -268,8 +268,8 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
 	evtInfo->metFilterFailBits |= kBadPFMuonFilter;
       }
 
-      //edm::InputTag metFiltersTag("TriggerResults","","PAT");
-      edm::InputTag metFiltersTag("TriggerResults","","HLT");
+      edm::InputTag metFiltersTag("TriggerResults","","PAT");
+      //edm::InputTag metFiltersTag("TriggerResults","","HLT");
       edm::Handle<edm::TriggerResults> hMETFilters;
       iEvent.getByToken(fTokMetFiltersTag,hMETFilters);
       assert(hMETFilters.isValid());
