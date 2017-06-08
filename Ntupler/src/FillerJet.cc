@@ -36,7 +36,6 @@
 
 using namespace baconhep;
 
-
 //--------------------------------------------------------------------------------------------------
 FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::ConsumesCollector && iC):
   fMinPt              (iConfig.getUntrackedParameter<double>("minPt",20)),
@@ -68,6 +67,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fShowerDecoConf     (iConfig.getUntrackedParameter<std::string>("showerDecoConf","")),
   fConeSize           (iConfig.getUntrackedParameter<double>("coneSize",0.4)),
   fComputeFullJetInfo (iConfig.getUntrackedParameter<bool>("doComputeFullJetInfo",false)),  
+  fAddPFCand          (iConfig.getUntrackedParameter<bool>("addPFCand",true)),  
   fShowerDeco         (0),
   fJetCorr            (0),
   fJetUnc             (0),
@@ -427,7 +427,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
 	baconhep::TGenParticle *pGen = (baconhep::TGenParticle*)(*iGenArr)[i0];
 	double pDEta             = pGen->eta-itJet->eta();
 	double pDPhi             = reco::deltaPhi(pGen->phi,itJet->phi());
-	if(sqrt(pDEta*pDEta+pDPhi*pDPhi) > fConeSize) continue;
+	if((pDEta*pDEta+pDPhi*pDPhi) > fConeSize*fConeSize) continue;
 	bool pPass = false;
 	for(unsigned int i1 = 0; i1 < lVtxs.size(); i1++) { 
 	  if(lVtxs[i1].first != pGen->vtxId) continue;
@@ -450,18 +450,19 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
 
     if(triggerEvent      != 0) {pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, *triggerEvent); } 
     else                       {pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, *patTriggerObjects); }
-
     pJet->pfCands.clear();
-    std::vector<reco::CandidatePtr> pfConstituents = itJet->getJetConstituents();                                                                                                   
-    for(unsigned int i0 = 0; i0 < pfConstituents.size(); i0++) { 
-      reco::CandidatePtr pfcand = pfConstituents[i0];    
-      for(       int i1 = 0; i1 < iPFArr->GetEntries();  i1++) { 
-	baconhep::TPFPart *pPF = (baconhep::TPFPart*)(*iPFArr)[i1];
-	if(fabs(pfcand->pt() - pPF->pt)  > 0.1)  continue;
-	if(fabs(pfcand->eta()- pPF->eta) > 0.01) continue;
-	if(reco::deltaPhi(pfcand->phi(),pPF->phi) > 0.01) continue;
-	if(pfcand->pdgId() != pPF->pfType)  continue;
-	pJet->pfCands.push_back(i1);
+    if(fAddPFCand) { 
+      std::vector<reco::CandidatePtr> pfConstituents = itJet->getJetConstituents();                                                                                                   
+      for(unsigned int i0 = 0; i0 < pfConstituents.size(); i0++) { 
+	reco::CandidatePtr pfcand = pfConstituents[i0]; 
+	for(       int i1 = 0; i1 < iPFArr->GetEntriesFast();  i1++) { 
+	  baconhep::TPFPart *pPF = (baconhep::TPFPart*)(*iPFArr)[i1];
+	  if(pfcand->pdgId() != pPF->pfType)  continue;
+	  if(fabs(pfcand->pt() - pPF->pt)  > 0.1)  continue;
+	  if(fabs(pfcand->eta()- pPF->eta) > 0.01) continue;
+	  if(fabs(reco::deltaPhi(pfcand->phi(),pPF->phi)) > 0.01) continue;
+	  pJet->pfCands.push_back(i1);
+	}
       }
     }
     ////Add Extras
@@ -488,7 +489,6 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
   assert(array);
   assert(!fComputeFullJetInfo || iExtraArray);
   fRand->SetSeed(iEvent.id().event());
-
 
   // Get jet collection
   edm::Handle<pat::JetCollection> hJetProduct;
@@ -655,7 +655,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
 	baconhep::TGenParticle *pGen = (baconhep::TGenParticle*)(*iGenArr)[i0];
 	double pDEta             = pGen->eta-itJet->eta();
 	double pDPhi             = reco::deltaPhi(pGen->phi,itJet->phi());
-	if(sqrt(pDEta*pDEta+pDPhi*pDPhi) > fConeSize) continue;
+	if((pDEta*pDEta+pDPhi*pDPhi) > fConeSize*fConeSize) continue;
 	bool pPass = false;
 	for(unsigned int i1 = 0; i1 < lVtxs.size(); i1++) { 
 	  if(lVtxs[i1].first != pGen->vtxId) continue;
@@ -680,16 +680,18 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
 
     pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, triggerObjects);
     pJet->pfCands.clear();
-    std::vector<reco::CandidatePtr> pfConstituents = itJet->getJetConstituents();
-    for(unsigned int i0 = 0; i0 < pfConstituents.size(); i0++) { 
-      reco::CandidatePtr pfcand = pfConstituents[i0];    
-      for(int i1 = 0; i1 < iPFArr->GetEntries(); i1++) { 
-	baconhep::TPFPart *pPF = (baconhep::TPFPart*)(*iPFArr)[i1];
-	if(fabs(pfcand->pt() - pPF->pt)  > 0.1) continue;
-	if(fabs(pfcand->eta()- pPF->eta) > 0.01) continue;
-	if(reco::deltaPhi(pfcand->phi(),pPF->phi) > 0.01) continue;
-	if(pfcand->pdgId() != pPF->pfType) continue;
-	pJet->pfCands.push_back(i1);
+    if(fAddPFCand) { 
+      std::vector<reco::CandidatePtr> pfConstituents = itJet->getJetConstituents();
+      for(unsigned int i0 = 0; i0 < pfConstituents.size(); i0++) { 
+	reco::CandidatePtr pfcand = pfConstituents[i0];    
+	for(int i1 = 0; i1 < iPFArr->GetEntries(); i1++) { 
+	  baconhep::TPFPart *pPF = (baconhep::TPFPart*)(*iPFArr)[i1];
+	  if(fabs(pfcand->pt() - pPF->pt)  > 0.1) continue;
+	  if(fabs(pfcand->eta()- pPF->eta) > 0.01) continue;
+	  if(reco::deltaPhi(pfcand->phi(),pPF->phi) > 0.01) continue;
+	  if(pfcand->pdgId() != pPF->pfType) continue;
+	  pJet->pfCands.push_back(i1);
+	}
       }
     }
     ////Add Extras
@@ -1090,11 +1092,9 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr, const r
   //
   // Secondary Vertex
   // 
-  std::cout << " Sec Vertex size ===> " << svtx.size() << std::endl;
   pAddJet->svtx.clear();
   TClonesArray &rSVArray = *iSVArr;
   for (const reco::VertexCompositePtrCandidate &sv : svtx) {
-    std::cout << "====>  adding sv " << rSVArray.GetEntries() << " -- " << reco::deltaR(sv,itJet) << std::endl;
     if (reco::deltaR(sv,itJet)>0.7) { continue; }
     assert(rSVArray.GetEntries() < rSVArray.GetSize());
     const int svIndex = rSVArray.GetEntries();

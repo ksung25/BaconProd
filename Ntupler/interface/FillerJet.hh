@@ -133,7 +133,8 @@ namespace baconhep
       std::string fShowerDecoConf;
       double      fConeSize;
       bool        fComputeFullJetInfo;
-      
+      bool        fAddPFCand;
+
       // Jet ID MVA
       JetPUIDMVACalculator fJetPUIDMVACalc;
       BoostedBtaggingMVACalculator fJetBoostedBtaggingMVACalc;

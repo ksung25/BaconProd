@@ -124,7 +124,6 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, 
   std::vector<edm::Ptr<reco::GenParticle> > lMothers;
   TClonesArray &rGenParArray = *particlesArr;
   TClonesArray &rVtxArray    = *vtxArr;
-  std::cout <<" ===> size : " << genParticles.size() << std::endl;
   std::vector<std::pair<double,int> > lVtxs;
   std::vector<TLorentzVector>         lVecs;
   for (reco::GenParticleCollection::const_iterator itGenP = genParticles.begin(); itGenP!=genParticles.end(); ++itGenP) {
@@ -204,7 +203,7 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, 
       lVId = pVIndex;
     }
     pGenPart->vtxId = lVId;
-    std::cout << rGenParArray.GetEntries()-1  << " -pdg--> " << itGenP->pdgId() << " -status- " << itGenP->status() << " -pt- " << itGenP->pt() << " -vx- " << itGenP->vx() << "  -vy- " << itGenP->vy() << " -vz- " << itGenP->vz() << " -parent- " << pGenPart->parent << " -- " << lVId << std::endl;
+    //std::cout << rGenParArray.GetEntries()-1  << " -pdg--> " << itGenP->pdgId() << " -status- " << itGenP->status() << " -pt- " << itGenP->pt() << " -vx- " << itGenP->vx() << "  -vy- " << itGenP->vy() << " -vz- " << itGenP->vz() << " -parent- " << pGenPart->parent << " -- " << lVId << std::endl;
     edm::Ptr<reco::GenParticle> thePtr(hGenParProduct, itGenP - genParticles.begin());
     lMothers.emplace_back(thePtr);
   }
@@ -213,8 +212,6 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, 
   lVX0 =  lGenVtx->vx;
   lVY0 =  lGenVtx->vy;
   lVZ0 =  lGenVtx->vz;
-  std::cout << "vertices: " << lVtxs.size() << std::endl;
-  std::cout << " ---> " << lVtxs.size() << " -- " << lVecs.size() << " -- " << rVtxArray.GetEntries() << std::endl;
   for(int i0 = 0; i0 < rVtxArray.GetEntries(); i0++) { 
       baconhep::TGenVtx *pGenVtx = (baconhep::TGenVtx*)rVtxArray[i0];
       pGenVtx->pdgId = lVtxs[i0].second;
@@ -225,7 +222,6 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, 
       pGenVtx->vx    = pGenVtx->vx-lVX0;
       pGenVtx->vy    = pGenVtx->vy-lVY0;
       pGenVtx->vz    = pGenVtx->vz-lVZ0;
-      std::cout << "===> Vertex " << i0 << " -- " << sqrt((pGenVtx->vx)*(pGenVtx->vx)+(pGenVtx->vy)*(pGenVtx->vy))  << " -flav- " << lVtxs[i0].second << std::endl;
   }
   lGenVtx->pdgId = 0;
   edm::Handle<pat::PackedGenParticleCollection> hGenPackParProduct;
@@ -233,7 +229,6 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, 
   assert(hGenPackParProduct.isValid());  
   const pat::PackedGenParticleCollection packedGenParticles = *(hGenPackParProduct.product());  
   //std::vector<edm::Ptr<pat::PackedGenParticle> > lPatMothers;
-  std::cout <<" ===> packed size : " << packedGenParticles.size() << std::endl;
   for (pat::PackedGenParticleCollection::const_iterator itGenP = packedGenParticles.begin(); itGenP!= packedGenParticles.end(); ++itGenP) {
     // if not storing all gen particles, then do selective storing
     // Note: assuming Pythia8 status codes
