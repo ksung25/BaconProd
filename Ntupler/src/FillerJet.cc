@@ -2,6 +2,7 @@
 //#include "BaconProd/Utils/interface/EnergyCorrelator.hh"
 #include "BaconProd/Utils/interface/TriggerTools.hh"
 #include "BaconProd/Utils/interface/JetTools.hh"
+#include "BaconProd/Utils/interface/RecursiveSoftDrop.hh"
 #include "BaconAna/DataFormats/interface/TJet.hh"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -68,7 +69,8 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fShowerDeco         (0),
   fJetCorr            (0),
   fJetUnc             (0),
-  fUseAOD             (useAOD)
+  fUseAOD             (useAOD),
+  fRecursiveSoftDrop1 (0)
 {
     std::vector<std::string> empty_vstring;
     /* ===> Switching to DB
@@ -140,6 +142,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fTokCMSTTJetProduct    = iC.consumes<reco::BasicJetCollection>(lTopTag);
     fTokCMSTTSubJetProduct = iC.consumes<reco::PFJetCollection>   (lTopTagSubJet);
     fECF = new EnergyCorrelations();
+    fRecursiveSoftDrop1 = new fastjet::RecursiveSoftDrop( 0. ,0.1,2.0); // Use fConeSize instead?
   }
 }
 
@@ -148,6 +151,7 @@ FillerJet::~FillerJet()
 {
   delete fJetCorr;
   delete fJetUnc;
+  delete fRecursiveSoftDrop1;
 }
 void FillerJet::initPUJetId() { 
   if(!fUseAOD) return;
@@ -776,6 +780,10 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
     pAddJet->e4_v1_sdb2   = float(fECF->manager->ecfns["4_1"]);
     pAddJet->e4_v2_sdb2   = float(fECF->manager->ecfns["4_2"]);
   }
+  
+  // Recursive Soft drop
+  fastjet::PseudoJet pRSM1Jet = (*fRecursiveSoftDrop1) (inclusive_jets[0]);
+  pAddJet->mass_rsd0  = pRSM1Jet.m()*pCorr;
   /*
   // Q-Jets
   pAddJet->qjet = 0;

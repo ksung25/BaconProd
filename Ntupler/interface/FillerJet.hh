@@ -6,6 +6,7 @@
 #include "BaconProd/Utils/interface/BoostedBtaggingMVACalculator.hh"
 #include "BaconProd/Utils/interface/ShowerDeco.hh"
 #include "BaconProd/Utils/interface/EnergyCorrelations.h"
+#include "BaconProd/Utils/interface/RecursiveSoftDrop.hh"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
 #include "DataFormats/BTauReco/interface/BoostedDoubleSVTagInfo.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
@@ -131,6 +132,7 @@ namespace baconhep
 
       bool fUseAOD;
       EnergyCorrelations* fECF;
+      fastjet::RecursiveSoftDrop *fRecursiveSoftDrop1;
 
     edm::EDGetTokenT<reco::PFJetCollection>  fTokJetName;
     edm::EDGetTokenT<reco::JetCorrector>     fTokJECName;
