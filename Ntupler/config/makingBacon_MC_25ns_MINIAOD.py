@@ -11,9 +11,9 @@ do_alpaca     = False
 cmssw_base = os.environ['CMSSW_BASE']
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if is_data_flag:
-  process.GlobalTag.globaltag = cms.string('80X_dataRun2_2016SeptRepro_v6')
+  process.GlobalTag.globaltag = cms.string('80X_dataRun2_2016SeptRepro_v7')
 else:
-  process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_TrancheIV_v7')
+  process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_TrancheIV_v8')
 
 #JEC
 JECTag='Summer16_23Sep2016V4_MC'
@@ -91,18 +91,18 @@ setMiniAODAK4Puppi (process)
 setMiniAODAK8Puppi (process)
 setMiniAODCA15Puppi(process)
 #METFilters
-process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
-process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
-process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+#process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
+#process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
+#process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
 
-process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
-process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
-process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+#process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
+#process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
+#process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
 
 # MVA MET
-from BaconProd.Ntupler.myMVAMet_cff import setMiniAODMVAMet
-process.load('BaconProd/Ntupler/myMVAMet_cff')     
-setMiniAODMVAMet(process)
+#from BaconProd.Ntupler.myMVAMet_cff import setMiniAODMVAMet
+#process.load('BaconProd/Ntupler/myMVAMet_cff')     
+#setMiniAODMVAMet(process)
 #CHS
 process.chs = cms.EDFilter("CandPtrSelector",
                            src = cms.InputTag('packedPFCandidates'),
@@ -119,7 +119,9 @@ if is_data_flag:
   process.CA15QGTaggerSubJetsCHS.jec = cms.InputTag("ak8chsL1FastL2L3ResidualCorrector")
 
 # produce photon isolation with proper footprint removal
+process.load("RecoEgamma.PhotonIdentification.egmPhotonIDs_cfi")
 process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
+process.load("RecoEgamma/PhotonIdentification/PhotonMVAValueMapProducer_cfi")
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 switchOnVIDPhotonIdProducer(process, DataFormat.MiniAOD)
 my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.mvaPhotonID_Spring15_25ns_nonTrig_V2p1_cff']
@@ -175,7 +177,11 @@ if do_alpaca:
 #================================================================================
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring('/store/mc/RunIISummer16MiniAODv2/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/80000/F62B1C9B-4DB9-E611-8816-0025905A611E.root')
+                            fileNames = cms.untracked.vstring('/store/mc/RunIISummer16MiniAODv2/ZprimeToTT_M-4000_W-40_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/02DEA6C9-19B7-E611-B22D-A0000420FE80.root'),
+#'/store/mc/RunIISummer16MiniAODv2/ZprimeToWW_width0p3_M-800_TuneCUETP8M1_13TeV-madgraph-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/1EB4DB0E-BABE-E611-A5DC-001E67792494.root'),
+                            #'/store/mc/PhaseISpring17MiniAOD/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/FlatPU28to62_902_90X_upgrade2017_realistic_v20_ext1-v1/120000/087F2D40-9933-E711-89AF-0025904C66EC.root'),
+#/store/mc/PhaseISpring17MiniAOD/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/FlatPU28to62_902_90X_upgrade2017_realistic_v20_ext1-v1/120000/DA17D4FA-9F33-E711-B2DF-0242AC110003.root')
+                            #'/store/mc/PhaseISpring17MiniAOD/QCD_Pt-15to7000_TuneCUETP8M1_Flat_13TeV_pythia8/MINIAODSIM/FlatPU28to62_90X_upgrade2017_realistic_v20-v1/60000/98FFC301-3A2F-E711-97FF-1866DAEA8190.root')#/store/group/upgrade/timing/pfintegration/Mar31jme/dymm200notiming/MINIAODSIM/step3_dymm200notiming_MINIAODSIM_276.root')
                             )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -217,14 +223,15 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmPupAlpacaMETName  = cms.untracked.string(alpacaPuppiMet),
     edmRhoForIsoName     = cms.untracked.string('fixedGridRhoFastjetAll'),
     edmRhoForJetEnergy   = cms.untracked.string('fixedGridRhoFastjetAll'),
-    doFillMETFilters     = cms.untracked.bool(True),
+    doFillMETFilters     = cms.untracked.bool(False),
     doFillMET            = cms.untracked.bool(True)
   ),
   
   GenInfo = cms.untracked.PSet(
     isActive            = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
-    edmGenEventInfoName = cms.untracked.string('generator'),
-    edmGenParticlesName = cms.untracked.string('prunedGenParticles'),
+    edmGenEventInfoName     = cms.untracked.string('generator'),
+    edmGenParticlesName     = cms.untracked.string('prunedGenParticles'),
+    edmGenPackParticlesName = cms.untracked.string('packedGenParticles'),
     fillAllGen          = cms.untracked.bool(False),
     fillLHEWeights      = cms.untracked.bool(True)
   ),
@@ -279,7 +286,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmChHadIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoChargedIsolation"),        # EGM recommendation not in AOD/MINIAOD
     edmNeuHadIsoMapTag    = cms.untracked.InputTag("photonIDValueMapProducer:phoNeutralHadronIsolation"),  # EGM recommendation not in AOD/MINIAOD
     edmGammaIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoPhotonIsolation"),          # EGM recommendation not in AOD/MINIAOD
-    edmPhoMVAIdTag        = cms.untracked.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring15NonTrig25nsV2p1Values")
+    edmPhoMVAIdTag        = cms.untracked.InputTag(""),#photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring16NonTrigV1Values"),
   ),
   
   Tau = cms.untracked.PSet(
@@ -296,6 +303,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     useAOD               = cms.untracked.bool(False),
     minPt                = cms.untracked.double(15),
     coneSize             = cms.untracked.double(0.4),
+    addPFCand            = cms.untracked.bool(False),
     doComputeFullJetInfo = cms.untracked.bool(False),
     doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
     showerDecoConf       = cms.untracked.string(''),
@@ -356,11 +364,11 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   ),
 
   AK8CHS = cms.untracked.PSet(
-    isActive             = cms.untracked.bool(True),
+    isActive             = cms.untracked.bool(False),
     useAOD               = cms.untracked.bool(True),
     minPt                = cms.untracked.double(180),
     coneSize             = cms.untracked.double(0.8),
-    doComputeFullJetInfo = cms.untracked.bool(True),
+    doComputeFullJetInfo = cms.untracked.bool(False),
     doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
     showerDecoConf       = cms.untracked.string(''),
     jetPUIDFiles = cms.untracked.vstring('',
@@ -464,11 +472,11 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   ),
 
   CA15CHS = cms.untracked.PSet(
-    isActive             = cms.untracked.bool(True),
+    isActive             = cms.untracked.bool(False),
     useAOD               = cms.untracked.bool(True),
     minPt                = cms.untracked.double(180),
     coneSize             = cms.untracked.double(1.5),
-    doComputeFullJetInfo = cms.untracked.bool(True),
+    doComputeFullJetInfo = cms.untracked.bool(False),
     doGenJet             = ( cms.untracked.bool(False) if is_data_flag else cms.untracked.bool(True) ),
     showerDecoConf       = cms.untracked.string(''),
     edmPVName   = cms.untracked.string('offlineSlimmedPrimaryVertices'),
@@ -500,6 +508,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     qgLikelihoodSubjet = cms.untracked.string('CA15QGTaggerSubJetsCHS'),
     topTaggerName      = cms.untracked.string('HEP')
   ),
+
   CA15Puppi = cms.untracked.PSet(
     isActive             = cms.untracked.bool(True),
     useAOD               = cms.untracked.bool(True),
@@ -548,17 +557,19 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
 )
 process.baconSequence = cms.Sequence(
                                      #process.pfCleaned*
-                                     process.BadPFMuonFilter          *
-                                     process.BadChargedCandidateFilter*
+                                     #process.BadPFMuonFilter          *
+                                     #process.BadChargedCandidateFilter*
                                      process.ak4chsL1FastL2L3Chain    *
                                      process.ak8chsL1FastL2L3Chain    *
                                      process.ak4PuppiL1FastL2L3Chain  *
                                      process.ak8PuppiL1FastL2L3Chain  *
                                      process.QGTagger                 *
                                      process.pfNoPileUpJME            *
-                                     process.electronMVAValueMapProducer *
-                                     process.egmGsfElectronIDs        *
-                                     process.egmPhotonIDSequence      *
+                                     #process.egmGsfElectronIDs        *
+                                     #process.electronMVAValueMapProducer *
+                                     process.photonIDValueMapProducer *
+                                     #process.photonMVAValueMapProducer*
+                                     #process.egmPhotonIDSequence      *
                                      process.puppiMETSequence         *
                                      process.genjetsequence           *
                                      process.AK4genjetsequenceCHS     *
@@ -585,9 +596,9 @@ if do_hlt_filter:
     if (line[0:3] == 'HLT'):         # assumes typical lines begin with HLT path name (e.g. HLT_Mu15_v1)
       hlt_path = line.split()[0]
       process.hltHighLevel.HLTPaths.extend(cms.untracked.vstring(hlt_path))
-  process.p = cms.Path(process.hltHighLevel*process.baconSequence)
+  process.p = cms.EndPath(process.hltHighLevel*process.baconSequence)
 else:
-  process.p = cms.Path(process.baconSequence)
+  process.p = cms.EndPath(process.baconSequence)
 
 #--------------------------------------------------------------------------------
 # simple checks to catch some mistakes...

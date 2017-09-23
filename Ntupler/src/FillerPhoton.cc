@@ -105,6 +105,7 @@ void FillerPhoton::fill(TClonesArray *array,
   const reco::SuperClusterCollection *scCol = hSCProduct.product();
 
   // Get isolation value maps (EGM recommendations currently not in AOD/MINIAOD)
+  
   edm::Handle<edm::ValueMap<float> > hChHadIsoMap;
   iEvent.getByToken(fTokChHadIsoMapTag, hChHadIsoMap);
   assert(hChHadIsoMap.isValid());
@@ -233,7 +234,7 @@ void FillerPhoton::fill(TClonesArray *array,
   assert(hSCProduct.isValid());
   const reco::SuperClusterCollection *scCol = hSCProduct.product();
 
-  // (!) Get isolation value maps, fix for 7_2_0 MC
+  /*
   edm::Handle<edm::ValueMap<float> > hChHadIsoMap;
   iEvent.getByToken(fTokChHadIsoMapTag, hChHadIsoMap);
   assert(hChHadIsoMap.isValid());
@@ -245,10 +246,12 @@ void FillerPhoton::fill(TClonesArray *array,
   edm::Handle<edm::ValueMap<float> > hGammaIsoMap;
   iEvent.getByToken(fTokGammaIsoMapTag, hGammaIsoMap);
   assert(hGammaIsoMap.isValid());
-
+  */
   edm::Handle<edm::ValueMap<float> > hPhoMVAMap;
-  iEvent.getByToken(fTokPhoMVAMapTag, hPhoMVAMap);
-  assert(hPhoMVAMap.isValid());
+  if(fPhoMVAMapTag.label().size() > 0) {
+    iEvent.getByToken(fTokPhoMVAMapTag, hPhoMVAMap);
+    assert(hPhoMVAMap.isValid());
+  }
 
   for(pat::PhotonCollection::const_iterator itPho = photonCol->begin(); itPho!=photonCol->end(); ++itPho) {
 
@@ -287,9 +290,9 @@ void FillerPhoton::fill(TClonesArray *array,
     pPhoton->ecalIso = itPho->ecalRecHitSumEtConeDR04();
     pPhoton->hcalIso = itPho->hcalTowerSumEtConeDR04();
 
-    pPhoton->chHadIso  = (*hChHadIsoMap)[phoBaseRef];
-    pPhoton->gammaIso  = (*hGammaIsoMap)[phoBaseRef];
-    pPhoton->neuHadIso = (*hNeuHadIsoMap)[phoBaseRef];
+    pPhoton->chHadIso  = itPho->chargedHadronIso();
+    pPhoton->gammaIso  = itPho->photonIso();       //(*hGammaIsoMap)[phoBaseRef];
+    pPhoton->neuHadIso = itPho->neutralHadronIso();//(*hNeuHadIsoMap)[phoBaseRef];
 
     //Isolation for Photon MVA
 //    pPhoton->chHadIso03SelVtx  = -1;
@@ -336,7 +339,7 @@ void FillerPhoton::fill(TClonesArray *array,
     pPhoton->passElectronVeto = itPho->passElectronVeto(); // here for backwards compatibility
 
     // Photon MVA ID: https://twiki.cern.ch/twiki/bin/view/CMS/MultivariatePhotonIdentificationRun2
-    pPhoton->mva = (*hPhoMVAMap)[phoBaseRef];//itPho->photonID("egmPhotonIDs:mvaPhoID-Spring15-25ns-nonTrig-V2-wp90");
+    if(fPhoMVAMapTag.label().size() > 0) pPhoton->mva = (*hPhoMVAMap)[phoBaseRef];//itPho->photonID("egmPhotonIDs:mvaPhoID-Spring15-25ns-nonTrig-V2-wp90");
 
     pPhoton->hltMatchBits = TriggerTools::matchHLT(pPhoton->eta, pPhoton->phi, triggerRecords, triggerObjects);
   }
