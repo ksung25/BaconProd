@@ -9,6 +9,7 @@
 #include "BaconProd/Utils/interface/RecursiveSoftDrop.hh"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
 #include "DataFormats/BTauReco/interface/BoostedDoubleSVTagInfo.h"
+#include "DataFormats/BTauReco/interface/CandSoftLeptonTagInfo.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/BasicJet.h"
 #include "DataFormats/JetReco/interface/JetCollection.h"
@@ -106,6 +107,8 @@ namespace baconhep
       std::string fCSVbtagSubJetName;
       std::string fCSVDoubleBtagName;
       std::string fBoostedDoubleSVTagInfoName;
+      std::string fsoftPFMuonTagInfoName;
+      std::string fsoftPFElectronTagInfoName;
       std::string fJettinessName;
       std::string fQGLikelihood;
       std::string fQGLikelihoodSubJets;
@@ -162,6 +165,8 @@ namespace baconhep
     edm::EDGetTokenT<reco::BasicJetCollection> fTokCMSTTJetProduct ;
     edm::EDGetTokenT<reco::PFJetCollection>    fTokCMSTTSubJetProduct;
     edm::EDGetTokenT<reco::BoostedDoubleSVTagInfoCollection>  fTokBoostedDoubleSVTagInfo;
+    edm::EDGetTokenT<reco::CandSoftLeptonTagInfoCollection>      fToksoftPFMuonTagInfo;
+    edm::EDGetTokenT<reco::CandSoftLeptonTagInfoCollection>      fToksoftPFElectronTagInfo;
     edm::EDGetTokenT<double>                   fTokRhoTag;
   };
 }

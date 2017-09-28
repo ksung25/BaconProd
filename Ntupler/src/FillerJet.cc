@@ -16,6 +16,7 @@
 #include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/BTauReco/interface/CATopJetTagInfo.h"
 #include "DataFormats/BTauReco/interface/BoostedDoubleSVTagInfo.h"
+#include "DataFormats/BTauReco/interface/CandSoftLeptonTagInfo.h"
 #include "DataFormats/BTauReco/interface/TaggingVariable.h"
 //#include "DataFormats/JetReco/interface/HTTTopJetTagInfo.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -59,6 +60,8 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fCSVbtagSubJetName  (iConfig.getUntrackedParameter<std::string>("csvBTagSubJetName","AK4CombinedInclusiveSecondaryVertexV2BJetTagsSJCHS")),
   fCSVDoubleBtagName  (iConfig.getUntrackedParameter<std::string>("csvDoubleBTagName","AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS")),
   fBoostedDoubleSVTagInfoName (iConfig.getUntrackedParameter<std::string>("boostedDoubleSVTagInfoName","AK8PFBoostedDoubleSVTagInfosCHS")),
+  fsoftPFMuonTagInfoName    (iConfig.getUntrackedParameter<std::string>("softPFMuonTagInfoName","AK4PFSoftPFMuonsTagInfosCHS")),
+  fsoftPFElectronTagInfoName(iConfig.getUntrackedParameter<std::string>("softPFElectronTagInfoName","AK4PFSoftPFElectronsTagInfosCHS")),
   fJettinessName      (iConfig.getUntrackedParameter<std::string>("jettiness","AK4NjettinessCHS")),
   fQGLikelihood       (iConfig.getUntrackedParameter<std::string>("qgLikelihood","QGLikelihood")),
   fQGLikelihoodSubJets(iConfig.getUntrackedParameter<std::string>("qgLikelihoodSubjet","QGLikelihood")),
@@ -125,6 +128,8 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fTokCSVbtagSubJetName = iC.consumes<reco::JetTagCollection>  (fCSVbtagSubJetName);
     fTokCSVDoubleBtagName = iC.consumes<reco::JetTagCollection>  (fCSVDoubleBtagName);
     fTokBoostedDoubleSVTagInfo = iC.consumes<reco::BoostedDoubleSVTagInfoCollection> (fBoostedDoubleSVTagInfoName);
+    fToksoftPFMuonTagInfo     = iC.consumes<reco::CandSoftLeptonTagInfoCollection>     (fsoftPFMuonTagInfoName);
+    fToksoftPFElectronTagInfo = iC.consumes<reco::CandSoftLeptonTagInfoCollection>     (fsoftPFElectronTagInfoName);
     edm::InputTag lTau1(fJettinessName,"tau1");
     edm::InputTag lTau2(fJettinessName,"tau2");
     edm::InputTag lTau3(fJettinessName,"tau3");
@@ -956,6 +961,79 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   }
 
   else std::cout<< "   not found matched double-b tag info  "<<std::endl;	
+
+  // Lepton in Jet
+  //reco::CandSoftLeptonTagInfo const *softPFMuTagInfo = dynamic_cast<reco::CandSoftLeptonTagInfo const *>(itJet.tagInfoCandSoftLepton("softPFMuonTagInfos"));
+
+  edm::Handle<reco::CandSoftLeptonTagInfoCollection> hsoftPFMuonTagInfo;
+  iEvent.getByToken(fToksoftPFMuonTagInfo,hsoftPFMuonTagInfo);
+  assert(hsoftPFMuonTagInfo.isValid());
+  const reco::CandSoftLeptonTagInfoCollection & softPFMuonTagInfoCollection = *(hsoftPFMuonTagInfo.product());
+
+  edm::Handle<reco::CandSoftLeptonTagInfoCollection> hsoftPFElectronTagInfo;
+  iEvent.getByToken(fToksoftPFElectronTagInfo, hsoftPFElectronTagInfo);
+  assert(hsoftPFElectronTagInfo.isValid());
+  const reco::CandSoftLeptonTagInfoCollection & softPFElectronTagInfoCollection = *(hsoftPFElectronTagInfo.product());
+
+  // match to jet and find highest pT matched lepton
+  bool matchedMu,matchedEle;
+  int nMu(0);
+  reco::CandSoftLeptonTagInfoCollection::const_iterator matchSM = hsoftPFMuonTagInfo->end();
+  std::cout << "loop over muon collection  " << std::endl;
+  for( reco::CandSoftLeptonTagInfoCollection::const_iterator itTM = hsoftPFMuonTagInfo->begin(); itTM != hsoftPFMuonTagInfo->end(); ++itTM ) {
+    matchedMu =false;
+    const reco::JetBaseRef jetTM = itTM->jet();
+    std::cout << "jet tm pz " << jetTM->pz() << std::endl;
+    std::cout << "jet base pz " << jetBaseRef->pz() << std::endl;
+    std::cout << "muons " << itTM->leptons() << std::endl;
+    for (size_t PFmu = 0; PFmu < (size_t)itTM->leptons(); ++PFmu) {
+      std::cout << "muon pt " << itTM->lepton(PFmu)->pt();
+      /*
+      pAddJet->PFMuon_pt       = itTM.lepton(PFmu)->pt();
+      pAddJet->PFMuon_eta      = itTM.lepton(PFmu)->eta();
+      pAddJet->PFMuon_phi      = itTM.lepton(PFmu)->phi();
+      pAddJet->PFMuon_ptRel    = itTM.properties(PFmu).ptRel;
+      pAddJet->PFMuon_ratio    = itTM.properties(PFmu).ratio;
+      pAddJet->PFMuon_ratioRel = itTM.properties(PFmu).ratioRel;
+      pAddJet->PFMuon_deltaR   = itTM.properties(PFmu).deltaR;
+      pAddJet->PFMuon_IP       = itTM.properties(PFmu).sip3d;
+      pAddJet->PFMuon_IP2D     = itTM.properties(PFmu).sip2d;
+      */
+      //nSM ++;
+    }
+    if( jetTM->px() ==  jetBaseRef->px()  && jetTM->pz() ==  jetBaseRef->pz() ) {
+      matchSM = itTM;
+      matchedMu = true;
+      //std::cout << "muon pt " << itTM->lepton(0)->pt() << std::endl;
+      //std::cout << "found muon matched "  << nMu << std::endl;
+      //nMu++;
+      break;
+    }
+  }
+
+  reco::CandSoftLeptonTagInfoCollection::const_iterator matchSE = hsoftPFElectronTagInfo->end();
+  for( reco::CandSoftLeptonTagInfoCollection::const_iterator itTE = hsoftPFElectronTagInfo->begin(); itTE != hsoftPFElectronTagInfo->end(); ++itTE ) {
+    matchedEle =false;
+    const reco::JetBaseRef jetTE = itTE->jet();
+    if( jetTE->px() ==  jetBaseRef->px()  && jetTE->pz() ==  jetBaseRef->pz() ) {
+      matchSE = itTE;
+      matchedEle = true;
+      break;
+    }
+  }
+
+  if( matchSM != hsoftPFMuonTagInfo->end() && matchedMu) {
+    for (std::size_t lepIndex = 0; lepIndex < softPFMuonTagInfoCollection.size(); ++lepIndex) {
+    }
+  }
+  else std::cout<< "   not found matched soft muon tag info  "<<std::endl;
+
+  if( matchSE != hsoftPFElectronTagInfo->end() && matchedEle) {
+    for (std::size_t lepIndex = 0; lepIndex < softPFElectronTagInfoCollection.size(); ++lepIndex) {
+    }
+  }
+  else std::cout<< "   not found matched soft electron tag info  "<<std::endl;
+
 
   //
   // Top Tagging
