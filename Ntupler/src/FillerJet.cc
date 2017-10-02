@@ -980,6 +980,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   else std::cout<< "   not found matched double-b tag info  "<<std::endl;	
 
   // Lepton in Jet
+
   edm::Handle<pat::MuonCollection> hMuonProduct;
   iEvent.getByToken(fTokPatMuonName,hMuonProduct);
   assert(hMuonProduct.isValid());
@@ -1016,6 +1017,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
       break;
     }
   }
+
   reco::CandSoftLeptonTagInfoCollection::const_iterator matchSE = hsoftPFElectronTagInfo->end();
   for( reco::CandSoftLeptonTagInfoCollection::const_iterator itTE = hsoftPFElectronTagInfo->begin(); itTE != hsoftPFElectronTagInfo->end(); ++itTE ) {
     matchedEle =false;
@@ -1026,6 +1028,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
       break;
     }
   }
+
   
   if( matchSM != hsoftPFMuonTagInfo->end() && matchedMu) {
     for (size_t PFmu = 0; PFmu < (size_t)matchSM->leptons(); ++PFmu) {

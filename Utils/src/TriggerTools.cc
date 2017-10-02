@@ -53,7 +53,7 @@ TriggerObjects TriggerTools::matchHLT(const double eta, const double phi,
       for(pat::TriggerObjectStandAlone tobj : triggerObjects) {
         if(tobj.hasFilterLabel(filterName)) {
           if(reco::deltaR(eta,phi,tobj.eta(),tobj.phi()) < dRMax) {
-            matchBits[filterBit] = 1; 
+	    matchBits[filterBit] = 1; 
           }
         }
       }

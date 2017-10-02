@@ -171,7 +171,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       fHLTObjTag = edm::InputTag("hltTriggerSummaryAOD","","HLT");
     } else {
       //fHLTObjTag = edm::InputTag("selectedPatTrigger","","PAT");
-      fHLTObjTag = edm::InputTag("selectedPatTrigger");
+      fHLTObjTag = edm::InputTag("slimmedPatTrigger");
     }
   }
 
@@ -510,11 +510,11 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 
   fTotalEvents->Fill(1);
   TriggerBits triggerBits;
+  edm::Handle<edm::TriggerResults> hTrgRes;
   if(fUseTrigger) { 
-    edm::Handle<edm::TriggerResults> hTrgRes;
     iEvent.getByToken(fTokTrgRes,hTrgRes);
     assert(hTrgRes.isValid()); 
-    const edm::TriggerNames &triggerNames = iEvent.triggerNames(*hTrgRes);
+    const edm::TriggerNames triggerNames = iEvent.triggerNames(*hTrgRes);
     Bool_t config_changed = false;
     if(fTriggerNamesID != triggerNames.parameterSetID()) {
       fTriggerNamesID = triggerNames.parameterSetID();
@@ -557,33 +557,41 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   }
   edm::Handle<trigger::TriggerEvent> hTrgEvt;
   edm::Handle<pat::TriggerObjectStandAloneCollection> hTrgObjs;
+  pat::TriggerObjectStandAloneCollection *uFTrgObjs = new pat::TriggerObjectStandAloneCollection(); 
   const trigger::TriggerEvent*                  hTrgEvtDummy      = 0; 
   const pat::TriggerObjectStandAloneCollection* hTrgObjsDummy     = 0; 
   if(fUseTrigger) { 
     iEvent.getByToken(fTokTrgEvt,hTrgEvt);
     iEvent.getByToken(fTokTrgObj,hTrgObjs);
+    const edm::TriggerNames triggerNames = iEvent.triggerNames(*hTrgRes);
+    for(pat::TriggerObjectStandAlone tobj : *hTrgObjs) {
+      pat::TriggerObjectStandAlone patTriggerObjectStandAloneUnpacked(tobj);
+      patTriggerObjectStandAloneUnpacked.unpackPathNames(triggerNames);
+      patTriggerObjectStandAloneUnpacked.unpackFilterLabels(iEvent,*hTrgRes);
+      uFTrgObjs->push_back(patTriggerObjectStandAloneUnpacked);
+    }
     if(fUseAOD) {hTrgEvtDummy  = &(*hTrgEvt); }
-    else        {hTrgObjsDummy = &(*hTrgObjs); }
+    else        {hTrgObjsDummy = uFTrgObjs; }
   }
   if(fIsActiveEle) {
     fEleArr->Clear();
     if(fUseAOD) { fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);  }
-    else        { fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+    else        { fFillerEle->fill(fEleArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
   }
   if(fIsActiveMuon) {
     fMuonArr->Clear();  
     if(fUseAOD) { fFillerMuon->fill(fMuonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);  }
-    else        { fFillerMuon->fill(fMuonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+    else        { fFillerMuon->fill(fMuonArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
   }
   if(fIsActivePhoton) {
     fPhotonArr->Clear();
     if(fUseAOD) { fFillerPhoton->fill(fPhotonArr, iEvent, iSetup, fTrigger->fRecords, *hTrgEvt);  }
-    else        { fFillerPhoton->fill(fPhotonArr, iEvent, iSetup, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+    else        { fFillerPhoton->fill(fPhotonArr, iEvent, iSetup, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
   }
   if(fIsActiveTau) {
     fTauArr->Clear();
     if(fUseAOD) { fFillerTau->fill(fTauArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgEvt);  }
-    else        { fFillerTau->fill(fTauArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+    else        { fFillerTau->fill(fTauArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
   }
   //  if(fIsActiveCaloJet) {
   //  fCaloJetArr->Clear();
@@ -594,10 +602,10 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if(fComputeFullJetInfo) {
       fAddJetArr->Clear();      
       if(fUseAODJet) { fFillerJet->fill(fJetArr, fAddJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
-      else           { fFillerJet->fill(fJetArr, fAddJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+      else           { fFillerJet->fill(fJetArr, fAddJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     } else {
       if(fUseAODJet) { fFillerJet->fill(fJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
-      else           { fFillerJet->fill(fJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+      else           { fFillerJet->fill(fJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     }
   }
   if(fIsActiveFatJet) {
@@ -605,10 +613,10 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if(fComputeFullFatJetInfo) {
       fAddFatJetArr->Clear();      
       if(fUseAODFatJet) { fFillerFatJet->fill(fFatJetArr, fAddFatJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
-      else              { fFillerFatJet->fill(fFatJetArr, fAddFatJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+      else              { fFillerFatJet->fill(fFatJetArr, fAddFatJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     } else {
       if(fUseAODFatJet) { fFillerFatJet->fill(fFatJetArr,             0, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
-      else              { fFillerFatJet->fill(fFatJetArr,             0, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+      else              { fFillerFatJet->fill(fFatJetArr,             0, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     }
   }
   if(fIsActiveFatterJet) {
@@ -616,10 +624,10 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if(fComputeFullFatterJetInfo) {
       fAddFatterJetArr->Clear();      
       if(fUseAODFatterJet) { fFillerFatterJet->fill(fFatterJetArr, fAddFatterJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
-      else                 { fFillerFatterJet->fill(fFatterJetArr, fAddFatterJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); } 
+      else                 { fFillerFatterJet->fill(fFatterJetArr, fAddFatterJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); } 
     } else {
       if(fUseAODFatterJet) { fFillerFatterJet->fill(fFatterJetArr,                0, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy); }
-      else                 { fFillerFatterJet->fill(fFatterJetArr,                0, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs);  } 
+      else                 { fFillerFatterJet->fill(fFatterJetArr,                0, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs);  } 
     }
   }
   if(fIsActivePuppiJet) {
@@ -627,10 +635,10 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if(fComputeFullPuppiJetInfo) {
       fAddPuppiJetArr->Clear();      
       if(fUseAODPuppiJet) { fFillerPuppiJet->fill(fPuppiJetArr, fAddPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords,  hTrgEvtDummy, hTrgObjsDummy);  }
-      else                { fFillerPuppiJet->fill(fPuppiJetArr, fAddPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords,  *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+      else                { fFillerPuppiJet->fill(fPuppiJetArr, fAddPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords,  *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     } else {
       if(fUseAODPuppiJet) { fFillerPuppiJet->fill(fPuppiJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy, hTrgObjsDummy);  }
-      else                { fFillerPuppiJet->fill(fPuppiJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+      else                { fFillerPuppiJet->fill(fPuppiJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     }
   }
   if(fIsActiveFatPuppiJet) {
@@ -638,10 +646,10 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if(fComputeFullFatPuppiJetInfo) {
       fAddFatPuppiJetArr->Clear();      
       if(fUseAODFatPuppiJet) { fFillerFatPuppiJet->fill(fFatPuppiJetArr, fAddFatPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords,hTrgEvtDummy,hTrgObjsDummy);  }
-      else                   { fFillerFatPuppiJet->fill(fFatPuppiJetArr, fAddFatPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); } 
+      else                   { fFillerFatPuppiJet->fill(fFatPuppiJetArr, fAddFatPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); } 
     } else {
       if(fUseAODFatPuppiJet) { fFillerFatPuppiJet->fill(fFatPuppiJetArr,             0, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy,hTrgObjsDummy);  }
-      else                   { fFillerFatPuppiJet->fill(fFatPuppiJetArr,             0, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); }
+      else                   { fFillerFatPuppiJet->fill(fFatPuppiJetArr,             0, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }
     }
   }
   if(fIsActiveFatterPuppiJet) {
@@ -649,10 +657,10 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     if(fComputeFullFatterPuppiJetInfo) {
       fAddFatterPuppiJetArr->Clear();      
       if(fUseAODFatterPuppiJet) { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr, fAddFatterPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords,hTrgEvtDummy,hTrgObjsDummy);  }
-      else                      { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr, fAddFatterPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); } 
+      else                      { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr, fAddFatterPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); } 
     } else {
       if(fUseAODFatterPuppiJet) { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr,                     0, iEvent, iSetup, *pv, fTrigger->fRecords,hTrgEvtDummy,hTrgObjsDummy);  }
-      else                      { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr,                     0, iEvent, iSetup, *pv, fTrigger->fRecords, *hTrgObjs); } 
+      else                      { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr,                     0, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); } 
     }
   }
   if(fIsActivePF) { 
@@ -707,6 +715,7 @@ void NtuplerMod::fillDescriptions(edm::ConfigurationDescriptions& descriptions) 
   desc.setUnknown();
   descriptions.addDefault(desc);
 }
+
 void NtuplerMod::endRun  (const edm::Run& iRun, const edm::EventSetup& iSetup){
   if(fIsActiveGenInfo && fUseRunInfo) { 
     // Get generator event information
@@ -718,6 +727,7 @@ void NtuplerMod::endRun  (const edm::Run& iRun, const edm::EventSetup& iSetup){
   }
 
 }
+
 void NtuplerMod::beginLuminosityBlock(const edm::LuminosityBlock& iLumi, const edm::EventSetup& iSetup){}
 void NtuplerMod::endLuminosityBlock  (const edm::LuminosityBlock& iLumi, const edm::EventSetup& iSetup){}
 
