@@ -1310,7 +1310,8 @@ float JetTools::leptons(const reco::PFJet &jet,int iId) {
   float lFPt = lVec.Pt();
   return lFPt;  
 }
-float JetTools::lsf(std::vector<fastjet::PseudoJet> iCParticles,float ilPt, float ilEta, float ilPhi, int ilId, double dr, int nsj, int iId){
+float JetTools::lsf(std::vector<fastjet::PseudoJet> iCParticles, std::vector<fastjet::PseudoJet> &ljets, 
+		    float ilPt, float ilEta, float ilPhi, int ilId, double dr, int nsj, int iId) {
   float lsf(-100),lmd(-100);
   if(ilPt>0 && (ilId == 11 || ilId == 13)) {    
     TLorentzVector ilep; 
@@ -1318,7 +1319,6 @@ float JetTools::lsf(std::vector<fastjet::PseudoJet> iCParticles,float ilPt, floa
     if(ilId == 13) ilep.SetPtEtaPhiM(ilPt, ilEta, ilPhi, 0.105658);
     fastjet::JetDefinition lCJet_def(fastjet::kt_algorithm, dr);
     fastjet::ClusterSequence lCClust_seq(iCParticles, lCJet_def);
-    std::vector<fastjet::PseudoJet> ljets;
     if (dr > 0.5) {
       ljets = sorted_by_pt(lCClust_seq.exclusive_jets_up_to(nsj));
     }
