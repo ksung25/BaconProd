@@ -16,6 +16,9 @@
 #include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/BTauReco/interface/CATopJetTagInfo.h"
 #include "DataFormats/BTauReco/interface/BoostedDoubleSVTagInfo.h"
+//#include "DataFormats/MuonReco/interface/Muon.h"
+//#include "DataFormats/PatCandidates/interface/Muon.h"
+//#include "DataFormats/BTauReco/interface/CandSoftLeptonTagInfo.h"
 #include "DataFormats/BTauReco/interface/TaggingVariable.h"
 //#include "DataFormats/JetReco/interface/HTTTopJetTagInfo.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -59,6 +62,10 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fCSVbtagSubJetName  (iConfig.getUntrackedParameter<std::string>("csvBTagSubJetName","AK4CombinedInclusiveSecondaryVertexV2BJetTagsSJCHS")),
   fCSVDoubleBtagName  (iConfig.getUntrackedParameter<std::string>("csvDoubleBTagName","AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS")),
   fBoostedDoubleSVTagInfoName (iConfig.getUntrackedParameter<std::string>("boostedDoubleSVTagInfoName","AK8PFBoostedDoubleSVTagInfosCHS")),
+  //fMuonName           (iConfig.getUntrackedParameter<std::string>("edmMuonName","muons")),
+  //fEleName            (iConfig.getUntrackedParameter<std::string>("edmElectronName","gedGsfElectrons")),
+  //fsoftPFMuonTagInfoName    (iConfig.getUntrackedParameter<std::string>("softPFMuonTagInfoName","AK4PFSoftPFMuonsTagInfosCHS")),
+  //fsoftPFElectronTagInfoName(iConfig.getUntrackedParameter<std::string>("softPFElectronTagInfoName","AK4PFSoftPFElectronsTagInfosCHS")),
   fJettinessName      (iConfig.getUntrackedParameter<std::string>("jettiness","AK4NjettinessCHS")),
   fQGLikelihood       (iConfig.getUntrackedParameter<std::string>("qgLikelihood","QGLikelihood")),
   fQGLikelihoodSubJets(iConfig.getUntrackedParameter<std::string>("qgLikelihoodSubjet","QGLikelihood")),
@@ -70,7 +77,8 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fJetCorr            (0),
   fJetUnc             (0),
   fUseAOD             (useAOD),
-  fRecursiveSoftDrop1 (0)
+  fRecursiveSoftDrop1 (0),
+  fRecursiveSoftDrop2 (0)
 {
     std::vector<std::string> empty_vstring;
     /* ===> Switching to DB
@@ -109,6 +117,14 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fTokMVAbtagName   = iC.consumes<reco::JetTagCollection>(fMVAbtagName);
   fTokCVBctagName   = iC.consumes<reco::JetTagCollection>(fCVBctagName);
   fTokCVLctagName   = iC.consumes<reco::JetTagCollection>(fCVLctagName);
+  //if(fUseAOD)  
+  //fTokMuonName       = iC.consumes<reco::MuonCollection>       (fMuonName);
+  //if(!fUseAOD) 
+  //fTokPatMuonName    = iC.consumes<pat::MuonCollection>(iConfig.getUntrackedParameter<std::string>("edmMuonName","muons"));
+  //if(fUseAOD)  
+  //fTokEleName        = iC.consumes<reco::GsfElectronCollection>(iConfig.getUntrackedParameter<std::string>("edmElectronName","gedGsfElectrons"));
+  //if(!fUseAOD) 
+  //fTokPatEleName     = iC.consumes<pat::ElectronCollection>(iConfig.getUntrackedParameter<std::string>("edmElectronName","gedGsfElectrons"));
   
   edm::InputTag lQGLikelihood(fQGLikelihood,"qgLikelihood");
   edm::InputTag lQGLAxis2    (fQGLikelihood,"axis2");
@@ -125,6 +141,8 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fTokCSVbtagSubJetName = iC.consumes<reco::JetTagCollection>  (fCSVbtagSubJetName);
     fTokCSVDoubleBtagName = iC.consumes<reco::JetTagCollection>  (fCSVDoubleBtagName);
     fTokBoostedDoubleSVTagInfo = iC.consumes<reco::BoostedDoubleSVTagInfoCollection> (fBoostedDoubleSVTagInfoName);
+    //fToksoftPFMuonTagInfo     = iC.consumes<reco::CandSoftLeptonTagInfoCollection>     (fsoftPFMuonTagInfoName);
+    //fToksoftPFElectronTagInfo = iC.consumes<reco::CandSoftLeptonTagInfoCollection>     (fsoftPFElectronTagInfoName);
     edm::InputTag lTau1(fJettinessName,"tau1");
     edm::InputTag lTau2(fJettinessName,"tau2");
     edm::InputTag lTau3(fJettinessName,"tau3");
@@ -142,7 +160,8 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fTokCMSTTJetProduct    = iC.consumes<reco::BasicJetCollection>(lTopTag);
     fTokCMSTTSubJetProduct = iC.consumes<reco::PFJetCollection>   (lTopTagSubJet);
     fECF = new EnergyCorrelations();
-    fRecursiveSoftDrop1 = new fastjet::RecursiveSoftDrop( 0. ,0.1,2.0); // Use fConeSize instead?
+    fRecursiveSoftDrop1 = new fastjet::RecursiveSoftDrop( 0. ,0.1,2.0,0);
+    fRecursiveSoftDrop2 = new fastjet::RecursiveSoftDrop( 0. ,0.1,2.0,2);
   }
 }
 
@@ -152,6 +171,7 @@ FillerJet::~FillerJet()
   delete fJetCorr;
   delete fJetUnc;
   delete fRecursiveSoftDrop1;
+  delete fRecursiveSoftDrop2;
 }
 void FillerJet::initPUJetId() { 
   if(!fUseAOD) return;
@@ -330,10 +350,13 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     pJet->area  = itJet->jetArea();
     pJet->unc   = jetunc;
     //
-    // Impact Parameter
+    // Impact Parameter and leptons
     //==============================
     pJet->d0 = JetTools::jetD0(*itJet, pv);
     pJet->dz = JetTools::jetDz(*itJet, pv);
+    pJet->leadPt = JetTools::leadPt(*itJet);
+    pJet->lepPt  = JetTools::leptons(*itJet,0);
+    pJet->lepDR  = JetTools::leptons(*itJet,2);
 
     //
     // Identification
@@ -545,7 +568,9 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     //==============================
     pJet->d0 = JetTools::jetD0(*itJet, pv);
     pJet->dz = JetTools::jetDz(*itJet, pv);
-
+    pJet->leadPt = JetTools::leadPt(*itJet);
+    pJet->lepPt  = JetTools::leptons(*itJet,0);
+    pJet->lepDR  = JetTools::leptons(*itJet,2);
     //
     // Identification
     //==============================
@@ -783,7 +808,9 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   
   // Recursive Soft drop
   fastjet::PseudoJet pRSM1Jet = (*fRecursiveSoftDrop1) (inclusive_jets[0]);
+  fastjet::PseudoJet pRSM2Jet = (*fRecursiveSoftDrop2) (inclusive_jets[0]);
   pAddJet->mass_rsd0  = pRSM1Jet.m()*pCorr;
+  pAddJet->mass_rsd2  = pRSM2Jet.m()*pCorr;
   /*
   // Q-Jets
   pAddJet->qjet = 0;
@@ -956,6 +983,143 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   }
 
   else std::cout<< "   not found matched double-b tag info  "<<std::endl;	
+
+  // Lepton in Jet
+
+  /*
+  edm::Handle<pat::MuonCollection> hMuonProduct;
+  iEvent.getByToken(fTokPatMuonName,hMuonProduct);
+  assert(hMuonProduct.isValid());
+  const pat::MuonCollection *muonCol = hMuonProduct.product();
+
+  edm::Handle<reco::CandSoftLeptonTagInfoCollection> hsoftPFMuonTagInfo;
+  iEvent.getByToken(fToksoftPFMuonTagInfo,hsoftPFMuonTagInfo);
+  assert(hsoftPFMuonTagInfo.isValid());
+
+  edm::Handle<pat::ElectronCollection> hEleProduct;
+  iEvent.getByToken(fTokPatEleName,hEleProduct);
+  assert(hEleProduct.isValid());
+  const pat::ElectronCollection *eleCol = hEleProduct.product();
+
+  edm::Handle<reco::CandSoftLeptonTagInfoCollection> hsoftPFElectronTagInfo;
+  iEvent.getByToken(fToksoftPFElectronTagInfo, hsoftPFElectronTagInfo);
+  assert(hsoftPFElectronTagInfo.isValid());
+
+  // match to jet and find highest pT matched lepton
+  bool matchedMu,matchedEle;
+  int indexTM(-1);
+  float lepPt(-100), lepEta(-100), lepPhi(-100);
+  float lepRPt(-100), lepREta(-100), lepRPhi(-100);
+  float lepId(0), lepRId(0);
+  reco::CandSoftLeptonTagInfoCollection::const_iterator matchSM = hsoftPFMuonTagInfo->end();
+  for( reco::CandSoftLeptonTagInfoCollection::const_iterator itTM = hsoftPFMuonTagInfo->begin(); itTM != hsoftPFMuonTagInfo->end(); ++itTM ) {
+    indexTM +=1;
+    matchedMu =false;
+    const reco::JetBaseRef jetTM = itTM->jet();
+    if( jetTM->px() ==  jetBaseRef->px()  && jetTM->pz() ==  jetBaseRef->pz() ) {
+      matchSM = itTM;
+      matchedMu = true;
+      break;
+    }
+  }
+
+  reco::CandSoftLeptonTagInfoCollection::const_iterator matchSE = hsoftPFElectronTagInfo->end();
+  for( reco::CandSoftLeptonTagInfoCollection::const_iterator itTE = hsoftPFElectronTagInfo->begin(); itTE != hsoftPFElectronTagInfo->end(); ++itTE ) {
+    matchedEle =false;
+    const reco::JetBaseRef jetTE = itTE->jet();
+    if( jetTE->px() ==  jetBaseRef->px()  && jetTE->pz() ==  jetBaseRef->pz() ) {
+      matchSE = itTE;
+      matchedEle = true;
+      break;
+    }
+  }
+
+  
+  if( matchSM != hsoftPFMuonTagInfo->end() && matchedMu) {
+    for (size_t PFmu = 0; PFmu < (size_t)matchSM->leptons(); ++PFmu) {
+      if(matchSM->lepton(PFmu)->pt() > lepPt) { 
+	lepPt = matchSM->lepton(PFmu)->pt(); 
+	lepEta = matchSM->lepton(PFmu)->eta();
+        lepPhi = matchSM->lepton(PFmu)->phi();
+	lepId = 13; }
+    }
+  }
+  else std::cout<< "   not found matched soft muon tag info  "<<std::endl;
+
+  if( matchSE != hsoftPFElectronTagInfo->end() && matchedEle) {
+    for (size_t PFele = 0; PFele < (size_t)matchSE->leptons(); ++PFele) {
+      if(matchSE->lepton(PFele)->pt() > lepPt) { 
+	lepPt = matchSE->lepton(PFele)->pt(); 
+	lepEta = matchSE->lepton(PFele)->eta();
+        lepPhi = matchSE->lepton(PFele)->phi();
+	lepId = 11; 
+      }
+    }
+  }
+  else std::cout<< "   not found matched soft electron tag info  "<<std::endl;
+
+  for(pat::MuonCollection::const_iterator itMu = muonCol->begin(); itMu!=muonCol->end(); ++itMu) {
+    if(itMu->pt() > lepRPt && deltaR( itJet.eta(), itJet.phi(), itMu->eta(), itMu->phi()) < fConeSize){
+      lepRPt = itMu->pt(); 
+      lepREta = itMu->eta();
+      lepRPhi = itMu->phi();
+      lepRId = 13;
+    }
+  }
+  for(pat::ElectronCollection::const_iterator itEle = eleCol->begin(); itEle!=eleCol->end(); ++itEle) {
+    if(itEle->pt() > lepRPt  && deltaR( itJet.eta(), itJet.phi(), itEle->eta(), itEle->phi()) < fConeSize) {
+      lepRPt = itEle->pt(); 
+      lepREta = itEle->eta();
+      lepRPhi = itEle->phi();
+      lepRId = 11;
+    }
+  }
+  */
+  float lepCPt(-100), lepCEta(-100), lepCPhi(-100);
+  float lepCId(0);
+
+  if(JetTools::leptons(itJet,3)> 0 && JetTools::leptons(itJet,2)<fConeSize) {
+    lepCPt = JetTools::leptons(itJet,2);
+    lepCEta = JetTools::leptons(itJet,5);
+    lepCPhi = JetTools::leptons(itJet,6);
+    lepCId = JetTools::leptons(itJet,7);
+  }
+  
+  pAddJet->lepCPt = lepCPt;
+  pAddJet->lepCEta = lepCEta;
+  pAddJet->lepCPhi = lepCPhi;
+  pAddJet->lepCId = lepCId;
+
+  // LSF
+  std::vector<fastjet::PseudoJet> vSubCInc; pAddJet->lsfCInc = JetTools::lsf(lClusterParticles, vSubCInc, lepCPt, lepCEta, lepCPhi, lepCId, 0.2, 2);
+  std::vector<fastjet::PseudoJet> vSubC_2;  pAddJet->lsfC_2 = JetTools::lsf(lClusterParticles, vSubC_2, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 2);
+  std::vector<fastjet::PseudoJet> vSubC_3;  pAddJet->lsfC_3 = JetTools::lsf(lClusterParticles, vSubC_3, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 3);
+  std::vector<fastjet::PseudoJet> vSubC_4;  pAddJet->lsfC_4 = JetTools::lsf(lClusterParticles, vSubC_4, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 4);
+
+  if(vSubC_3.size() > 0) {
+    pAddJet->lsfC_3_sj1_pt = vSubC_3[0].pt();
+    pAddJet->lsfC_3_sj1_eta = vSubC_3[0].eta();
+    pAddJet->lsfC_3_sj1_phi = vSubC_3[0].phi();
+    pAddJet->lsfC_3_sj1_m = vSubC_3[0].m();
+  }
+  if(vSubC_3.size() > 1) {
+    pAddJet->lsfC_3_sj2_pt = vSubC_3[1].pt();
+    pAddJet->lsfC_3_sj2_eta = vSubC_3[1].eta();
+    pAddJet->lsfC_3_sj2_phi = vSubC_3[1].phi();
+    pAddJet->lsfC_3_sj2_m = vSubC_3[1].m();
+  }
+  if(vSubC_3.size() > 2) {
+    pAddJet->lsfC_3_sj3_pt = vSubC_3[2].pt();
+    pAddJet->lsfC_3_sj3_eta = vSubC_3[2].eta();
+    pAddJet->lsfC_3_sj3_phi = vSubC_3[2].phi();
+    pAddJet->lsfC_3_sj3_m = vSubC_3[2].m();
+  }
+
+  pAddJet->lmdCInc = JetTools::lsf(lClusterParticles, vSubCInc, lepCPt, lepCEta, lepCPhi, lepCId, 0.2, 2, 1);
+  pAddJet->lmdC_2 = JetTools::lsf(lClusterParticles, vSubC_2, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 2, 1);
+  pAddJet->lmdC_3 = JetTools::lsf(lClusterParticles, vSubC_3, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 3, 1);
+  pAddJet->lmdC_4 = JetTools::lsf(lClusterParticles, vSubC_4, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 4, 1);
+
 
   //
   // Top Tagging

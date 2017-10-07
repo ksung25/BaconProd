@@ -11,9 +11,9 @@ do_alpaca     = False
 cmssw_base = os.environ['CMSSW_BASE']
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if is_data_flag:
-  process.GlobalTag.globaltag = cms.string('80X_dataRun2_2016SeptRepro_v7')
+  process.GlobalTag.globaltag = cms.string('90X_upgrade2017_realistic_v20')
 else:
-  process.GlobalTag.globaltag = cms.string('80X_mcRun2_asymptotic_2016_TrancheIV_v8')
+  process.GlobalTag.globaltag = cms.string('90X_upgrade2017_realistic_v20')
 
 #JEC
 JECTag='Summer16_23Sep2016V4_MC'
@@ -124,7 +124,7 @@ process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
 process.load("RecoEgamma/PhotonIdentification/PhotonMVAValueMapProducer_cfi")
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 switchOnVIDPhotonIdProducer(process, DataFormat.MiniAOD)
-my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.mvaPhotonID_Spring15_25ns_nonTrig_V2p1_cff']
+my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.mvaPhotonID_Spring16_nonTrig_V1_cff']
 for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection)
 
@@ -175,13 +175,14 @@ if do_alpaca:
 #--------------------------------------------------------------------------------
 # input settings
 #================================================================================
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring('/store/mc/RunIISummer16MiniAODv2/ZprimeToTT_M-4000_W-40_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/02DEA6C9-19B7-E611-B22D-A0000420FE80.root'),
-#'/store/mc/RunIISummer16MiniAODv2/ZprimeToWW_width0p3_M-800_TuneCUETP8M1_13TeV-madgraph-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/1EB4DB0E-BABE-E611-A5DC-001E67792494.root'),
-                            #'/store/mc/PhaseISpring17MiniAOD/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/FlatPU28to62_902_90X_upgrade2017_realistic_v20_ext1-v1/120000/087F2D40-9933-E711-89AF-0025904C66EC.root'),
-#/store/mc/PhaseISpring17MiniAOD/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/FlatPU28to62_902_90X_upgrade2017_realistic_v20_ext1-v1/120000/DA17D4FA-9F33-E711-B2DF-0242AC110003.root')
-                            #'/store/mc/PhaseISpring17MiniAOD/QCD_Pt-15to7000_TuneCUETP8M1_Flat_13TeV_pythia8/MINIAODSIM/FlatPU28to62_90X_upgrade2017_realistic_v20-v1/60000/98FFC301-3A2F-E711-97FF-1866DAEA8190.root')#/store/group/upgrade/timing/pfintegration/Mar31jme/dymm200notiming/MINIAODSIM/step3_dymm200notiming_MINIAODSIM_276.root')
+                            fileNames = cms.untracked.vstring(
+    #'/store/mc/RunIISummer16MiniAODv2/WJetsToLNu_HT-100To200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/120000/04B30E2B-09CD-E611-952D-02163E019D5F.root'),
+    '/store/mc/RunIISummer16MiniAODv2/BulkGravTohhTohVVhbb_narrow_M-2000_13TeV-madgraph/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/B6B1F15D-B0BE-E611-B5BE-0CC47A4C8EE8.root'),
+    #'/store/mc/RunIISummer16MiniAODv2/ZprimeToTT_M-4000_W-40_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/02DEA6C9-19B7-E611-B22D-A0000420FE80.root'),
+    #'/store/mc/RunIISummer16MiniAODv2/ZprimeToWW_width0p3_M-800_TuneCUETP8M1_13TeV-madgraph-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/1EB4DB0E-BABE-E611-A5DC-001E67792494.root'),
+    #'/store/mc/PhaseISpring17MiniAOD/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/FlatPU28to62_902_90X_upgrade2017_realistic_v20_ext1-v1/120000/087F2D40-9933-E711-89AF-0025904C66EC.root'),
                             )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -189,7 +190,7 @@ process.source.inputCommands = cms.untracked.vstring("keep *",
 #--------------------------------------------------------------------------------
 # Reporting
 #================================================================================
-process.MessageLogger.cerr.FwkReport.reportEvery = 10
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 process.options = cms.untracked.PSet(
   wantSummary = cms.untracked.bool(False),
   Rethrow     = cms.untracked.vstring('ProductNotFound'),
@@ -286,7 +287,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmChHadIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoChargedIsolation"),        # EGM recommendation not in AOD/MINIAOD
     edmNeuHadIsoMapTag    = cms.untracked.InputTag("photonIDValueMapProducer:phoNeutralHadronIsolation"),  # EGM recommendation not in AOD/MINIAOD
     edmGammaIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoPhotonIsolation"),          # EGM recommendation not in AOD/MINIAOD
-    edmPhoMVAIdTag        = cms.untracked.InputTag(""),#photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring16NonTrigV1Values"),
+    edmPhoMVAIdTag        = cms.untracked.InputTag(""),#photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring16NonTrigV1Values")
   ),
   
   Tau = cms.untracked.PSet(
@@ -357,6 +358,10 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     csvBTagSubJetName  = cms.untracked.string('AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi'),
     csvDoubleBTagName  = cms.untracked.string('AK4PFBoostedDoubleSecondaryVertexBJetTagsPuppi'),
     boostedDoubleSVTagInfoName = cms.untracked.string('AK4PFBoostedDoubleSVTagInfosPuppi'), 
+    edmMuonName                   = cms.untracked.string('slimmedMuons'),
+    edmElectronName                   = cms.untracked.string('slimmedElectrons'),
+    softPFMuonTagInfoName     = cms.untracked.string('AK4PFSoftPFMuonsTagInfosPuppi'),
+    softPFElectronTagInfoName = cms.untracked.string('AK4PFSoftPFElectronsTagInfosPuppi'),
     jettiness          = cms.untracked.string('AK4NjettinessPuppi'),
     qgLikelihood       = cms.untracked.string('AK4QGTaggerPuppi'),
     qgLikelihoodSubjet = cms.untracked.string('AK4QGTaggerSubJetsPuppi'),
@@ -396,6 +401,10 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     csvBTagSubJetName    = cms.untracked.string('AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS'),
     csvDoubleBTagName    = cms.untracked.string('AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS'),
     boostedDoubleSVTagInfoName = cms.untracked.string('AK8PFBoostedDoubleSVTagInfosCHS'),
+    edmMuonName                   = cms.untracked.string('slimmedMuons'),
+    edmElectronName                   = cms.untracked.string('slimmedElectrons'),
+    softPFMuonTagInfoName     = cms.untracked.string('AK8PFSoftPFMuonsTagInfosCHS'),
+    softPFElectronTagInfoName = cms.untracked.string('AK8PFSoftPFElectronsTagInfosCHS'),
     jettiness          = cms.untracked.string('AK8NjettinessCHS'),
     qgLikelihood         = cms.untracked.string('AK8QGTaggerCHS'),
     qgLikelihoodSubjet   = cms.untracked.string('AK8QGTaggerSubJetsCHS'),
@@ -422,6 +431,10 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     csvBTagName          = cms.untracked.string('CA8PFCombinedInclusiveSecondaryVertexV2BJetTags'),
     csvDoubleBTagName    = cms.untracked.string('CA8PFBoostedDoubleSecondaryVertexBJetTagsCHS'),
     boostedDoubleSVTagInfoName = cms.untracked.string('CA8PFBoostedDoubleSVTagInfosCHS'),
+    edmMuonName                   = cms.untracked.string('slimmedMuons'),
+    edmElectronName                   = cms.untracked.string('slimmedElectrons'),
+    softPFMuonTagInfoName     = cms.untracked.string('CA8PFSoftPFMuonsTagInfosCHS'),
+    softPFElectronTagInfoName = cms.untracked.string('CA8PFSoftPFElectronsTagInfosCHS'),
     qgLikelihood         = cms.untracked.string('CA8QGTaggerCHS'),
     prunedJetName        = cms.untracked.string('CA8PFJetsCHSPruned'),
     trimmedJetName       = cms.untracked.string('CA8PFJetsCHSTrimmed'),
@@ -465,6 +478,10 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     csvBTagSubJetName  = cms.untracked.string('AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi'),
     csvDoubleBTagName  = cms.untracked.string('AK8PFBoostedDoubleSecondaryVertexBJetTagsPuppi'),
     boostedDoubleSVTagInfoName = cms.untracked.string('AK8PFBoostedDoubleSVTagInfosPuppi'),
+    edmMuonName                   = cms.untracked.string('slimmedMuons'),
+    edmElectronName                   = cms.untracked.string('slimmedElectrons'),
+    softPFMuonTagInfoName     = cms.untracked.string('AK8PFSoftPFMuonsTagInfosPuppi'),
+    softPFElectronTagInfoName = cms.untracked.string('AK8PFSoftPFElectronsTagInfosPuppi'),
     jettiness          = cms.untracked.string('AK8NjettinessPuppi'),
     qgLikelihood       = cms.untracked.string('AK8QGTaggerPuppi'),
     qgLikelihoodSubjet = cms.untracked.string('AK8QGTaggerSubJetsPuppi'),
@@ -503,6 +520,10 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     csvBTagSubJetName  = cms.untracked.string('CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJCHS'),
     csvDoubleBTagName  = cms.untracked.string('CA15PFBoostedDoubleSecondaryVertexBJetTagsCHS'),
     boostedDoubleSVTagInfoName = cms.untracked.string('CA15PFBoostedDoubleSVTagInfosCHS'),
+    edmMuonName                   = cms.untracked.string('slimmedMuons'),
+    edmElectronName                   = cms.untracked.string('slimmedElectrons'),
+    softPFMuonTagInfoName     = cms.untracked.string('CA15PFSoftPFMuonsTagInfosCHS'),
+    softPFElectronTagInfoName = cms.untracked.string('CA15PFSoftPFElectronsTagInfosCHS'),
     jettiness          = cms.untracked.string('CA15NjettinessCHS'),
     qgLikelihood       = cms.untracked.string('CA15QGTaggerCHS'),
     qgLikelihoodSubjet = cms.untracked.string('CA15QGTaggerSubJetsCHS'),
@@ -541,7 +562,10 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     csvBTagSubJetName  = cms.untracked.string('CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi'),
     csvDoubleBTagName  = cms.untracked.string('CA15PFBoostedDoubleSecondaryVertexBJetTagsPuppi'),
     boostedDoubleSVTagInfoName = cms.untracked.string('CA15PFBoostedDoubleSVTagInfosPuppi'),
-
+    edmMuonName                   = cms.untracked.string('slimmedMuons'),
+    edmElectronName                   = cms.untracked.string('slimmedElectrons'),
+    softPFMuonTagInfoName     = cms.untracked.string('CA15PFSoftPFMuonsTagInfosPuppi'),
+    softPFElectronTagInfoName = cms.untracked.string('CA15PFSoftPFElectronsTagInfosPuppi'),
     jettiness          = cms.untracked.string('CA15NjettinessPuppi'),
     qgLikelihood       = cms.untracked.string('CA15QGTaggerPuppi'),
     qgLikelihoodSubjet = cms.untracked.string('CA15QGTaggerSubJetsPuppi'),
@@ -567,7 +591,7 @@ process.baconSequence = cms.Sequence(
                                      process.pfNoPileUpJME            *
                                      #process.egmGsfElectronIDs        *
                                      #process.electronMVAValueMapProducer *
-                                     process.photonIDValueMapProducer *
+                                     #process.photonIDValueMapProducer *
                                      #process.photonMVAValueMapProducer*
                                      #process.egmPhotonIDSequence      *
                                      process.puppiMETSequence         *

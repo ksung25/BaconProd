@@ -1179,3 +1179,169 @@ bool JetTools::orderPseudoJet(fastjet::PseudoJet j1, fastjet::PseudoJet j2) {
   // to be used to order pseudojets in decreasing pT order
   return j1.perp2() > j2.perp2();
 }
+float JetTools::leadPt(const pat::Jet &jet) {
+  double lPt = -1;
+  for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
+    double pPt = jet.daughter(ida)->pt();
+    if(pPt < lPt) continue;
+    lPt = pPt;
+  }
+  float lFPt = lPt;
+  return lFPt;
+}
+float JetTools::leadPt(const reco::PFJet &jet) { 
+  double lPt = -1;
+
+  const unsigned int nPFCands = jet.nConstituents ();
+  for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
+    const reco::Candidate* cand = jet.getJetConstituentsQuick ()[ipf];
+    const pat::PackedCandidate *packCand = dynamic_cast<const pat::PackedCandidate *>(cand);
+    if(packCand != 0) { 
+      if(lPt < packCand->pt()) lPt = packCand->pt();
+    } else { 
+      const reco::PFCandidatePtr pfcand    = jet.getPFConstituents().at(ipf);
+      if(lPt < pfcand->pt()) lPt = pfcand->pt();
+    }
+  }
+  float lFPt = lPt;
+  return lFPt;
+}
+float JetTools::leptons(const pat::Jet &jet,int iId) {
+  TLorentzVector lVec; lVec.SetPtEtaPhiM(0.,0.,0.,0.);
+  double lPt(-1), lEta(-1), lPhi(-1), lId(-1);
+  for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
+    const reco::Candidate* pPart = jet.daughter(ida);
+    if(fabs(pPart->pdgId()) != 11 && fabs(pPart->pdgId()) != 13) continue;
+    if(pPart->pt() > lPt) { 
+      lPt = pPart->pt(); 
+      lEta = pPart->eta();
+      lPhi = pPart->phi();
+      lId = fabs(pPart->pdgId()); }
+    TLorentzVector pVec; pVec.SetPtEtaPhiM(pPart->pt(),pPart->eta(),pPart->phi(),pPart->mass());
+    lVec += pVec;
+  }
+  if(iId == 1) { 
+    TVector3 lProj(jet.px(),jet.py(),jet.pz());
+    std::cout << " ==> " << lProj.Pt() << " -- " << lVec.Pt() << " -- " << lVec.Perp(lProj) << std::endl;
+    return float(lVec.Perp(lProj));
+  }
+  if(iId == 2) {
+    float pDPhi = fabs(jet.phi()-lVec.Phi());
+    if(pDPhi > 2.*TMath::Pi()-pDPhi) pDPhi = 2.*TMath::Pi()-pDPhi;
+    float pDEta = fabs(jet.eta()-lVec.Eta());
+    return sqrt(pDPhi*pDPhi+pDEta*pDEta);
+  }
+  if(iId == 3) {
+    float lLPt = lPt;
+    return lLPt;
+  }
+  if(iId == 4) {
+    float lLId = lId;
+    return lLId;
+  }
+  if(iId == 5) {
+    float lLEta = lEta;
+    return lLEta;
+  }
+  if(iId == 6) {
+    float lLPhi = lPhi;
+    return lLPhi;
+  }
+  float lFPt = lVec.Pt();
+  return lFPt;
+}
+float JetTools::leptons(const reco::PFJet &jet,int iId) {
+  TLorentzVector lVec; lVec.SetPtEtaPhiM(0.,0.,0.,0.);
+  double lPt(-1), lEta(-1), lPhi(-1), lId(-1);
+  const unsigned int nPFCands = jet.nConstituents ();
+  for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
+    const reco::Candidate* cand = jet.getJetConstituentsQuick ()[ipf];
+    const pat::PackedCandidate *packCand = dynamic_cast<const pat::PackedCandidate *>(cand);
+    if(packCand != 0) { 
+      if(fabs(packCand->pdgId()) != 11 && fabs(packCand->pdgId()) != 13) continue;
+      if(packCand->pt() > lPt) { 
+	lPt = packCand->pt(); 
+	lEta = packCand->eta();
+	lPhi = packCand->phi();
+	lId = fabs(packCand->pdgId()); 
+      }
+      TLorentzVector pVec; pVec.SetPtEtaPhiM(packCand->pt(),packCand->eta(),packCand->phi(),packCand->mass());
+      lVec += pVec;
+    } else {
+      const reco::PFCandidatePtr pfcand    = jet.getPFConstituents().at(ipf);
+      if(fabs(pfcand->pdgId()) != 11 && fabs(pfcand->pdgId()) != 13) continue;
+      if(pfcand->pt() > lPt) { 
+	lPt = pfcand->pt();
+	lEta = pfcand->eta();
+        lPhi = pfcand->phi();
+	lId = fabs(pfcand->pdgId()); 
+      }
+      TLorentzVector pVec; pVec.SetPtEtaPhiM(pfcand->pt(),pfcand->eta(),pfcand->phi(),pfcand->mass());
+      lVec += pVec;
+    }
+  }
+  if(iId == 1) { 
+    TVector3 lProj(jet.px(),jet.py(),jet.pz());
+    std::cout << " ==> " << lProj.Pt() << " -- " << lVec.Pt() << " -- " << lVec.Perp(lProj) << std::endl;
+    return float(lVec.Perp(lProj));
+  }
+  if(iId == 2) {
+    float pDPhi = fabs(jet.phi()-lVec.Phi());
+    if(pDPhi > 2.*TMath::Pi()-pDPhi) pDPhi = 2.*TMath::Pi()-pDPhi;
+    float pDEta = fabs(jet.eta()-lVec.Eta());
+    return sqrt(pDPhi*pDPhi+pDEta*pDEta);
+  }
+  if(iId == 3) {
+    float lLPt = lPt;
+    return lLPt;
+  }
+  if(iId == 4) {
+    float lLId = lId;
+    return lLId;
+  }
+  if(iId == 5) {
+    float lLEta = lEta;
+    return lLEta;
+  }
+  if(iId == 6) {
+    float lLPhi = lPhi;
+    return lLPhi;
+  }
+  float lFPt = lVec.Pt();
+  return lFPt;  
+}
+float JetTools::lsf(std::vector<fastjet::PseudoJet> iCParticles, std::vector<fastjet::PseudoJet> &ljets, 
+		    float ilPt, float ilEta, float ilPhi, int ilId, double dr, int nsj, int iId) {
+  float lsf(-100),lmd(-100);
+  if(ilPt>0 && (ilId == 11 || ilId == 13)) {    
+    TLorentzVector ilep; 
+    if(ilId == 11) ilep.SetPtEtaPhiM(ilPt, ilEta, ilPhi, 0.000511);
+    if(ilId == 13) ilep.SetPtEtaPhiM(ilPt, ilEta, ilPhi, 0.105658);
+    fastjet::JetDefinition lCJet_def(fastjet::kt_algorithm, dr);
+    fastjet::ClusterSequence lCClust_seq(iCParticles, lCJet_def);
+    if (dr > 0.5) {
+      ljets = sorted_by_pt(lCClust_seq.exclusive_jets_up_to(nsj));
+    }
+    else {
+      ljets = sorted_by_pt(lCClust_seq.inclusive_jets());
+    }
+    int lId(-1);
+    double dRmin = 999.;
+    for (unsigned int i0=0; i0<ljets.size(); i0++) {
+      double dR = reco::deltaR(ljets[i0].eta(), ljets[i0].phi(), ilep.Eta(), ilep.Phi());
+      if ( dR < dRmin ) {
+	dRmin = dR;
+	lId = i0;
+      }
+    }
+    if(lId != -1) {
+      TLorentzVector pVec; pVec.SetPtEtaPhiM(ljets[lId].pt(), ljets[lId].eta(), ljets[lId].phi(), ljets[lId].m());
+      lsf = ilep.Pt()/pVec.Pt();
+      lmd = (ilep-pVec).M()/pVec.M();
+    }
+    if(iId == 1) {
+      return lmd;
+    }
+  }
+  return lsf;
+}

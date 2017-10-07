@@ -93,6 +93,16 @@ namespace baconhep {
       static double e3_func(double beta, fastjet::contrib::EnergyCorrelator::Measure measurelist, fastjet::PseudoJet myjet );
       static double e3_vn_func(unsigned int n, double beta,fastjet::contrib::EnergyCorrelator::Measure measurelist, fastjet::PseudoJet myjet );
       static bool   orderPseudoJet(fastjet::PseudoJet j1, fastjet::PseudoJet j2);
+    
+      //leptons
+      static float leadPt(const pat::Jet &jet);
+      static float leadPt(const reco::PFJet &jet);
+      static float leptons(const pat::Jet &jet,int iId);
+      static float leptons(const reco::PFJet &jet,int iId);
+      static float lsf(std::vector<fastjet::PseudoJet> iCParticles,std::vector<fastjet::PseudoJet> &ljets,
+		       float ilPt, float ilEta, float ilPhi, int ilId, double dr, int nsj, int iId = 0);
+
+      
   };
 }
 #endif
