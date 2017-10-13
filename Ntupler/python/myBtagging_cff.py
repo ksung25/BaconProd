@@ -82,7 +82,7 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
   	    setattr(process, head+'PFBoostedDoubleSVTagInfos'+tail,
                    pfBoostedDoubleSVCA15TagInfos.clone(
                    svTagInfos = cms.InputTag(head+'PFInclusiveSecondaryVertexFinderTagInfos'+tail)
-             	    ))
+            	    ))
             setattr(process, head+'PFBoostedDoubleSecondaryVertexBJetTags'+tail,
                     pfBoostedDoubleSecondaryVertexCA15BJetTags.clone(
                     tagInfos = cms.VInputTag(

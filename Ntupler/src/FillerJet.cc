@@ -3,6 +3,7 @@
 #include "BaconProd/Utils/interface/TriggerTools.hh"
 #include "BaconProd/Utils/interface/JetTools.hh"
 #include "BaconAna/DataFormats/interface/TJet.hh"
+#include "BaconAna/DataFormats/interface/TSVtx.hh"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -15,9 +16,14 @@
 #include "DataFormats/BTauReco/interface/JetTag.h"
 #include "DataFormats/BTauReco/interface/CATopJetTagInfo.h"
 #include "DataFormats/BTauReco/interface/BoostedDoubleSVTagInfo.h"
+
 #include "DataFormats/BTauReco/interface/TaggingVariable.h"
 //#include "DataFormats/JetReco/interface/HTTTopJetTagInfo.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/Candidate/interface/VertexCompositePtrCandidate.h"
+#include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
+#include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
+#include "RecoVertex/VertexPrimitives/interface/VertexState.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "JetMETCorrections/JetCorrector/interface/JetCorrector.h"
 #include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h"
@@ -52,11 +58,13 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fSoftDropJetName    (iConfig.getUntrackedParameter<std::string>("softdropJetName","AK4caPFJetsSoftDropCHS")),
   fSubJetName         (iConfig.getUntrackedParameter<std::string>("subJetName","AK4caPFJetsTrimmedCHS__SubJets")),
   fCVLctagName        (iConfig.getUntrackedParameter<std::string>("cvlcTagName","AK4PFCombinedCvsLJetTagsCHS")),
+  fSVName             (iConfig.getUntrackedParameter<std::string>("secVertices","slimmedSecondaryVertices")),
   fCVBctagName        (iConfig.getUntrackedParameter<std::string>("cvbcTagName","AK4PFCombinedCvsBJetTagsCHS")),
   fMVAbtagName        (iConfig.getUntrackedParameter<std::string>("mvaBTagName","AK4PFCombinedMVAV2BJetTagsCHS")),
   fCSVbtagName        (iConfig.getUntrackedParameter<std::string>("csvBTagName","combinedInclusiveSecondaryVertexV2BJetTags")),
   fCSVbtagSubJetName  (iConfig.getUntrackedParameter<std::string>("csvBTagSubJetName","AK4CombinedInclusiveSecondaryVertexV2BJetTagsSJCHS")),
   fCSVDoubleBtagName  (iConfig.getUntrackedParameter<std::string>("csvDoubleBTagName","AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS")),
+  //fSVTagInfoName      (iConfig.getUntrackedParameter<std::string>("svTagInfoName","AK4PFSecondaryVertexTagInfosCHS")),
   fBoostedDoubleSVTagInfoName (iConfig.getUntrackedParameter<std::string>("boostedDoubleSVTagInfoName","AK8PFBoostedDoubleSVTagInfosCHS")),
   fJettinessName      (iConfig.getUntrackedParameter<std::string>("jettiness","AK4NjettinessCHS")),
   fQGLikelihood       (iConfig.getUntrackedParameter<std::string>("qgLikelihood","QGLikelihood")),
@@ -65,6 +73,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fShowerDecoConf     (iConfig.getUntrackedParameter<std::string>("showerDecoConf","")),
   fConeSize           (iConfig.getUntrackedParameter<double>("coneSize",0.4)),
   fComputeFullJetInfo (iConfig.getUntrackedParameter<bool>("doComputeFullJetInfo",false)),  
+  fComputeSVInfo      (iConfig.getUntrackedParameter<bool>("doComputeSVInfo",false)),  
   fShowerDeco         (0),
   fJetCorr            (0),
   fJetUnc             (0),
@@ -84,6 +93,11 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
    fWeightFile  =  (cmssw_base_src + "BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml");//BoostedBtaggingFiles) ;
    if(fConeSize < 1.0)   fWeightFile  =  (cmssw_base_src + "BaconProd/Utils/data/BoostedDoubleSV_AK8_BDT_v4.weights.xml");
    std::cout<<"Double B-tag: "<< fWeightFile <<std::endl;
+
+   fBRegFile  =  (cmssw_base_src + "BaconProd/Utils/data/ttbar-G25-500k-13d-300t.weights.xml");
+   std::cout<<"BJet Regression "<< fBRegFile <<std::endl;
+   initBReg();
+   
    if(fUseAOD) {
       std::vector<std::string> puIDFiles = iConfig.getUntrackedParameter< std::vector<std::string> >("jetPUIDFiles",empty_vstring);
       assert(puIDFiles.size()==2);
@@ -107,7 +121,9 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fTokMVAbtagName   = iC.consumes<reco::JetTagCollection>(fMVAbtagName);
   fTokCVBctagName   = iC.consumes<reco::JetTagCollection>(fCVBctagName);
   fTokCVLctagName   = iC.consumes<reco::JetTagCollection>(fCVLctagName);
-  
+  fTokSVName        = iC.consumes<reco::VertexCompositePtrCandidateCollection>(fSVName);
+  //fTokSVTagInfoCollection = iC.consumes<std::vector<reco::CandIPTagInfo> >(fSVTagInfoName);
+
   edm::InputTag lQGLikelihood(fQGLikelihood,"qgLikelihood");
   edm::InputTag lQGLAxis2    (fQGLikelihood,"axis2");
   edm::InputTag lQGLPtD      (fQGLikelihood,"ptD");
@@ -156,8 +172,11 @@ void FillerJet::initPUJetId() {
 			     "BDT",fLowPtWeightFile,
 			     "BDT",fHighPtWeightFile);
   initBoostedBtaggingJetId();
+  initBReg();
 }
-
+void FillerJet::initBReg(){
+  fBReg.initialize("BDT",fBRegFile);
+}
 void FillerJet::initBoostedBtaggingJetId(){
   fJetBoostedBtaggingMVACalc.initialize("BDT",fWeightFile,fWeightFile.find("Subjet") < std::string::npos);
 
@@ -182,12 +201,26 @@ void FillerJet::initJetCorr(const std::vector<std::string> &jecFiles,
   JetCorrectorParameters param(cmssw_base_src + jecUncFiles[0]);
   fJetUnc = new JetCorrectionUncertainty(param);
 }
+Measurement1D FillerJet::vertexDxy(const reco::VertexCompositePtrCandidate &svcand, const reco::Vertex &pv)  {
+  VertexDistanceXY dist;
+  reco::Vertex::CovarianceMatrix csv; svcand.fillVertexCovariance(csv);
+  reco::Vertex svtx(svcand.vertex(), csv);
+  return dist.distance(svtx, pv);
+}
+
+Measurement1D FillerJet::vertexD3d(const reco::VertexCompositePtrCandidate &svcand, const reco::Vertex &pv)  {
+  VertexDistance3D dist;
+  reco::Vertex::CovarianceMatrix csv; svcand.fillVertexCovariance(csv);
+  reco::Vertex svtx(svcand.vertex(), csv);
+  return dist.distance(svtx, pv);
+}
 
 //--------------------------------------------------------------------------------------------------
 // === filler for AOD ===
-void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
+void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray *iSVArray,
                      const edm::Event &iEvent, const edm::EventSetup &iSetup, 
 		     const reco::Vertex	&pv,
+		     int iNPV,
 		     const std::vector<TriggerRecord> &triggerRecords,
 		     const trigger::TriggerEvent *triggerEvent,
                      const pat::TriggerObjectStandAloneCollection *patTriggerObjects)
@@ -281,6 +314,12 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
   iEvent.getByToken(fTokQGLMult,hQGLmult);
   assert(hQGLmult.isValid());
 
+  //edm::Handle<std::vector<reco::CandIPTagInfo> > hSVTagInfoCollection;
+  //iEvent.getByToken(fTokSVTagInfoCollection, hSVTagInfoCollection);
+  //assert(hSVTagInfoCollection.isValid());
+  //const std::vector<reco::CandIPTagInfo> *trackIPTagInfos = hSVTagInfoCollection.product();
+
+  VertexDistance3D vdist;
   TClonesArray &rArray      = *array;
   TClonesArray &rExtraArray = *iExtraArray;
   for(reco::PFJetCollection::const_iterator itJet = jetCol->begin(); itJet!=jetCol->end(); ++itJet) {
@@ -326,25 +365,52 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     pJet->area  = itJet->jetArea();
     pJet->unc   = jetunc;
     //
-    // Impact Parameter
+    // Impact Parameter and leptons
     //==============================
     pJet->d0 = JetTools::jetD0(*itJet, pv);
     pJet->dz = JetTools::jetDz(*itJet, pv);
+    pJet->leadPt = JetTools::leadPt(*itJet);
+    pJet->lepPt  = JetTools::leptons(*itJet,0);
+    pJet->lepDR  = JetTools::leptons(*itJet,2);
 
+
+    edm::Handle<reco::VertexCompositePtrCandidateCollection> secVertices;
+    iEvent.getByToken(fTokSVName, secVertices);
+    const reco::VertexCompositePtrCandidateCollection svtx=*secVertices;
+    float vtxPt=-1,vtxMass=-1,vtx3DVal=-1,vtx3DeVal=-1,vtxNTrks=-1,maxFoundSignificance=0;
+    for (const reco::VertexCompositePtrCandidate &sv : svtx) {
+      GlobalVector flightDir(sv.vertex().x() - pv.x(), sv.vertex().y() - pv.y(),sv.vertex().z() - pv.z());
+      GlobalVector jetDir(itJet->px(),itJet->py(),itJet->pz());
+      if( Geom::deltaR2( flightDir, jetDir ) < 0.09 ){
+	Measurement1D dl= vdist.distance(pv,VertexState(RecoVertex::convertPos(sv.position()),RecoVertex::convertError(sv.error())));
+	if(dl.significance() > maxFoundSignificance){
+	  maxFoundSignificance=dl.significance();
+	  vtxPt    = sv.pt();
+	  vtxMass  = sv.p4().M();
+	  vtx3DVal = dl.value();
+	  vtx3DeVal = dl.error();
+	  vtxNTrks  = sv.numberOfSourceCandidatePtrs();
+	}
+      }
+    }
+    pJet->vtx3DSig = maxFoundSignificance;
+    pJet->vtxMass  = vtxMass;
+    pJet->vtxPt    = vtxPt;
+    pJet->vtxNtk   = vtxNTrks;
+    pJet->vtx3DVal = vtx3DVal;
+    pJet->ptreg    = fBReg.mvaValue(iNPV,jetcorr,*itJet,vtxPt,vtxMass,vtx3DVal,vtxNTrks,vtx3DeVal);
+      
     //
     // Identification
     //==============================
     reco::PFJetRef jetRef(hJetProduct, itJet - jetCol->begin());
     reco::JetBaseRef jetBaseRef(jetRef);
     //unsigned int idx = itJet - jetCol->begin();
-    //edm::RefToBase<reco::Jet> jetRef_ = jetCol->refAt(idx);
-
-  
+    //edm::RefToBase<reco::Jet> jetRef_ = jetCol->refAt(idx);  
     pJet->csv  = (*(hCSVbtags.product()))[jetBaseRef];
     pJet->bmva = (*(hMVAbtags.product()))[jetBaseRef];
     pJet->cvb  = (*(hCVBctags.product()))[jetBaseRef];
     pJet->cvl  = (*(hCVLctags.product()))[jetBaseRef];
-    
     pJet->qgid  = (*(hQGLikelihood.product()))[jetBaseRef];
     pJet->axis2 = (*(hQGLaxis2.product()))[jetBaseRef];
     pJet->ptD   = (*(hQGLptD.product()))[jetBaseRef];
@@ -390,6 +456,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     //==============================
     const reco::GenJet * matchGenJet = 0; 
     if(fUseGen) matchGenJet = match(&(*itJet),genJetCol);
+    int lNB =0,lNC = 0;
     if(matchGenJet != 0) { 
       pJet->partonFlavor = (*hJetFlavourMatch)[jetBaseRef].getPartonFlavour();
       pJet->hadronFlavor = (*hJetFlavourMatch)[jetBaseRef].getHadronFlavour();
@@ -397,12 +464,13 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
       pJet->geneta       = matchGenJet->eta();
       pJet->genphi       = matchGenJet->phi();
       pJet->genm         = matchGenJet->mass();
+      lNB = (*hJetFlavourMatch)[jetBaseRef].getbHadrons().size();
+      lNC = (*hJetFlavourMatch)[jetBaseRef].getcHadrons().size();
     }
-
+    pJet->vtxFlavInfo = lNB*1000 + lNC*100;
     pJet->nCharged   = itJet->chargedMultiplicity();
     pJet->nNeutrals  = itJet->neutralMultiplicity();
     pJet->nParticles = itJet->nConstituents ();
-
     if(triggerEvent      != 0) {pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, *triggerEvent); } 
     else                       {pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, *patTriggerObjects); }
 
@@ -414,23 +482,23 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
       new(rExtraArray[extraIndex]) baconhep::TAddJet();
       pAddJet = (baconhep::TAddJet*)rExtraArray[extraIndex];
       pAddJet->index = index;
-      addJet(pAddJet, iEvent, *itJet, jetBaseRef);
+      addJet(pAddJet, iSVArray, pv, iEvent, *itJet, jetBaseRef);
       
     }
   } 
 }
 
 // === filler for MINIAOD ===
-void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
+void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray *iSVArray,
                      const edm::Event &iEvent, const edm::EventSetup &iSetup,
                      const reco::Vertex &pv,
+		     int iNPV,
                      const std::vector<TriggerRecord> &triggerRecords,
                      const pat::TriggerObjectStandAloneCollection &triggerObjects)
 {
   assert(array);
   assert(!fComputeFullJetInfo || iExtraArray);
   fRand->SetSeed(iEvent.id().event());
-
 
   // Get jet collection
   edm::Handle<pat::JetCollection> hJetProduct;
@@ -490,7 +558,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
   }
   TClonesArray &rArray      = *array;
   TClonesArray &rExtraArray = *iExtraArray;
-
+  VertexDistance3D vdist;
   for(pat::JetCollection::const_iterator itJet = jetCol->begin(); itJet!=jetCol->end(); ++itJet) {
 
     edm::RefToBase<pat::Jet> jetBaseRef( edm::Ref<pat::JetCollection>(hJetProduct, itJet - jetCol->begin()) );
@@ -541,6 +609,35 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     //==============================
     pJet->d0 = JetTools::jetD0(*itJet, pv);
     pJet->dz = JetTools::jetDz(*itJet, pv);
+    pJet->leadPt = JetTools::leadPt(*itJet);
+    pJet->lepPt  = JetTools::leptons(*itJet,0);
+    pJet->lepDR  = JetTools::leptons(*itJet,2);
+
+    edm::Handle<reco::VertexCompositePtrCandidateCollection> secVertices;
+    iEvent.getByToken(fTokSVName, secVertices);
+    const reco::VertexCompositePtrCandidateCollection svtx=*secVertices;
+    float vtxPt=-1,vtxMass=-1,vtx3DVal=-1,vtx3DeVal=-1,vtxNTrks=-1,maxFoundSignificance=0;
+    for (const reco::VertexCompositePtrCandidate &sv : svtx) {
+      GlobalVector flightDir(sv.vertex().x() - pv.x(), sv.vertex().y() - pv.y(),sv.vertex().z() - pv.z());
+      GlobalVector jetDir(itJet->px(),itJet->py(),itJet->pz());
+      if( Geom::deltaR2( flightDir, jetDir ) < 0.09 ){
+	Measurement1D dl= vdist.distance(pv,VertexState(RecoVertex::convertPos(sv.position()),RecoVertex::convertError(sv.error())));
+	if(dl.significance() > maxFoundSignificance){
+	  maxFoundSignificance=dl.significance();
+	  vtxPt    = sv.pt();
+	  vtxMass  = sv.p4().M();
+	  vtx3DVal = dl.value();
+	  vtx3DeVal = dl.error();
+	  vtxNTrks  = sv.numberOfSourceCandidatePtrs();
+	}
+      }
+    }
+    pJet->vtx3DSig = maxFoundSignificance;
+    pJet->vtxMass  = vtxMass;
+    pJet->vtxPt    = vtxPt;
+    pJet->vtxNtk   = vtxNTrks;
+    pJet->vtx3DVal = vtx3DVal;
+    pJet->ptreg    = fBReg.mvaValue(iNPV,jetcorr,*itJet,vtxPt,vtxMass,vtx3DVal,vtxNTrks,vtx3DeVal);
 
     //
     // Identification
@@ -580,7 +677,6 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
     pJet->neuHadFrac = itJet->neutralHadronEnergyFraction();
     pJet->muonFrac   = itJet->muonEnergyFraction();
 
-
     //
     // Generator matching
     //==============================
@@ -594,13 +690,14 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
       pJet->genphi       = matchGenJet->phi();
       pJet->genm         = matchGenJet->mass();
     }
-
+    int lNB = itJet->jetFlavourInfo().getbHadrons().size();
+    int lNC = itJet->jetFlavourInfo().getcHadrons().size();
+    pJet->vtxFlavInfo = lNB*1000 + lNC*100;
     pJet->nCharged   = itJet->chargedMultiplicity();
     pJet->nNeutrals  = itJet->neutralMultiplicity();
     pJet->nParticles = itJet->numberOfDaughters();
-
+    
     pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, triggerObjects);
-
     ////Add Extras
     baconhep::TAddJet *pAddJet = 0;
     if(fComputeFullJetInfo) {
@@ -609,13 +706,13 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,
       new(rExtraArray[extraIndex]) baconhep::TAddJet();
       pAddJet = (baconhep::TAddJet*)rExtraArray[extraIndex];
       pAddJet->index = index;
-      addJet(pAddJet, iEvent, *itJet);
+      addJet(pAddJet, iSVArray, pv, iEvent, *itJet);
     }
   }
 }
 
 //--------------------------------------------------------------------------------------------------
-void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent, 
+void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const reco::Vertex &pv, const edm::Event &iEvent, 
                        const reco::PFJet &itJet, const reco::JetBaseRef &jetBaseRef)
 { 
   // Get pruned jet collection
@@ -675,9 +772,6 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   edm::Handle<double> hRho;
   iEvent.getByToken(fTokRhoTag,hRho);
   assert(hRho.isValid());
-
-
-
 
   pAddJet->pullAngle = JetTools::jetPullAngle(itJet,hSubJetProduct,fConeSize);
   pAddJet->tau1 = (*(hTau1.product()))[jetBaseRef];
@@ -892,14 +986,14 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   edm::Handle<reco::BoostedDoubleSVTagInfoCollection> hBoostedDoubleSVTagInfo;
   iEvent.getByToken(fTokBoostedDoubleSVTagInfo,hBoostedDoubleSVTagInfo);  // 
   assert(hBoostedDoubleSVTagInfo.isValid());
-  
+  //
+
   //match to jet 
   bool matched ;
   reco::BoostedDoubleSVTagInfoCollection::const_iterator matchTI = hBoostedDoubleSVTagInfo->end();
   for( reco::BoostedDoubleSVTagInfoCollection::const_iterator itTI = hBoostedDoubleSVTagInfo->begin(); itTI != hBoostedDoubleSVTagInfo->end(); ++itTI ) {
       matched =false;
       const reco::JetBaseRef jetTI = itTI->jet();
-
       if( jetTI->px() ==  jetBaseRef->px()  && jetTI->pz() ==  jetBaseRef->pz() ) {
         matchTI = itTI;
         matched = true;
@@ -907,47 +1001,82 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
       }
   }
   if( matchTI != hBoostedDoubleSVTagInfo->end() && matched) {
-
-  const reco::TaggingVariableList vars = matchTI->taggingVariables();
-  float SubJet_csv__ =  std::min( pAddJet->sj2_csv , pAddJet->sj1_csv) ;
-  if (SubJet_csv__ < -1 || SubJet_csv__ >1.0) SubJet_csv__ =-1;
-  float z_ratio__ = vars.get(reco::btau::z_ratio);
-  float trackSipdSig_3__ = vars.get(reco::btau::trackSip3dSig_3);
-  float trackSipdSig_2__ = vars.get(reco::btau::trackSip3dSig_2);
-  float trackSipdSig_1__ = vars.get(reco::btau::trackSip3dSig_1);
-  float trackSipdSig_0__ = vars.get(reco::btau::trackSip3dSig_0);
-  float trackSipdSig_1_0__ = vars.get(reco::btau::tau2_trackSip3dSig_0);
-  float trackSipdSig_0_0__ = vars.get(reco::btau::tau1_trackSip3dSig_0);
-  float trackSipdSig_1_1__ = vars.get(reco::btau::tau2_trackSip3dSig_1);
-  float trackSipdSig_0_1__ = vars.get(reco::btau::tau1_trackSip3dSig_1);
-  float trackSip2dSigAboveCharm_0__ = vars.get(reco::btau::trackSip2dSigAboveCharm);
-  float trackSip2dSigAboveBottom_0__ = vars.get(reco::btau::trackSip2dSigAboveBottom_0);
-  float trackSip2dSigAboveBottom_1__ = vars.get(reco::btau::trackSip2dSigAboveBottom_1);
-  float tau1_trackEtaRel_0__ = vars.get(reco::btau::tau2_trackEtaRel_0);
-  float tau1_trackEtaRel_1__ = vars.get(reco::btau::tau2_trackEtaRel_1);
-  float tau1_trackEtaRel_2__ = vars.get(reco::btau::tau2_trackEtaRel_2);
-  float tau0_trackEtaRel_0__ = vars.get(reco::btau::tau1_trackEtaRel_0);
-  float tau0_trackEtaRel_1__ = vars.get(reco::btau::tau1_trackEtaRel_1);
-  float tau0_trackEtaRel_2__ = vars.get(reco::btau::tau1_trackEtaRel_2);
-  float tau_vertexMass_0__ = vars.get(reco::btau::tau1_vertexMass);
-  float tau_vertexEnergyRatio_0__ = vars.get(reco::btau::tau1_vertexEnergyRatio);
-  float tau_vertexDeltaR_0__ = vars.get(reco::btau::tau1_vertexDeltaR);
-  float tau_flightDistance2dSig_0__ = vars.get(reco::btau::tau1_flightDistance2dSig);
-  float tau_vertexMass_1__ = vars.get(reco::btau::tau2_vertexMass);
-  float tau_vertexEnergyRatio_1__ = vars.get(reco::btau::tau2_vertexEnergyRatio);
-  float tau_flightDistance2dSig_1__ = vars.get(reco::btau::tau2_flightDistance2dSig);
-  float jetNTracks__ = vars.get(reco::btau::jetNTracks);
-  float nSV__ = vars.get(reco::btau::jetNSecondaryVertices);
-  float massPruned__ =pAddJet->mass_prun;
-  float flavour__ = -1;//itJet.partonFlavor();   // they're spectator variables
-  float nbHadrons__ = -1;//itJet.hadronFlavor(); // 
-  float ptPruned__ = itJet.pt();
-  float etaPruned__ =itJet.eta();
-  
-  pAddJet->Double_sub = fJetBoostedBtaggingMVACalc.mvaValue(massPruned__, flavour__, nbHadrons__, ptPruned__, etaPruned__,SubJet_csv__,z_ratio__,trackSipdSig_3__,trackSipdSig_2__,trackSipdSig_1__,trackSipdSig_0__,trackSipdSig_1_0__,trackSipdSig_0_0__,trackSipdSig_1_1__,trackSipdSig_0_1__,trackSip2dSigAboveCharm_0__,trackSip2dSigAboveBottom_0__,trackSip2dSigAboveBottom_1__,tau0_trackEtaRel_0__,tau0_trackEtaRel_1__,tau0_trackEtaRel_2__,tau1_trackEtaRel_0__,tau1_trackEtaRel_1__,tau1_trackEtaRel_2__,tau_vertexMass_0__,tau_vertexEnergyRatio_0__,tau_vertexDeltaR_0__,tau_flightDistance2dSig_0__,tau_vertexMass_1__,tau_vertexEnergyRatio_1__,tau_flightDistance2dSig_1__,jetNTracks__,nSV__,false);
+    const reco::TaggingVariableList vars = matchTI->taggingVariables();
+    float SubJet_csv__ =  std::min( pAddJet->sj2_csv , pAddJet->sj1_csv) ;
+    if (SubJet_csv__ < -1 || SubJet_csv__ >1.0) SubJet_csv__ =-1;
+    float z_ratio__ = vars.get(reco::btau::z_ratio);
+    float trackSipdSig_3__ = vars.get(reco::btau::trackSip3dSig_3);
+    float trackSipdSig_2__ = vars.get(reco::btau::trackSip3dSig_2);
+    float trackSipdSig_1__ = vars.get(reco::btau::trackSip3dSig_1);
+    float trackSipdSig_0__ = vars.get(reco::btau::trackSip3dSig_0);
+    float trackSipdSig_1_0__ = vars.get(reco::btau::tau2_trackSip3dSig_0);
+    float trackSipdSig_0_0__ = vars.get(reco::btau::tau1_trackSip3dSig_0);
+    float trackSipdSig_1_1__ = vars.get(reco::btau::tau2_trackSip3dSig_1);
+    float trackSipdSig_0_1__ = vars.get(reco::btau::tau1_trackSip3dSig_1);
+    float trackSip2dSigAboveCharm_0__ = vars.get(reco::btau::trackSip2dSigAboveCharm);
+    float trackSip2dSigAboveBottom_0__ = vars.get(reco::btau::trackSip2dSigAboveBottom_0);
+    float trackSip2dSigAboveBottom_1__ = vars.get(reco::btau::trackSip2dSigAboveBottom_1);
+    float tau1_trackEtaRel_0__ = vars.get(reco::btau::tau2_trackEtaRel_0);
+    float tau1_trackEtaRel_1__ = vars.get(reco::btau::tau2_trackEtaRel_1);
+    float tau1_trackEtaRel_2__ = vars.get(reco::btau::tau2_trackEtaRel_2);
+    float tau0_trackEtaRel_0__ = vars.get(reco::btau::tau1_trackEtaRel_0);
+    float tau0_trackEtaRel_1__ = vars.get(reco::btau::tau1_trackEtaRel_1);
+    float tau0_trackEtaRel_2__ = vars.get(reco::btau::tau1_trackEtaRel_2);
+    float tau_vertexMass_0__ = vars.get(reco::btau::tau1_vertexMass);
+    float tau_vertexEnergyRatio_0__ = vars.get(reco::btau::tau1_vertexEnergyRatio);
+    float tau_vertexDeltaR_0__ = vars.get(reco::btau::tau1_vertexDeltaR);
+    float tau_flightDistance2dSig_0__ = vars.get(reco::btau::tau1_flightDistance2dSig);
+    float tau_vertexMass_1__ = vars.get(reco::btau::tau2_vertexMass);
+    float tau_vertexEnergyRatio_1__ = vars.get(reco::btau::tau2_vertexEnergyRatio);
+    float tau_flightDistance2dSig_1__ = vars.get(reco::btau::tau2_flightDistance2dSig);
+    float jetNTracks__ = vars.get(reco::btau::jetNTracks);
+    float nSV__ = vars.get(reco::btau::jetNSecondaryVertices);
+    float massPruned__ =pAddJet->mass_prun;
+    float flavour__ = -1;//itJet.partonFlavor();   // they're spectator variables
+    float nbHadrons__ = -1;//itJet.hadronFlavor(); // 
+    float ptPruned__ = itJet.pt();
+    float etaPruned__ =itJet.eta();
+    
+    pAddJet->Double_sub = fJetBoostedBtaggingMVACalc.mvaValue(massPruned__, flavour__, nbHadrons__, ptPruned__, etaPruned__,SubJet_csv__,z_ratio__,trackSipdSig_3__,trackSipdSig_2__,trackSipdSig_1__,trackSipdSig_0__,trackSipdSig_1_0__,trackSipdSig_0_0__,trackSipdSig_1_1__,trackSipdSig_0_1__,trackSip2dSigAboveCharm_0__,trackSip2dSigAboveBottom_0__,trackSip2dSigAboveBottom_1__,tau0_trackEtaRel_0__,tau0_trackEtaRel_1__,tau0_trackEtaRel_2__,tau1_trackEtaRel_0__,tau1_trackEtaRel_1__,tau1_trackEtaRel_2__,tau_vertexMass_0__,tau_vertexEnergyRatio_0__,tau_vertexDeltaR_0__,tau_flightDistance2dSig_0__,tau_vertexMass_1__,tau_vertexEnergyRatio_1__,tau_flightDistance2dSig_1__,jetNTracks__,nSV__,false);
   }
-
   else std::cout<< "   not found matched double-b tag info  "<<std::endl;	
+  //Secondary Vertices
+  
+  //sec vtx                                                                                                                                                                                                                                                           
+  if(fComputeSVInfo) { 
+    edm::Handle<reco::VertexCompositePtrCandidateCollection> secVertices;
+    iEvent.getByToken(fTokSVName, secVertices);
+    assert(secVertices.isValid());
+    const reco::VertexCompositePtrCandidateCollection svtx=*secVertices;
+    pAddJet->svtx.clear();
+    TClonesArray &rSVArray = *iSVArr;
+    for (const reco::VertexCompositePtrCandidate &sv : svtx) {
+      if (reco::deltaR(sv,itJet)>0.7) { continue; }
+      assert(rSVArray.GetEntries() < rSVArray.GetSize());
+      const int svIndex = rSVArray.GetEntries();
+      new(rSVArray[svIndex]) baconhep::TSVtx();
+      baconhep::TSVtx* pSV = (baconhep::TSVtx*)rSVArray[svIndex];
+      pAddJet->svtx.push_back(svIndex);
+      pSV->pt          = sv.pt();
+      pSV->eta         = sv.eta();
+      pSV->phi         = sv.phi();
+      pSV->mass        = sv.mass();
+      pSV->etarel      = fabs(sv.eta()-itJet.eta());
+      pSV->phirel      = fabs(reco::deltaPhi(sv.phi(),itJet.phi()));
+      pSV->sv_deltaR   = fabs(reco::deltaR(sv,itJet));
+      pSV->sv_ntracks  = sv.numberOfDaughters();
+      pSV->sv_chi2     = sv.vertexChi2();
+      pSV->sv_ndf      = sv.vertexNdof();
+      pSV->sv_normchi2 = pSV->sv_chi2/pSV->sv_ndf; // really?!!!
+      pSV->sv_dxy      = vertexDxy(sv,pv).value();
+      pSV->sv_dxyerr   = vertexDxy(sv,pv).error();
+      pSV->sv_dxysig   = pSV->sv_dxy/pSV->sv_dxyerr; //really?!!!
+      pSV->sv_d3d      = vertexD3d(sv,pv).value();
+      pSV->sv_d3derr   = vertexD3d(sv,pv).error();
+      pSV->sv_d3dsig   = vertexD3d(sv,pv).value()/vertexD3d(sv,pv).error();
+      pSV->sv_enratio  = sv.energy()/itJet.energy();
+    }
+  }
 
   //
   // Top Tagging
@@ -1031,8 +1160,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent,
   }
 }
 
-void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent, const pat::Jet &itJet)
-{
+void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr, const reco::Vertex &pv, const edm::Event &iEvent, const pat::Jet &itJet) {
   //pAddJet->pullAngle = JetTools::jetPullAngle(itJet,hSubJetProduct,fConeSize);
   pAddJet->tau1 = itJet.userFloat(fJettinessName + std::string(":tau1"));
   pAddJet->tau2 = itJet.userFloat(fJettinessName + std::string(":tau2"));
@@ -1090,6 +1218,42 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent, con
   float etaPruned_ =itJet.eta();
     
   pAddJet->Double_sub = fJetBoostedBtaggingMVACalc.mvaValue(massPruned_, flavour_, nbHadrons_, ptPruned_, etaPruned_,SubJet_csv_,z_ratio_,trackSipdSig_3_,trackSipdSig_2_,trackSipdSig_1_,trackSipdSig_0_,trackSipdSig_1_0_,trackSipdSig_0_0_,trackSipdSig_1_1_,trackSipdSig_0_1_,trackSip2dSigAboveCharm_0_,trackSip2dSigAboveBottom_0_,trackSip2dSigAboveBottom_1_,tau0_trackEtaRel_0_,tau0_trackEtaRel_1_,tau0_trackEtaRel_2_,tau1_trackEtaRel_0_,tau1_trackEtaRel_1_,tau1_trackEtaRel_2_,tau_vertexMass_0_,tau_vertexEnergyRatio_0_,tau_vertexDeltaR_0_,tau_flightDistance2dSig_0_,tau_vertexMass_1_,tau_vertexEnergyRatio_1_,tau_flightDistance2dSig_1_,jetNTracks_,nSV_, true);
+
+
+  if(fComputeSVInfo) { 
+    edm::Handle<reco::VertexCompositePtrCandidateCollection> secVertices;
+    iEvent.getByToken(fTokSVName, secVertices);
+    assert(secVertices.isValid());
+    const reco::VertexCompositePtrCandidateCollection svtx=*secVertices;
+    pAddJet->svtx.clear();
+    TClonesArray &rSVArray = *iSVArr;
+    for (const reco::VertexCompositePtrCandidate &sv : svtx) {
+      if (reco::deltaR(sv,itJet)>0.7) { continue; }
+      assert(rSVArray.GetEntries() < rSVArray.GetSize());
+      const int svIndex = rSVArray.GetEntries();
+      new(rSVArray[svIndex]) baconhep::TSVtx();
+      baconhep::TSVtx* pSV = (baconhep::TSVtx*)rSVArray[svIndex];
+      pAddJet->svtx.push_back(svIndex);
+      pSV->pt          = sv.pt();
+      pSV->eta         = sv.eta();
+      pSV->phi         = sv.phi();
+      pSV->mass        = sv.mass();
+      pSV->etarel      = fabs(sv.eta()-itJet.eta());
+      pSV->phirel      = fabs(reco::deltaPhi(sv.phi(),itJet.phi()));
+      pSV->sv_deltaR   = fabs(reco::deltaR(sv,itJet));
+      pSV->sv_ntracks  = sv.numberOfDaughters();
+      pSV->sv_chi2     = sv.vertexChi2();
+      pSV->sv_ndf      = sv.vertexNdof();
+      pSV->sv_normchi2 = pSV->sv_chi2/pSV->sv_ndf; // really?!!!
+      pSV->sv_dxy      = vertexDxy(sv,pv).value();
+      pSV->sv_dxyerr   = vertexDxy(sv,pv).error();
+      pSV->sv_dxysig   = pSV->sv_dxy/pSV->sv_dxyerr; //really?!!!
+      pSV->sv_d3d      = vertexD3d(sv,pv).value();
+      pSV->sv_d3derr   = vertexD3d(sv,pv).error();
+      pSV->sv_d3dsig   = vertexD3d(sv,pv).value()/vertexD3d(sv,pv).error();
+      pSV->sv_enratio  = sv.energy()/itJet.energy();
+    }
+  }
 
   // Jet Shape Correlation observables
 //  fastjet::JetDefinition lCJet_def(fastjet::cambridge_algorithm, 2.0);

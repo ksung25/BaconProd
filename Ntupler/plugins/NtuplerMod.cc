@@ -17,6 +17,7 @@
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
 #include "BaconAna/DataFormats/interface/TPFPart.hh"
 #include "BaconAna/DataFormats/interface/TRHPart.hh"
+#include "BaconAna/DataFormats/interface/TSVtx.hh"
 #include "BaconAna/Utils/interface/TTrigger.hh"
 
 #include "BaconProd/Ntupler/interface/FillerEventInfo.hh"
@@ -141,7 +142,8 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fAddFatPuppiJetArr      (0),
   fAddFatterPuppiJetArr   (0),
   fPFParArr          (0),
-  fRHParArr          (0)
+  fRHParArr          (0),
+  fSVArr             (0)
 {
   fUseTrigger          = iConfig.getUntrackedParameter<bool>("useTrigger",true);
   fTokGenRunInfo       = consumes<GenRunInfoProduct,edm::InRun>(edm::InputTag(fGenRunInfoName)); 
@@ -158,6 +160,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   baconhep::TElectron::Class()->IgnoreTObjectStreamer();
   baconhep::TTau::Class()->IgnoreTObjectStreamer();
   baconhep::TJet::Class()->IgnoreTObjectStreamer();
+  baconhep::TSVtx::Class()->IgnoreTObjectStreamer();
   baconhep::TPhoton::Class()->IgnoreTObjectStreamer();
   baconhep::TVertex::Class()->IgnoreTObjectStreamer();
   baconhep::TAddJet::Class()->IgnoreTObjectStreamer();
@@ -268,6 +271,8 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       fJetArr = new TClonesArray("baconhep::TJet");       assert(fJetArr);
       if(fComputeFullJetInfo) {
         fAddJetArr = new TClonesArray("baconhep::TAddJet"); assert(fAddJetArr);
+	fComputeFullSVInfo  = cfg.getUntrackedParameter<bool>("doComputeSVInfo");
+	if(!fSVArr && fComputeFullSVInfo) fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr);
       }
     }
   }
@@ -282,6 +287,8 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       fFatJetArr = new TClonesArray("baconhep::TJet");             assert(fFatJetArr);
       if(fComputeFullFatJetInfo) {
         fAddFatJetArr = new TClonesArray("baconhep::TAddJet"); assert(fAddFatJetArr);
+	fComputeFullFatSVInfo  = cfg.getUntrackedParameter<bool>("doComputeSVInfo");
+	if(!fSVArr && fComputeFullFatSVInfo) fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr);
       }
     }
   }
@@ -296,6 +303,8 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       fFatterJetArr = new TClonesArray("baconhep::TJet");                assert(fFatterJetArr);
       if(fComputeFullFatterJetInfo) {
         fAddFatterJetArr = new TClonesArray("baconhep::TAddJet"); assert(fAddFatterJetArr);
+	fComputeFullFatterSVInfo  = cfg.getUntrackedParameter<bool>("doComputeSVInfo");
+	if(!fSVArr && fComputeFullFatterSVInfo) fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr);
       }
     }
   }
@@ -310,6 +319,8 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       fPuppiJetArr = new TClonesArray("baconhep::TJet");               assert(fPuppiJetArr);
       if(fComputeFullPuppiJetInfo) {
         fAddPuppiJetArr = new TClonesArray("baconhep::TAddJet"); assert(fAddPuppiJetArr);
+	fComputeFullPuppiSVInfo  = cfg.getUntrackedParameter<bool>("doComputeSVInfo");
+	if(!fSVArr && fComputeFullPuppiJetInfo) fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr);
       }
     }
   }
@@ -324,6 +335,8 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       fFatPuppiJetArr = new TClonesArray("baconhep::TJet");                 assert(fFatPuppiJetArr);
       if(fComputeFullFatPuppiJetInfo) {
         fAddFatPuppiJetArr = new TClonesArray("baconhep::TAddJet"); assert(fAddFatPuppiJetArr);
+	fComputeFullFatPuppiSVInfo  = cfg.getUntrackedParameter<bool>("doComputeSVInfo");
+	if(!fSVArr && fComputeFullFatPuppiSVInfo) fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr);
       }
     }
   }
@@ -338,6 +351,8 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       fFatterPuppiJetArr    = new TClonesArray("baconhep::TJet");                  assert(fFatterPuppiJetArr);
       if(fComputeFullFatterPuppiJetInfo) {
         fAddFatterPuppiJetArr = new TClonesArray("baconhep::TAddJet"); assert(fAddFatterPuppiJetArr);
+	fComputeFullFatterPuppiSVInfo  = cfg.getUntrackedParameter<bool>("doComputeSVInfo");
+	if(!fSVArr && fComputeFullFatterPuppiSVInfo) fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr);
       }
     }
   }
@@ -419,11 +434,12 @@ NtuplerMod::~NtuplerMod()
 void NtuplerMod::respondToOpenInputFile(edm::FileBlock const&) 
 {  
   //if(fFillerJet            != 0) fFillerJet           ->initPUJetId();
-  if(fFillerFatJet         != 0) {fFillerFatJet  ->initBoostedBtaggingJetId();}//fFillerFatJet        ->initPUJetId();  
-  if(fFillerFatterJet      != 0) {fFillerFatterJet ->initBoostedBtaggingJetId();}//fFillerFatterJet     ->initPUJetId(); 
+  if(fFillerJet            != 0) {fFillerJet  ->initBReg();}
+  if(fFillerFatJet         != 0) {fFillerFatJet  ->initBoostedBtaggingJetId();   fFillerFatJet   ->initBReg();}//fFillerFatJet        ->initPUJetId();  
+  if(fFillerFatterJet      != 0) {fFillerFatterJet ->initBoostedBtaggingJetId(); fFillerFatterJet->initBReg();}//fFillerFatterJet     ->initPUJetId(); 
   //if(fFillerPuppiJet       != 0) fFillerPuppiJet      ->initPUJetId();
-  if(fFillerFatPuppiJet    != 0) {fFillerFatPuppiJet   ->initBoostedBtaggingJetId();}//fFillerFatPuppiJet   ->initPUJetId(); 
-  if(fFillerFatterPuppiJet != 0) {fFillerFatterPuppiJet ->initBoostedBtaggingJetId();}//fFillerFatterPuppiJet->initPUJetId();  
+  if(fFillerFatPuppiJet    != 0) {fFillerFatPuppiJet   ->initBoostedBtaggingJetId();  fFillerFatPuppiJet     ->initBReg();}//fFillerFatPuppiJet   ->initPUJetId(); 
+  if(fFillerFatterPuppiJet != 0) {fFillerFatterPuppiJet ->initBoostedBtaggingJetId(); fFillerFatterPuppiJet  ->initBReg();}//fFillerFatterPuppiJet->initPUJetId();  
 }
 //--------------------------------------------------------------------------------------------------
 void NtuplerMod::beginJob()
@@ -472,6 +488,14 @@ void NtuplerMod::beginJob()
     fEventTree->Branch("CA15Puppi", &fFatterPuppiJetArr);
     if(fComputeFullFatterPuppiJetInfo) { fEventTree->Branch("AddCA15Puppi", &fAddFatterPuppiJetArr); }
   }
+  if(fComputeFullJetInfo      || fComputeFullFatJetInfo      || fComputeFullFatterJetInfo      ||
+     fComputeFullPuppiJetInfo || fComputeFullFatPuppiJetInfo || fComputeFullFatterPuppiJetInfo ||
+ 
+     fComputeFullSVInfo      || fComputeFullFatSVInfo      || fComputeFullFatterSVInfo      ||
+     fComputeFullPuppiSVInfo || fComputeFullFatPuppiSVInfo || fComputeFullFatterPuppiSVInfo 
+     ) {
+    fEventTree->Branch("SV", &fSVArr);
+  }
   if(fIsActivePF) { fEventTree->Branch("PFPart", &fPFParArr); }
   if(fIsActiveRH) { fEventTree->Branch("RHPart", &fRHParArr); }
   // Triggers
@@ -505,8 +529,7 @@ void NtuplerMod::setTriggers(bool iUseTrigger)
 }
 
 //--------------------------------------------------------------------------------------------------
-void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
-{
+void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   fTotalEvents->Fill(1);
   TriggerBits triggerBits;
@@ -598,69 +621,70 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   //  if(fUseAOD) { fFillerCaloJet->fill(fCaloJetArr,iEvent, iSetup,fTrigger->fRecords, *hTrgEvt);  }
   //}
   if(fIsActiveJet) {
+    if(fSVArr != 0) fSVArr->Clear();
     fJetArr->Clear();
     if(fComputeFullJetInfo) {
       fAddJetArr->Clear();      
-      if(fUseAODJet) { fFillerJet->fill(fJetArr, fAddJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
-      else           { fFillerJet->fill(fJetArr, fAddJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+      if(fUseAODJet) { fFillerJet->fill(fJetArr, fAddJetArr, fSVArr, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
+      else           { fFillerJet->fill(fJetArr, fAddJetArr, fSVArr, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     } else {
-      if(fUseAODJet) { fFillerJet->fill(fJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
-      else           { fFillerJet->fill(fJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+      if(fUseAODJet) { fFillerJet->fill(fJetArr,          0,     0,  iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
+      else           { fFillerJet->fill(fJetArr,          0,     0,  iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     }
   }
   if(fIsActiveFatJet) {
     fFatJetArr->Clear();
     if(fComputeFullFatJetInfo) {
       fAddFatJetArr->Clear();      
-      if(fUseAODFatJet) { fFillerFatJet->fill(fFatJetArr, fAddFatJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
-      else              { fFillerFatJet->fill(fFatJetArr, fAddFatJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+      if(fUseAODFatJet) { fFillerFatJet->fill(fFatJetArr, fAddFatJetArr, fSVArr, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
+      else              { fFillerFatJet->fill(fFatJetArr, fAddFatJetArr, fSVArr, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     } else {
-      if(fUseAODFatJet) { fFillerFatJet->fill(fFatJetArr,             0, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
-      else              { fFillerFatJet->fill(fFatJetArr,             0, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+      if(fUseAODFatJet) { fFillerFatJet->fill(fFatJetArr,             0,      0, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
+      else              { fFillerFatJet->fill(fFatJetArr,             0,      0, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     }
   }
   if(fIsActiveFatterJet) {
     fFatterJetArr->Clear();
     if(fComputeFullFatterJetInfo) {
       fAddFatterJetArr->Clear();      
-      if(fUseAODFatterJet) { fFillerFatterJet->fill(fFatterJetArr, fAddFatterJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
-      else                 { fFillerFatterJet->fill(fFatterJetArr, fAddFatterJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); } 
+      if(fUseAODFatterJet) { fFillerFatterJet->fill(fFatterJetArr, fAddFatterJetArr, fSVArr, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy);  }
+      else                 { fFillerFatterJet->fill(fFatterJetArr, fAddFatterJetArr, fSVArr, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, *uFTrgObjs); } 
     } else {
-      if(fUseAODFatterJet) { fFillerFatterJet->fill(fFatterJetArr,                0, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy); }
-      else                 { fFillerFatterJet->fill(fFatterJetArr,                0, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs);  } 
+      if(fUseAODFatterJet) { fFillerFatterJet->fill(fFatterJetArr,                0,      0, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, hTrgEvtDummy ,hTrgObjsDummy); }
+      else                 { fFillerFatterJet->fill(fFatterJetArr,                0,      0, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, *uFTrgObjs);  } 
     }
   }
   if(fIsActivePuppiJet) {
     fPuppiJetArr->Clear();
     if(fComputeFullPuppiJetInfo) {
       fAddPuppiJetArr->Clear();      
-      if(fUseAODPuppiJet) { fFillerPuppiJet->fill(fPuppiJetArr, fAddPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords,  hTrgEvtDummy, hTrgObjsDummy);  }
-      else                { fFillerPuppiJet->fill(fPuppiJetArr, fAddPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords,  *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+      if(fUseAODPuppiJet) { fFillerPuppiJet->fill(fPuppiJetArr, fAddPuppiJetArr, fSVArr, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords,  hTrgEvtDummy, hTrgObjsDummy);  }
+      else                { fFillerPuppiJet->fill(fPuppiJetArr, fAddPuppiJetArr, fSVArr, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords,  *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     } else {
-      if(fUseAODPuppiJet) { fFillerPuppiJet->fill(fPuppiJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy, hTrgObjsDummy);  }
-      else                { fFillerPuppiJet->fill(fPuppiJetArr,          0, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
+      if(fUseAODPuppiJet) { fFillerPuppiJet->fill(fPuppiJetArr,          0, 0, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, hTrgEvtDummy, hTrgObjsDummy);  }
+      else                { fFillerPuppiJet->fill(fPuppiJetArr,          0, 0, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, *uFTrgObjs); }  // (!) consolidate fillers for AOD and MINIAOD
     }
   }
   if(fIsActiveFatPuppiJet) {
     fFatPuppiJetArr->Clear();
     if(fComputeFullFatPuppiJetInfo) {
       fAddFatPuppiJetArr->Clear();      
-      if(fUseAODFatPuppiJet) { fFillerFatPuppiJet->fill(fFatPuppiJetArr, fAddFatPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords,hTrgEvtDummy,hTrgObjsDummy);  }
-      else                   { fFillerFatPuppiJet->fill(fFatPuppiJetArr, fAddFatPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); } 
+      if(fUseAODFatPuppiJet) { fFillerFatPuppiJet->fill(fFatPuppiJetArr, fAddFatPuppiJetArr, fSVArr, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords,hTrgEvtDummy,hTrgObjsDummy);  }
+      else                   { fFillerFatPuppiJet->fill(fFatPuppiJetArr, fAddFatPuppiJetArr, fSVArr, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, *uFTrgObjs); } 
     } else {
-      if(fUseAODFatPuppiJet) { fFillerFatPuppiJet->fill(fFatPuppiJetArr,             0, iEvent, iSetup, *pv, fTrigger->fRecords, hTrgEvtDummy,hTrgObjsDummy);  }
-      else                   { fFillerFatPuppiJet->fill(fFatPuppiJetArr,             0, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); }
+      if(fUseAODFatPuppiJet) { fFillerFatPuppiJet->fill(fFatPuppiJetArr,             0, 0, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, hTrgEvtDummy,hTrgObjsDummy);  }
+      else                   { fFillerFatPuppiJet->fill(fFatPuppiJetArr,             0, 0, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, *uFTrgObjs); }
     }
   }
   if(fIsActiveFatterPuppiJet) {
     fFatterPuppiJetArr->Clear();
     if(fComputeFullFatterPuppiJetInfo) {
       fAddFatterPuppiJetArr->Clear();      
-      if(fUseAODFatterPuppiJet) { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr, fAddFatterPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords,hTrgEvtDummy,hTrgObjsDummy);  }
-      else                      { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr, fAddFatterPuppiJetArr, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); } 
+      if(fUseAODFatterPuppiJet) { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr, fAddFatterPuppiJetArr, fSVArr, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords,hTrgEvtDummy,hTrgObjsDummy);  }
+      else                      { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr, fAddFatterPuppiJetArr, fSVArr, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, *uFTrgObjs); } 
     } else {
-      if(fUseAODFatterPuppiJet) { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr,                     0, iEvent, iSetup, *pv, fTrigger->fRecords,hTrgEvtDummy,hTrgObjsDummy);  }
-      else                      { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr,                     0, iEvent, iSetup, *pv, fTrigger->fRecords, *uFTrgObjs); } 
+      if(fUseAODFatterPuppiJet) { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr,                     0, 0, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords,hTrgEvtDummy,hTrgObjsDummy);  }
+      else                      { fFillerFatterPuppiJet->fill(fFatterPuppiJetArr,                     0, 0, iEvent, iSetup, *pv, nvertices,fTrigger->fRecords, *uFTrgObjs); } 
     }
   }
   if(fIsActivePF) { 

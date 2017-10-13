@@ -143,6 +143,7 @@ def setMiniAODAK4CHS(process) :
     process.QGTagger.jetsLabel             = cms.string('QGL_AK4PFchs')
     process.QGTagger.jec                   = cms.InputTag('')
     process.QGTagger.systematicsLabel      = cms.string('')
+    process.QGTagger.useQualityCuts        = cms.bool(False)
     process.AK4FlavorCHS.jets              = cms.InputTag('slimmedJets')
     process.AK4PUJetIdCHS.jets             = cms.InputTag("slimmedJets")
     process.AK4PUJetIdCHS.inputIsCorrected = True

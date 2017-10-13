@@ -93,6 +93,9 @@ class NtuplerMod : public edm::EDAnalyzer {
 
     bool fComputeFullJetInfo,      fComputeFullFatJetInfo,      fComputeFullFatterJetInfo;
     bool fComputeFullPuppiJetInfo, fComputeFullFatPuppiJetInfo, fComputeFullFatterPuppiJetInfo;
+
+    bool fComputeFullSVInfo,      fComputeFullFatSVInfo,      fComputeFullFatterSVInfo;
+    bool fComputeFullPuppiSVInfo, fComputeFullFatPuppiSVInfo, fComputeFullFatterPuppiSVInfo;
  
     // bacon fillers
     baconhep::FillerEventInfo *fFillerEvtInfo;
@@ -151,4 +154,5 @@ class NtuplerMod : public edm::EDAnalyzer {
     TClonesArray	    *fAddPuppiJetArr, *fAddFatPuppiJetArr, *fAddFatterPuppiJetArr;
     TClonesArray	    *fPFParArr;
     TClonesArray	    *fRHParArr;
+    TClonesArray            *fSVArr;
 };

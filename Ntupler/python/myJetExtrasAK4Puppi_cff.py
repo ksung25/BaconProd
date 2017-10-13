@@ -121,9 +121,9 @@ def setMiniAODAK4Puppi(process) :
     process.AK4PFImpactParameterTagInfosPuppi.primaryVertex                    = cms.InputTag("offlineSlimmedPrimaryVertices")
     process.AK4PFImpactParameterTagInfosPuppi.candidates                       = cms.InputTag("packedPFCandidates")
     process.AK4PFInclusiveSecondaryVertexFinderTagInfosPuppi.extSVCollection   = cms.InputTag('slimmedSecondaryVertices')
-    process.AK4PFImpactParameterTagInfosSJPuppi.primaryVertex                  = cms.InputTag("offlineSlimmedPrimaryVertices")
-    process.AK4PFImpactParameterTagInfosSJPuppi.candidates                     = cms.InputTag("packedPFCandidates")
-    process.AK4PFInclusiveSecondaryVertexFinderTagInfosSJPuppi.extSVCollection = cms.InputTag('slimmedSecondaryVertices')
+#    process.AK4PFImpactParameterTagInfosSJPuppi.primaryVertex                  = cms.InputTag("offlineSlimmedPrimaryVertices")
+#    process.AK4PFImpactParameterTagInfosSJPuppi.candidates                     = cms.InputTag("packedPFCandidates")
+#    process.AK4PFInclusiveSecondaryVertexFinderTagInfosSJPuppi.extSVCollection = cms.InputTag('slimmedSecondaryVertices')
 
 
     

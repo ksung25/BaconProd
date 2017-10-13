@@ -4,6 +4,7 @@
 #include "BaconProd/Utils/interface/TriggerTools.hh"
 #include "BaconProd/Utils/interface/JetPUIDMVACalculator.hh"
 #include "BaconProd/Utils/interface/BoostedBtaggingMVACalculator.hh"
+#include "BaconProd/Utils/interface/BJetRegression.hh"
 #include "BaconProd/Utils/interface/ShowerDeco.hh"
 #include "BaconProd/Utils/interface/EnergyCorrelations.h"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
@@ -23,10 +24,13 @@
 #include <vector>
 #include <string>
 
-// forward class declarations
+// forward class declarations                                                                                                                                                                                                                                                  
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "TrackingTools/IPTools/interface/IPTools.h"
+#include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
 
 //typedef std::vector<reco::BoostedDoubleSVTagInfo>  BoostedDoubleSVTagInfoCollection;
 
@@ -48,9 +52,11 @@ namespace baconhep
       // === filler for AOD ===
       void fill(TClonesArray                     *array,                        // output array to be filled
 		TClonesArray                     *iExtraArray,                  // Extra Array to be filled
+		TClonesArray                     *iSVArray,                     // SV Array to be filled
                 const edm::Event                 &iEvent,                       // event info
 		const edm::EventSetup            &iSetup,                       // event setup info
 	        const reco::Vertex		 &pv,	                        // event primary vertex
+		int iNPV,                                                       // Number of PV
 		const std::vector<TriggerRecord> &triggerRecords,               // list of trigger names and objects
 		const trigger::TriggerEvent      *triggerEvent,                 // event trigger objects
 		const pat::TriggerObjectStandAloneCollection *patTriggerObjects);  // hack for AOD type filler with miniAOD
@@ -58,20 +64,25 @@ namespace baconhep
       // === filler for MINIAOD ===
       void fill(TClonesArray                                 *array,            // output array to be filled
                 TClonesArray                                 *iExtraArray,      // Extra Array to be filled
+		TClonesArray                                 *iSVArray,         // SV Array to be filled
                 const edm::Event                             &iEvent,           // event info
                 const edm::EventSetup                        &iSetup,           // event setup info
                 const reco::Vertex                           &pv,               // event primary vertex
+		int iNPV,                                                       // Number of PV
                 const std::vector<TriggerRecord>             &triggerRecords,   // list of trigger names and objects
                 const pat::TriggerObjectStandAloneCollection &triggerObjects);  // event trigger objects
      void  initPUJetId();
-     void initBoostedBtaggingJetId();
+     void  initBoostedBtaggingJetId();
+     void  initBReg();
+    static Measurement1D vertexDxy(const reco::VertexCompositePtrCandidate &svcand, const reco::Vertex &pv)  ;
+    static Measurement1D vertexD3d(const reco::VertexCompositePtrCandidate &svcand, const reco::Vertex &pv)  ;
 
     protected:
       void initJetCorr(const std::vector<std::string> &jecFiles, 
                        const std::vector<std::string> &jecUncFiles);
     
-      void  addJet(TAddJet *pAddJet, const edm::Event &iEvent, const reco::PFJet &itJet, const reco::JetBaseRef &jetBaseRef);
-      void  addJet(baconhep::TAddJet *pAddJet, const edm::Event &iEvent, const pat::Jet &itJet);
+      void  addJet(baconhep::TAddJet *pAddJet,TClonesArray *iSVArry,  const reco::Vertex &pv,const edm::Event &iEvent, const reco::PFJet &itJet, const reco::JetBaseRef &jetBaseRef);
+      void  addJet(baconhep::TAddJet *pAddJet,TClonesArray *iSVArray, const reco::Vertex &pv,const edm::Event &iEvent, const pat::Jet &itJet);
 
       const reco::PFJet*    matchPF(const reco::PFJet *jet, const reco::PFJetCollection *jets);
       const reco::BasicJet* match(const reco::PFJet *jet, const reco::BasicJetCollection *jets);
@@ -99,11 +110,13 @@ namespace baconhep
       std::string fSoftDropJetName;
       std::string fSubJetName;
       std::string fCVLctagName;
+      std::string fSVName; 
       std::string fCVBctagName;
       std::string fMVAbtagName;
       std::string fCSVbtagName;
       std::string fCSVbtagSubJetName;
       std::string fCSVDoubleBtagName;
+    //std::string fSVTagInfoName;
       std::string fBoostedDoubleSVTagInfoName;
       std::string fJettinessName;
       std::string fQGLikelihood;
@@ -112,14 +125,16 @@ namespace baconhep
       std::string fLowPtWeightFile;
       std::string fHighPtWeightFile;
       std::string fWeightFile;
+      std::string fBRegFile;
       std::string fShowerDecoConf;
       double      fConeSize;
       bool        fComputeFullJetInfo;
+      bool        fComputeSVInfo;
       
       // Jet ID MVA
       JetPUIDMVACalculator fJetPUIDMVACalc;
       BoostedBtaggingMVACalculator fJetBoostedBtaggingMVACalc;
-      
+      BJetRegression               fBReg;
       ShowerDeco*          fShowerDeco;
 
       // Random number generator for Q-jet volatility
@@ -138,6 +153,10 @@ namespace baconhep
     edm::EDGetTokenT<reco::GenJetCollection> fTokGenJetName;
     edm::EDGetTokenT<reco::JetFlavourInfoMatchingCollection> fTokJetFlavorName;
     edm::EDGetTokenT<reco::VertexCollection> fTokPVName;
+    edm::EDGetTokenT<reco::VertexCompositePtrCandidateCollection> fTokSVName;
+    //edm::EDGetTokenT<reco::SecondaryVertexTagInfoCollection> fTokSVTagInfoCollection;
+    //edm::EDGetTokenT<vector<reco::IPTagInfo<vector<edm::Ptr<reco::Candidate> >,reco::JetTagInfo> > > fTokSVTagInfoCollection;
+    //edm::EDGetTokenT<std::vector<reco::CandIPTagInfo> > fTokSVTagInfoCollection;     
     edm::EDGetTokenT<reco::JetTagCollection> fTokCSVbtagName;
     edm::EDGetTokenT<reco::JetTagCollection> fTokMVAbtagName;
     edm::EDGetTokenT<reco::JetTagCollection> fTokCVBctagName;
