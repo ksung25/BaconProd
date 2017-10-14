@@ -176,8 +176,8 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fTokCMSTTJetProduct    = iC.consumes<reco::BasicJetCollection>(lTopTag);
     fTokCMSTTSubJetProduct = iC.consumes<reco::PFJetCollection>   (lTopTagSubJet);
     fECF = new EnergyCorrelations();
-    fRecursiveSoftDrop1 = new fastjet::RecursiveSoftDrop( 0. ,0.1,2.0,0);
-    fRecursiveSoftDrop2 = new fastjet::RecursiveSoftDrop( 0. ,0.1,2.0,2);
+    fRecursiveSoftDrop1 = new fastjet::RecursiveSoftDrop( 0. ,0.1,fConeSize,-1); // beta = 0, n = Inf
+    fRecursiveSoftDrop2 = new fastjet::RecursiveSoftDrop( 1. ,0.1,fConeSize,-1); // beta = 1, n = Inf
   }
 }
 
@@ -898,7 +898,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   fastjet::PseudoJet pRSM1Jet = (*fRecursiveSoftDrop1) (inclusive_jets[0]);
   fastjet::PseudoJet pRSM2Jet = (*fRecursiveSoftDrop2) (inclusive_jets[0]);
   pAddJet->mass_rsd0  = pRSM1Jet.m()*pCorr;
-  pAddJet->mass_rsd2  = pRSM2Jet.m()*pCorr;
+  pAddJet->mass_rsd1  = pRSM2Jet.m()*pCorr;
   /*
   // Q-Jets
   pAddJet->qjet = 0;
