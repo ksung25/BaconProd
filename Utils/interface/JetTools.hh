@@ -99,6 +99,8 @@ namespace baconhep {
       static float leadPt(const reco::PFJet &jet);
       static float leptons(const pat::Jet &jet,int iId);
       static float leptons(const reco::PFJet &jet,int iId);
+      static float lsf(std::vector<fastjet::PseudoJet> iCParticles,std::vector<fastjet::PseudoJet> &ljets,
+		       float ilPt, float ilEta, float ilPhi, int ilId, double dr, int nsj, int iId = 0);
   };
 }
 #endif

@@ -7,8 +7,14 @@
 #include "BaconProd/Utils/interface/BJetRegression.hh"
 #include "BaconProd/Utils/interface/ShowerDeco.hh"
 #include "BaconProd/Utils/interface/EnergyCorrelations.h"
+#include "BaconProd/Utils/interface/RecursiveSoftDrop.hh"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
 #include "DataFormats/BTauReco/interface/BoostedDoubleSVTagInfo.h"
+//#include "DataFormats/BTauReco/interface/CandSoftLeptonTagInfo.h"    
+//#include "DataFormats/MuonReco/interface/Muon.h"
+//#include "DataFormats/PatCandidates/interface/Muon.h"
+//#include "DataFormats/PatCandidates/interface/Electron.h"
+//#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/BasicJet.h"
 #include "DataFormats/JetReco/interface/JetCollection.h"
@@ -118,6 +124,10 @@ namespace baconhep
       std::string fCSVDoubleBtagName;
     //std::string fSVTagInfoName;
       std::string fBoostedDoubleSVTagInfoName;
+      //std::string fMuonName;
+      //std::string fEleName;
+      //std::string fsoftPFMuonTagInfoName;
+      //std::string fsoftPFElectronTagInfoName;
       std::string fJettinessName;
       std::string fQGLikelihood;
       std::string fQGLikelihoodSubJets;
@@ -146,6 +156,8 @@ namespace baconhep
 
       bool fUseAOD;
       EnergyCorrelations* fECF;
+      fastjet::RecursiveSoftDrop *fRecursiveSoftDrop1;
+      fastjet::RecursiveSoftDrop *fRecursiveSoftDrop2;
 
     edm::EDGetTokenT<reco::PFJetCollection>  fTokJetName;
     edm::EDGetTokenT<reco::JetCorrector>     fTokJECName;
@@ -179,6 +191,12 @@ namespace baconhep
     edm::EDGetTokenT<reco::BasicJetCollection> fTokCMSTTJetProduct ;
     edm::EDGetTokenT<reco::PFJetCollection>    fTokCMSTTSubJetProduct;
     edm::EDGetTokenT<reco::BoostedDoubleSVTagInfoCollection>  fTokBoostedDoubleSVTagInfo;
+    // edm::EDGetTokenT<reco::MuonCollection>         fTokMuonName; 
+    // edm::EDGetTokenT<pat::MuonCollection>          fTokPatMuonName;
+    // edm::EDGetTokenT<reco::GsfElectronCollection>  fTokEleName;
+    // edm::EDGetTokenT<pat::ElectronCollection>      fTokPatEleName;
+    // edm::EDGetTokenT<reco::CandSoftLeptonTagInfoCollection>      fToksoftPFMuonTagInfo;
+    // edm::EDGetTokenT<reco::CandSoftLeptonTagInfoCollection>      fToksoftPFElectronTagInfo;
     edm::EDGetTokenT<double>                   fTokRhoTag;
   };
 }
