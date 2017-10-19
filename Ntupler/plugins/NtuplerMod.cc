@@ -272,7 +272,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       if(fComputeFullJetInfo) {
         fAddJetArr = new TClonesArray("baconhep::TAddJet"); assert(fAddJetArr);
 	fComputeFullSVInfo  = cfg.getUntrackedParameter<bool>("doComputeSVInfo");
-	if(!fSVArr && fComputeFullSVInfo) fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr);
+	if(!fSVArr && fComputeFullSVInfo) {fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr); }
       }
     }
   }
@@ -288,7 +288,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       if(fComputeFullFatJetInfo) {
         fAddFatJetArr = new TClonesArray("baconhep::TAddJet"); assert(fAddFatJetArr);
 	fComputeFullFatSVInfo  = cfg.getUntrackedParameter<bool>("doComputeSVInfo");
-	if(!fSVArr && fComputeFullFatSVInfo) fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr);
+	if(!fSVArr && fComputeFullFatSVInfo) { fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr); }
       }
     }
   }
@@ -304,7 +304,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       if(fComputeFullFatterJetInfo) {
         fAddFatterJetArr = new TClonesArray("baconhep::TAddJet"); assert(fAddFatterJetArr);
 	fComputeFullFatterSVInfo  = cfg.getUntrackedParameter<bool>("doComputeSVInfo");
-	if(!fSVArr && fComputeFullFatterSVInfo) fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr);
+	if(!fSVArr && fComputeFullFatterSVInfo) { fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr); }
       }
     }
   }
@@ -320,7 +320,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       if(fComputeFullPuppiJetInfo) {
         fAddPuppiJetArr = new TClonesArray("baconhep::TAddJet"); assert(fAddPuppiJetArr);
 	fComputeFullPuppiSVInfo  = cfg.getUntrackedParameter<bool>("doComputeSVInfo");
-	if(!fSVArr && fComputeFullPuppiJetInfo) fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr);
+	if(!fSVArr && fComputeFullPuppiJetInfo) { fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr); }
       }
     }
   }
@@ -336,7 +336,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       if(fComputeFullFatPuppiJetInfo) {
         fAddFatPuppiJetArr = new TClonesArray("baconhep::TAddJet"); assert(fAddFatPuppiJetArr);
 	fComputeFullFatPuppiSVInfo  = cfg.getUntrackedParameter<bool>("doComputeSVInfo");
-	if(!fSVArr && fComputeFullFatPuppiSVInfo) fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr);
+	if(!fSVArr && fComputeFullFatPuppiSVInfo) { fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr); }
       }
     }
   }
@@ -352,7 +352,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
       if(fComputeFullFatterPuppiJetInfo) {
         fAddFatterPuppiJetArr = new TClonesArray("baconhep::TAddJet"); assert(fAddFatterPuppiJetArr);
 	fComputeFullFatterPuppiSVInfo  = cfg.getUntrackedParameter<bool>("doComputeSVInfo");
-	if(!fSVArr && fComputeFullFatterPuppiSVInfo) fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr);
+	if(!fSVArr && fComputeFullFatterPuppiSVInfo) { fSVArr = new TClonesArray("baconhep::TSVtx");       assert(fSVArr); }
       }
     }
   }
@@ -429,6 +429,7 @@ NtuplerMod::~NtuplerMod()
   delete fPVArr;
   delete fPFParArr;
   delete fRHParArr;
+  delete fSVArr;
 }
 //--------------------------------------------------------------------------------------------------
 void NtuplerMod::respondToOpenInputFile(edm::FileBlock const&) 
@@ -488,12 +489,8 @@ void NtuplerMod::beginJob()
     fEventTree->Branch("CA15Puppi", &fFatterPuppiJetArr);
     if(fComputeFullFatterPuppiJetInfo) { fEventTree->Branch("AddCA15Puppi", &fAddFatterPuppiJetArr); }
   }
-  if(fComputeFullJetInfo      || fComputeFullFatJetInfo      || fComputeFullFatterJetInfo      ||
-     fComputeFullPuppiJetInfo || fComputeFullFatPuppiJetInfo || fComputeFullFatterPuppiJetInfo ||
  
-     fComputeFullSVInfo      || fComputeFullFatSVInfo      || fComputeFullFatterSVInfo      ||
-     fComputeFullPuppiSVInfo || fComputeFullFatPuppiSVInfo || fComputeFullFatterPuppiSVInfo 
-     ) {
+  if(fSVArr != 0) {
     fEventTree->Branch("SV", &fSVArr);
   }
   if(fIsActivePF) { fEventTree->Branch("PFPart", &fPFParArr); }
@@ -620,8 +617,8 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   //  fCaloJetArr->Clear();
   //  if(fUseAOD) { fFillerCaloJet->fill(fCaloJetArr,iEvent, iSetup,fTrigger->fRecords, *hTrgEvt);  }
   //}
-  if(fIsActiveJet) {
-    if(fSVArr != 0) fSVArr->Clear();
+  if(fSVArr != 0) fSVArr->Clear();
+   if(fIsActiveJet) {
     fJetArr->Clear();
     if(fComputeFullJetInfo) {
       fAddJetArr->Clear();      

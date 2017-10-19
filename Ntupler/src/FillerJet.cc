@@ -1071,7 +1071,8 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   else std::cout<< "   not found matched double-b tag info  "<<std::endl;	
   //Secondary Vertices
   
-  //sec vtx                                                                                                                                                                                                                                                           
+  //sec vtx                    
+  pAddJet->svtx.clear();
   if(fComputeSVInfo) { 
     edm::Handle<reco::VertexCompositePtrCandidateCollection> secVertices;
     iEvent.getByToken(fTokSVName, secVertices);
@@ -1081,6 +1082,12 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
     TClonesArray &rSVArray = *iSVArr;
     for (const reco::VertexCompositePtrCandidate &sv : svtx) {
       if (reco::deltaR(sv,itJet)>0.7) { continue; }
+      bool pFind = false;
+      for(int i0 = 0; i0 < iSVArr->GetEntries(); i0++) { 
+	baconhep::TSVtx* pLSV = (baconhep::TSVtx*) iSVArr->At(i0);
+	if(fabs(sv.pt()-pLSV->pt) < 0.01 && fabs(pLSV->eta-sv.eta()) < 0.01 && fabs(pLSV->phi-sv.phi()) < 0.01) {pFind=true; break;}
+      }
+      if(pFind) continue;
       assert(rSVArray.GetEntries() < rSVArray.GetSize());
       const int svIndex = rSVArray.GetEntries();
       new(rSVArray[svIndex]) baconhep::TSVtx();
@@ -1395,6 +1402,12 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr, const r
     TClonesArray &rSVArray = *iSVArr;
     for (const reco::VertexCompositePtrCandidate &sv : svtx) {
       if (reco::deltaR(sv,itJet)>0.7) { continue; }
+      bool pFind = false;
+      for(int i0 = 0; i0 < iSVArr->GetEntries(); i0++) { 
+	baconhep::TSVtx* pLSV = (baconhep::TSVtx*) iSVArr->At(i0);
+	if(fabs(sv.pt()-pLSV->pt) < 0.01 && fabs(pLSV->eta-sv.eta()) < 0.01 && fabs(pLSV->phi-sv.phi()) < 0.01) {pFind=true; break;}
+      }
+      if(pFind) continue;
       assert(rSVArray.GetEntries() < rSVArray.GetSize());
       const int svIndex = rSVArray.GetEntries();
       new(rSVArray[svIndex]) baconhep::TSVtx();

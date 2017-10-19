@@ -189,8 +189,9 @@ if do_alpaca:
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(#'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/301/283/00000/E0D8674F-5E84-E711-9158-02163E019B4A.root')
-                            '/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/742/00000/8A74859E-757E-E711-A964-02163E019CB5.root'),
-                            skipEvents = cms.untracked.uint32(3250),
+    '/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/742/00000/8A74859E-757E-E711-A964-02163E019CB5.root'),
+    #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/806/00000/5EB6B34D-E683-E711-8CBB-02163E0118FB.root'),
+                            #skipEvents = cms.untracked.uint32(3250),
                             #/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v2/000/300/398/00000/EC8C061B-BE7C-E711-A426-02163E0142C5.root')
                             #fileNames = cms.untracked.vstring('/store/data/Run2017D/SingleElectron/MINIAOD/PromptReco-v1/000/302/030/00000/B21ACAC0-EE8E-E711-A71E-02163E0136F1.root')
 )

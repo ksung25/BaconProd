@@ -189,7 +189,7 @@ if do_alpaca:
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring('/store/mc/RunIISummer16MiniAODv2/ZprimeToTT_M-4000_W-40_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/02DEA6C9-19B7-E611-B22D-A0000420FE80.root'),
-                            #skipEvents = cms.untracked.uint32(0),
+                            #skipEvents = cms.untracked.uint32(9430),
 #'/store/mc/RunIISummer16MiniAODv2/ZprimeToWW_width0p3_M-800_TuneCUETP8M1_13TeV-madgraph-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/1EB4DB0E-BABE-E611-A5DC-001E67792494.root'),
                             #'/store/mc/PhaseISpring17MiniAOD/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/FlatPU28to62_902_90X_upgrade2017_realistic_v20_ext1-v1/120000/087F2D40-9933-E711-89AF-0025904C66EC.root'),
 #/store/mc/PhaseISpring17MiniAOD/QCD_Pt_1400to1800_TuneCUETP8M1_13TeV_pythia8/MINIAODSIM/FlatPU28to62_902_90X_upgrade2017_realistic_v20_ext1-v1/120000/DA17D4FA-9F33-E711-B2DF-0242AC110003.root')
