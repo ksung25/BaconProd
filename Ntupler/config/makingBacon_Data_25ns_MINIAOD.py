@@ -81,6 +81,7 @@ process.btagging = cms.Sequence()
 addBTagging(process,'AK4PFJetsPuppi' ,0.4,'AK4' ,'Puppi')
 addBTagging(process,'AK8PFJetsPuppi' ,0.8,'AK8' ,'Puppi')
 addBTagging(process,'CA15PFJetsPuppi',1.5,'CA15','Puppi')
+process.CA15PFImpactParameterTagInfosPuppi.computeGhostTrack = cms.bool(False)
 
 setMiniAODGenJets(process)
 setMiniAODAK4CHS(process)

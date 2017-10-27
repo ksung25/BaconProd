@@ -176,8 +176,8 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fTokCMSTTJetProduct    = iC.consumes<reco::BasicJetCollection>(lTopTag);
     fTokCMSTTSubJetProduct = iC.consumes<reco::PFJetCollection>   (lTopTagSubJet);
     fECF = new EnergyCorrelations();
-    fRecursiveSoftDrop1 = new fastjet::RecursiveSoftDrop( 0. ,0.1,fConeSize,-1); // beta = 0, n = Inf
-    fRecursiveSoftDrop2 = new fastjet::RecursiveSoftDrop( 1. ,0.1,fConeSize,-1); // beta = 1, n = Inf
+    fRecursiveSoftDrop1 = new fastjet::RecursiveSoftDrop( 1. ,0.05,fConeSize,-1); // beta = 1, zcut=0.05, n = Inf
+    fRecursiveSoftDrop2 = new fastjet::RecursiveSoftDrop( 2. ,0.1,fConeSize,-1); // beta = 2, zcut=0.1, n = Inf                                              
   }
 }
 
