@@ -155,6 +155,7 @@ runMetCorAndUncFromMiniAOD(process,
 # PUPPI Woof Woof
 from PhysicsTools.PatAlgos.slimming.puppiForMET_cff import makePuppiesFromMiniAOD
 makePuppiesFromMiniAOD (process, True )
+#process.puppi.useExistingWeights = True
 runMetCorAndUncFromMiniAOD(process,
                            isData=is_data_flag,
                            manualJetConfig=True,
@@ -187,12 +188,18 @@ if do_alpaca:
 #--------------------------------------------------------------------------------
 # input settings
 #================================================================================
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring(#'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/301/283/00000/E0D8674F-5E84-E711-9158-02163E019B4A.root')
-    '/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/742/00000/8A74859E-757E-E711-A964-02163E019CB5.root'),
-    #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/806/00000/5EB6B34D-E683-E711-8CBB-02163E0118FB.root'),
-                            #skipEvents = cms.untracked.uint32(3250),
+                            #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/742/00000/8A74859E-757E-E711-A964-02163E019CB5.root'),
+                            #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/806/00000/5EB6B34D-E683-E711-8CBB-02163E0118FB.root'),
+    #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v2/000/300/238/00000/D4B96E4E-3F78-E711-9C3C-02163E01A342.root'),
+    #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v2/000/300/122/00000/1C2E493D-6577-E711-BD30-02163E011B72.root'),
+    #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/742/00000/2E2C8597-B77E-E711-A230-02163E013932.root'),
+#'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/777/00000/0ECEF1BB-CC7E-E711-BB04-02163E01448A.root'),
+    #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/817/00000/0EDBC01D-7683-E711-A3B6-02163E019CD5.root'),
+    '/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/777/00000/BCBC9DA1-FD7E-E711-A6BF-02163E0143DC.root'),
+                            skipEvents = cms.untracked.uint32(3250),
                             #/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v2/000/300/398/00000/EC8C061B-BE7C-E711-A426-02163E0142C5.root')
                             #fileNames = cms.untracked.vstring('/store/data/Run2017D/SingleElectron/MINIAOD/PromptReco-v1/000/302/030/00000/B21ACAC0-EE8E-E711-A71E-02163E0136F1.root')
 )
@@ -585,7 +592,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   ),
   
   PFCand = cms.untracked.PSet(
-    isActive       = cms.untracked.bool(False),
+    isActive       = cms.untracked.bool(True),
     edmName        = cms.untracked.string('packedPFCandidates'),
     edmPVName      = cms.untracked.string('offlineSlimmedPrimaryVertices'),
     doAddDepthTime = cms.untracked.bool(False)
@@ -612,14 +619,13 @@ process.baconSequence = cms.Sequence(
                                      #process.genjetsequence           *
                                      #process.AK4genjetsequenceCHS     *
                                      process.AK4jetsequencePuppiData  *
-
                                      process.AK8jetsequencePuppiData  *
-
                                      process.CA15jetsequencePuppiData *
                                      process.btagging                 *
                                      process.fullPatMetSequenceV2     *
                                      process.fullPatMetSequencePuppi  *
-                                     process.ntupler)
+                                     process.ntupler
+                                     )
 
 #--------------------------------------------------------------------------------
 # apply trigger filter, if necessary

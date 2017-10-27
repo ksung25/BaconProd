@@ -37,13 +37,17 @@ namespace baconhep
       float timeDeltaR (const reco::PFCandidate *iPF,const reco::PFRecHitCollection &iPFCol,double iDR=0.08);
       float depth(const reco::PFCandidate *iPF);
       float time (const reco::PFCandidate *iPF);
-      
+
+      float catchInfsAndBound(const float& in,const float& replace_value, const float& lowerbound, const float& upperbound);
+      const float& catchInfs (const float& in,const float& replace_value);      
+
       // EDM object collection names
       std::string fPFName;
       std::string fPVName;
       bool        fAddDepthTime;
       
       edm::EDGetTokenT<reco::PFCandidateCollection>   fTokPFName;
+      edm::EDGetTokenT<pat::PackedCandidateCollection> fTokPackCandName;
       edm::EDGetTokenT<reco::VertexCollection>        fTokPVName;
       edm::EDGetTokenT<reco::PFRecHitCollection>      fTokPFRecHitECAL;
       edm::EDGetTokenT<reco::PFRecHitCollection>      fTokPFRecHitHCAL;

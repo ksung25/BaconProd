@@ -63,6 +63,7 @@ namespace baconhep
 		const edm::EventSetup            &iSetup,                       // event setup info
 	        const reco::Vertex		 &pv,	                        // event primary vertex
 		int iNPV,                                                       // Number of PV
+		const TClonesArray               *iPFArr,                       // PF Can Arr
 		const std::vector<TriggerRecord> &triggerRecords,               // list of trigger names and objects
 		const trigger::TriggerEvent      *triggerEvent,                 // event trigger objects
 		const pat::TriggerObjectStandAloneCollection *patTriggerObjects);  // hack for AOD type filler with miniAOD
@@ -75,6 +76,7 @@ namespace baconhep
                 const edm::EventSetup                        &iSetup,           // event setup info
                 const reco::Vertex                           &pv,               // event primary vertex
 		int iNPV,                                                       // Number of PV
+		const TClonesArray                           *iPFArr,           // PF Arr
                 const std::vector<TriggerRecord>             &triggerRecords,   // list of trigger names and objects
                 const pat::TriggerObjectStandAloneCollection &triggerObjects);  // event trigger objects
      void  initPUJetId();
@@ -139,6 +141,7 @@ namespace baconhep
       std::string fShowerDecoConf;
       double      fConeSize;
       bool        fComputeFullJetInfo;
+      bool        fAddPFCand;
       bool        fComputeSVInfo;
       
       // Jet ID MVA
