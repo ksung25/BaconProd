@@ -46,7 +46,7 @@ void FillerPF::fill(TClonesArray *array,TClonesArray *iVtxCol,
   assert(array);
   // Get PF collection
   edm::Handle<reco::PFCandidateCollection> hPFProduct;
-  iEvent.getByToken(fTokPackCandName,hPFProduct);
+  iEvent.getByToken(fTokPFName,hPFProduct);
   assert(hPFProduct.isValid());
   const reco::PFCandidateCollection *PFCol = hPFProduct.product();
 
@@ -170,13 +170,12 @@ void FillerPF::fill(TClonesArray *array,TClonesArray *iVtxCol,
   } 
 }
 void FillerPF::fillMiniAOD(TClonesArray *array,TClonesArray *iVtxCol,
-			   const edm::Event &iEvent) 
-		   
+			   const edm::Event &iEvent) 		   
 {
   assert(array);
   // Get PF collection
   edm::Handle<pat::PackedCandidateCollection> hPFProduct;
-  iEvent.getByToken(fTokPFName,hPFProduct);
+  iEvent.getByToken(fTokPackCandName,hPFProduct);
   assert(hPFProduct.isValid());
   const pat::PackedCandidateCollection *PFCol = hPFProduct.product();
 
@@ -200,26 +199,29 @@ void FillerPF::fillMiniAOD(TClonesArray *array,TClonesArray *iVtxCol,
     pPF->e       = itPF->energy();
     pPF->q       = itPF->charge();
     pPF->pfType  = itPF->pdgId();
-    pPF->vtxChi2 = itPF->vertexChi2();
-    pPF->dz      = itPF->dz();
-    pPF->d0      = itPF->dxy();
-    pPF->d0Err   = itPF->dxyError();
-    pPF->pup     = itPF->puppiWeight();
-    if(itPF->charge() == 0) continue;
-
-    const reco::Track & pseudoTrack =  itPF->pseudoTrack();
-    pPF->trkChi2 = pseudoTrack.normalizedChi2();
+    if (itPF->hasTrackDetails()) {
+      pPF->vtxChi2 = itPF->vertexChi2();
+      pPF->pup     = itPF->puppiWeight();
+      if(itPF->charge() == 0) continue;
       
-    reco::Track::CovarianceMatrix myCov = pseudoTrack.covariance ();
-    pPF->dptdpt    = catchInfsAndBound(myCov[0][0],0,-1,1);
-    pPF->detadeta  = catchInfsAndBound(myCov[1][1],0,-1,0.01);
-    pPF->dphidphi  = catchInfsAndBound(myCov[2][2],0,-1,0.1);
-    pPF->dxydxy    = catchInfsAndBound(myCov[3][3],7.,-1,7); 
-    pPF->dzdz      = catchInfsAndBound(myCov[4][4],6.5,-1,6.5); 
-    pPF->dxydz     = catchInfsAndBound(myCov[3][4],6.,-6,6); 
-    pPF->dphidxy   = catchInfs(myCov[2][3],-0.03); 
-    pPF->dlambdadz = catchInfs(myCov[1][4],-0.03);
-  } 
+      const reco::Track & pseudoTrack =  itPF->pseudoTrack();
+      pPF->trkChi2 = pseudoTrack.normalizedChi2();
+      pPF->dz      = itPF->dz();
+      pPF->d0      = itPF->dxy();
+      pPF->d0Err   = itPF->dxyError();
+      reco::Track::CovarianceMatrix myCov = pseudoTrack.covariance ();
+      pPF->dptdpt    = catchInfsAndBound(myCov[0][0],0,-1,1);
+      pPF->detadeta  = catchInfsAndBound(myCov[1][1],0,-1,0.01);
+      pPF->dphidphi  = catchInfsAndBound(myCov[2][2],0,-1,0.1);
+      pPF->dxydxy    = catchInfsAndBound(myCov[3][3],7.,-1,7); 
+      pPF->dzdz      = catchInfsAndBound(myCov[4][4],6.5,-1,6.5); 
+      pPF->dxydz     = catchInfsAndBound(myCov[3][4],6.,-6,6); 
+      pPF->dphidxy   = catchInfs(myCov[2][3],-0.03); 
+      pPF->dlambdadz = catchInfs(myCov[1][4],-0.03);  
+    }
+    else continue;
+   
+  }
 }
 float FillerPF::depthDeltaR(const reco::PFCandidate *iPF,const reco::PFRecHitCollection &iPFCol,double iDR) { 
    //Get Calo Depth of PF Clusters in a cylinder using deltar R
