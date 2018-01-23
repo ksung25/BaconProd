@@ -11,9 +11,9 @@ do_alpaca     = False
 cmssw_base = os.environ['CMSSW_BASE']
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if is_data_flag:
-  process.GlobalTag.globaltag = cms.string('90X_upgrade2017_realistic_v20')
+  process.GlobalTag.globaltag = cms.string('94X_dataRun2_ReReco_EOY17_v2')
 else:
-  process.GlobalTag.globaltag = cms.string('90X_upgrade2017_realistic_v20')
+  process.GlobalTag.globaltag = cms.string('94X_mc2017_realistic_v10')
 
 #JEC
 JECTag='Summer16_23Sep2016V4_MC'
@@ -81,6 +81,9 @@ process.btagging = cms.Sequence()
 addBTagging(process,'AK4PFJetsPuppi' ,0.4,'AK4' ,'Puppi')
 addBTagging(process,'AK8PFJetsPuppi' ,0.8,'AK8' ,'Puppi')
 addBTagging(process,'CA15PFJetsPuppi',1.5,'CA15','Puppi')
+process.AK4PFImpactParameterTagInfosPuppi.computeGhostTrack = cms.bool(False)
+process.AK8PFImpactParameterTagInfosPuppi.computeGhostTrack = cms.bool(False)
+process.CA15PFImpactParameterTagInfosPuppi.computeGhostTrack = cms.bool(False)
 
 setMiniAODGenJets(process)
 setMiniAODAK4CHS(process)
@@ -154,6 +157,7 @@ runMetCorAndUncFromMiniAOD(process,
 # PUPPI Woof Woof
 from PhysicsTools.PatAlgos.slimming.puppiForMET_cff import makePuppiesFromMiniAOD
 makePuppiesFromMiniAOD (process, True )
+#process.puppi.useExistingWeights = True
 runMetCorAndUncFromMiniAOD(process,
                            isData=is_data_flag,
                            manualJetConfig=True,
@@ -186,13 +190,10 @@ if do_alpaca:
 #--------------------------------------------------------------------------------
 # input settings
 #================================================================================
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring(#'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/301/283/00000/E0D8674F-5E84-E711-9158-02163E019B4A.root')
-                            '/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/742/00000/8A74859E-757E-E711-A964-02163E019CB5.root'),
+                            fileNames = cms.untracked.vstring('/store/data/Run2017D/JetHT/MINIAOD/17Nov2017-v1/40000/4A6E1527-00CC-E711-879D-0025904CF710.root'),
                             skipEvents = cms.untracked.uint32(3250),
-                            #/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v2/000/300/398/00000/EC8C061B-BE7C-E711-A426-02163E0142C5.root')
-                            #fileNames = cms.untracked.vstring('/store/data/Run2017D/SingleElectron/MINIAOD/PromptReco-v1/000/302/030/00000/B21ACAC0-EE8E-E711-A71E-02163E0136F1.root')
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -229,7 +230,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmMETName           = cms.untracked.string('slimmedMETs'),
     edmPFMETName         = cms.untracked.InputTag('slimmedMETsV2','','MakingBacon'),
     edmMVAMETName        = cms.untracked.string(''),
-    edmPuppETName        = cms.untracked.InputTag('slimmedMETsPuppi','','MakingBacon'),
+    edmPuppETName        = cms.untracked.string('slimmedMETsPuppi'),
     edmAlpacaMETName     = cms.untracked.string(alpacaMet),
     edmPupAlpacaMETName  = cms.untracked.string(alpacaPuppiMet),
     edmRhoForIsoName     = cms.untracked.string('fixedGridRhoFastjetAll'),
@@ -583,7 +584,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   ),
   
   PFCand = cms.untracked.PSet(
-    isActive       = cms.untracked.bool(False),
+    isActive       = cms.untracked.bool(True),
     edmName        = cms.untracked.string('packedPFCandidates'),
     edmPVName      = cms.untracked.string('offlineSlimmedPrimaryVertices'),
     doAddDepthTime = cms.untracked.bool(False)
@@ -606,18 +607,17 @@ process.baconSequence = cms.Sequence(
                                      #process.photonMVAValueMapProducer*
                                      process.egmGsfElectronIDSequence *
                                      #process.egmPhotonIDSequence      *
-                                     process.puppiMETSequence         *
+                                     process.puppiMETSequence          *
                                      #process.genjetsequence           *
                                      #process.AK4genjetsequenceCHS     *
                                      process.AK4jetsequencePuppiData  *
-
                                      process.AK8jetsequencePuppiData  *
-
                                      process.CA15jetsequencePuppiData *
                                      process.btagging                 *
                                      process.fullPatMetSequenceV2     *
-                                     process.fullPatMetSequencePuppi  *
-                                     process.ntupler)
+                                     process.fullPatMetSequencePuppi * 
+                                     process.ntupler
+                                     )
 
 #--------------------------------------------------------------------------------
 # apply trigger filter, if necessary

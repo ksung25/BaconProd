@@ -22,8 +22,9 @@ FillerPF::FillerPF(const edm::ParameterSet &iConfig,edm::ConsumesCollector && iC
   fPVName      (iConfig.getUntrackedParameter<std::string>("edmPVName","offlinePrimaryVertices")),
   fAddDepthTime(iConfig.getUntrackedParameter<bool>("doAddDepthTime",false))
 {
-  fTokPFName   = iC.consumes<reco::PFCandidateCollection>(fPFName);
-  fTokPVName   = iC.consumes<reco::VertexCollection>     (fPVName);
+  fTokPFName       = iC.consumes<reco::PFCandidateCollection>(fPFName);
+  fTokPackCandName = iC.consumes<pat::PackedCandidateCollection>(fPFName);
+  fTokPVName       = iC.consumes<reco::VertexCollection>     (fPVName);
   if(fAddDepthTime) { 
     std::string lTokPFRecHitECAL = "particleFlowRecHitECAL";
     std::string lTokPFRecHitHCAL = "particleFlowRecHitHCAL";
@@ -100,6 +101,7 @@ void FillerPF::fill(TClonesArray *array,TClonesArray *iVtxCol,
   TClonesArray &rArray = *array;
   int pId = 0; 
   for(reco::PFCandidateCollection::const_iterator itPF = PFCol->begin(); itPF!=PFCol->end(); itPF++) {
+    if(itPF->pt() < 0.1) continue;
     pId++;
     // construct object and place in array
     assert(rArray.GetEntries() < rArray.GetSize());
@@ -168,13 +170,12 @@ void FillerPF::fill(TClonesArray *array,TClonesArray *iVtxCol,
   } 
 }
 void FillerPF::fillMiniAOD(TClonesArray *array,TClonesArray *iVtxCol,
-			   const edm::Event &iEvent) 
-		   
+			   const edm::Event &iEvent) 		   
 {
   assert(array);
   // Get PF collection
   edm::Handle<pat::PackedCandidateCollection> hPFProduct;
-  iEvent.getByToken(fTokPFName,hPFProduct);
+  iEvent.getByToken(fTokPackCandName,hPFProduct);
   assert(hPFProduct.isValid());
   const pat::PackedCandidateCollection *PFCol = hPFProduct.product();
 
@@ -183,7 +184,7 @@ void FillerPF::fillMiniAOD(TClonesArray *array,TClonesArray *iVtxCol,
   for(pat::PackedCandidateCollection::const_iterator itPF = PFCol->begin(); itPF!=PFCol->end(); itPF++) {
     pId++;
     // construct object and place in array
-    assert(rArray.GetEntries() < rArray.GetSize());
+    //assert(rArray.GetEntries() < rArray.GetSize());
     const int index = rArray.GetEntries();
     new(rArray[index]) baconhep::TPFPart();
     baconhep::TPFPart *pPF = (baconhep::TPFPart*)rArray[index];
@@ -198,10 +199,29 @@ void FillerPF::fillMiniAOD(TClonesArray *array,TClonesArray *iVtxCol,
     pPF->e       = itPF->energy();
     pPF->q       = itPF->charge();
     pPF->pfType  = itPF->pdgId();
-    pPF->vtxChi2 = itPF->vertexChi2();
-    pPF->dz      = itPF->dz();
-    pPF->d0      = itPF->dxy();
-  } 
+    if (itPF->hasTrackDetails()) {
+      pPF->vtxChi2 = itPF->vertexChi2();
+      pPF->pup     = itPF->puppiWeight();
+      if(itPF->charge() == 0) continue;
+      
+      const reco::Track & pseudoTrack =  itPF->pseudoTrack();
+      pPF->trkChi2 = pseudoTrack.normalizedChi2();
+      pPF->dz      = itPF->dz();
+      pPF->d0      = itPF->dxy();
+      pPF->d0Err   = itPF->dxyError();
+      reco::Track::CovarianceMatrix myCov = pseudoTrack.covariance ();
+      pPF->dptdpt    = catchInfsAndBound(myCov[0][0],0,-1,1);
+      pPF->detadeta  = catchInfsAndBound(myCov[1][1],0,-1,0.01);
+      pPF->dphidphi  = catchInfsAndBound(myCov[2][2],0,-1,0.1);
+      pPF->dxydxy    = catchInfsAndBound(myCov[3][3],7.,-1,7); 
+      pPF->dzdz      = catchInfsAndBound(myCov[4][4],6.5,-1,6.5); 
+      pPF->dxydz     = catchInfsAndBound(myCov[3][4],6.,-6,6); 
+      pPF->dphidxy   = catchInfs(myCov[2][3],-0.03); 
+      pPF->dlambdadz = catchInfs(myCov[1][4],-0.03);  
+    }
+    else continue;
+   
+  }
 }
 float FillerPF::depthDeltaR(const reco::PFCandidate *iPF,const reco::PFRecHitCollection &iPFCol,double iDR) { 
    //Get Calo Depth of PF Clusters in a cylinder using deltar R
@@ -290,4 +310,20 @@ float FillerPF::time(const reco::PFCandidate *iPF) {
     }
   }
   return lMaxTime;
+}
+const float& FillerPF::catchInfs(const float& in,const float& replace_value){
+  if(in==in){
+    if(std::isinf(in))
+      return replace_value;
+    else if(in < -1e32 || in > 1e32)
+      return replace_value;
+    return in;
+  }
+  return replace_value;
+}
+float FillerPF::catchInfsAndBound(const float& in,const float& replace_value, const float& lowerbound, const float& upperbound){
+  float withoutinfs=catchInfs(in,replace_value);
+  if(withoutinfs<lowerbound) return lowerbound;
+  if(withoutinfs>upperbound) return upperbound;
+  return withoutinfs;
 }

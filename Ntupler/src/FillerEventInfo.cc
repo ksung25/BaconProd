@@ -20,7 +20,7 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig, const bool us
   fPFMETName     (iConfig.getUntrackedParameter<edm::InputTag>("edmPFMETName")),
   fPFMETCName    (iConfig.getUntrackedParameter<std::string>("edmPFMETCorrName","pfType1CorrectedMet")),
   fMVAMETName    (iConfig.getUntrackedParameter<std::string>("edmMVAMETName","pfMEtMVA")),
-  fPUPPETName    (iConfig.getUntrackedParameter<edm::InputTag>("edmPuppETName")),
+  fPUPPETName    (iConfig.getUntrackedParameter<std::string>("edmPuppETName")),
   fPUPPETCName   (iConfig.getUntrackedParameter<std::string>("edmPuppETCorrName","pfType1CorrectedMetPuppi")),
   fALPACAMETName (iConfig.getUntrackedParameter<std::string>("edmAlpacaMETName"    ,"pfMetAlpacaMC")),
   fPALPACAMETName(iConfig.getUntrackedParameter<std::string>("edmPupAlpacaMETName","pfMetPuppiAlpacaMC")),

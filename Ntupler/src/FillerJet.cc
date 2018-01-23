@@ -4,6 +4,7 @@
 #include "BaconProd/Utils/interface/JetTools.hh"
 #include "BaconProd/Utils/interface/RecursiveSoftDrop.hh"
 #include "BaconAna/DataFormats/interface/TJet.hh"
+#include "BaconAna/DataFormats/interface/TPFPart.hh"
 #include "BaconAna/DataFormats/interface/TSVtx.hh"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -55,7 +56,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fJetName            (iConfig.getUntrackedParameter<std::string>("jetName","ak4PFJetsCHS")),
   fJECName            (iConfig.getUntrackedParameter<std::string>("jecName","")),
   fJECUName           (iConfig.getUntrackedParameter<std::string>("jecUncName","")),
-  fGenJetName         (iConfig.getUntrackedParameter<std::string>("genJetName","AK4GenJetsCHS")),
+  fGenJetName         (iConfig.getUntrackedParameter<std::string>("genJetName","slimmedGenJets")),
   fJetFlavorName      (iConfig.getUntrackedParameter<std::string>("jetFlavorName","AK4byValAlgoCHS")),
   fPrunedJetName      (iConfig.getUntrackedParameter<std::string>("prunedJetName","AK4caPFJetsPrunedCHS")),
   fTrimmedJetName     (iConfig.getUntrackedParameter<std::string>("trimmedJetName","AK4caPFJetsTrimmedCHS")),
@@ -81,6 +82,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fShowerDecoConf     (iConfig.getUntrackedParameter<std::string>("showerDecoConf","")),
   fConeSize           (iConfig.getUntrackedParameter<double>("coneSize",0.4)),
   fComputeFullJetInfo (iConfig.getUntrackedParameter<bool>("doComputeFullJetInfo",false)),  
+  fAddPFCand          (iConfig.getUntrackedParameter<bool>("addPFCand",true)),
   fComputeSVInfo      (iConfig.getUntrackedParameter<bool>("doComputeSVInfo",false)),  
   fShowerDeco         (0),
   fJetCorr            (0),
@@ -176,8 +178,8 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fTokCMSTTJetProduct    = iC.consumes<reco::BasicJetCollection>(lTopTag);
     fTokCMSTTSubJetProduct = iC.consumes<reco::PFJetCollection>   (lTopTagSubJet);
     fECF = new EnergyCorrelations();
-    fRecursiveSoftDrop1 = new fastjet::RecursiveSoftDrop( 0. ,0.1,fConeSize,-1); // beta = 0, n = Inf
-    fRecursiveSoftDrop2 = new fastjet::RecursiveSoftDrop( 1. ,0.1,fConeSize,-1); // beta = 1, n = Inf
+    fRecursiveSoftDrop1 = new fastjet::RecursiveSoftDrop( 1. ,0.05,fConeSize,-1); // beta = 1, zcut=0.05, n = Inf
+    fRecursiveSoftDrop2 = new fastjet::RecursiveSoftDrop( 2. ,0.1,fConeSize,-1); // beta = 2, zcut=0.1, n = Inf
   }
 }
 
@@ -186,8 +188,11 @@ FillerJet::~FillerJet()
 {
   delete fJetCorr;
   delete fJetUnc;
-  delete fRecursiveSoftDrop1;
-  delete fRecursiveSoftDrop2;
+  //delete fRecursiveSoftDrop1;
+  //delete fRecursiveSoftDrop2;
+  //delete fShowerDeco;
+  //delete fECF;
+  //delete fRand;
 }
 void FillerJet::initPUJetId() { 
   if(!fUseAOD) return;
@@ -245,6 +250,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
                      const edm::Event &iEvent, const edm::EventSetup &iSetup, 
 		     const reco::Vertex	&pv,
 		     int iNPV,
+		     const TClonesArray *iPFArr,
 		     const std::vector<TriggerRecord> &triggerRecords,
 		     const trigger::TriggerEvent *triggerEvent,
                      const pat::TriggerObjectStandAloneCollection *patTriggerObjects)
@@ -276,6 +282,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
   fJetUnc  = new JetCorrectionUncertainty(jetPars);
 
   // Get gen jet collection
+  //std::cout << fGenJetName << std::endl;
   edm::Handle<reco::GenJetCollection> hGenJetProduct;
   const reco::GenJetCollection *genJetCol = 0;
   if(fUseGen) { 
@@ -497,6 +504,21 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     if(triggerEvent      != 0) {pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, *triggerEvent); } 
     else                       {pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, *patTriggerObjects); }
 
+    pJet->pfCands.clear();
+    if(fAddPFCand) { 
+      std::vector<reco::CandidatePtr> pfConstituents = itJet->getJetConstituents();                                                                                                   
+      for(unsigned int i0 = 0; i0 < pfConstituents.size(); i0++) { 
+	reco::CandidatePtr pfcand = pfConstituents[i0]; 
+	for(       int i1 = 0; i1 < iPFArr->GetEntriesFast();  i1++) { 
+	  baconhep::TPFPart *pPF = (baconhep::TPFPart*)(*iPFArr)[i1];
+	  if(pfcand->pdgId() != pPF->pfType)  continue;
+	  if(fabs(pfcand->pt() - pPF->pt)  > 0.1)  continue;
+	  if(fabs(pfcand->eta()- pPF->eta) > 0.01) continue;
+	  if(fabs(reco::deltaPhi(pfcand->phi(),pPF->phi)) > 0.01) continue;
+	  pJet->pfCands.push_back(i1);
+	}
+      }
+    }
     ////Add Extras
     baconhep::TAddJet *pAddJet = 0; 
     if(fComputeFullJetInfo) {
@@ -516,6 +538,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
                      const edm::Event &iEvent, const edm::EventSetup &iSetup,
                      const reco::Vertex &pv,
 		     int iNPV,
+		     const TClonesArray *iPFArr,
                      const std::vector<TriggerRecord> &triggerRecords,
                      const pat::TriggerObjectStandAloneCollection &triggerObjects)
 {
@@ -721,6 +744,21 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->nParticles = itJet->numberOfDaughters();
     
     pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, triggerObjects);
+    pJet->pfCands.clear();
+    if(fAddPFCand) { 
+      std::vector<reco::CandidatePtr> pfConstituents = itJet->getJetConstituents();
+      for(unsigned int i0 = 0; i0 < pfConstituents.size(); i0++) { 
+	reco::CandidatePtr pfcand = pfConstituents[i0];    
+	for(int i1 = 0; i1 < iPFArr->GetEntries(); i1++) { 
+	  baconhep::TPFPart *pPF = (baconhep::TPFPart*)(*iPFArr)[i1];
+	  if(fabs(pfcand->pt() - pPF->pt)  > 0.1) continue;
+	  if(fabs(pfcand->eta()- pPF->eta) > 0.01) continue;
+	  if(reco::deltaPhi(pfcand->phi(),pPF->phi) > 0.01) continue;
+	  if(pfcand->pdgId() != pPF->pfType) continue;
+	  pJet->pfCands.push_back(i1);
+	}
+      }
+    }
     ////Add Extras
     baconhep::TAddJet *pAddJet = 0;
     if(fComputeFullJetInfo) {
@@ -846,7 +884,22 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   pAddJet->e3_v2_b2   = float(fECF->manager->ecfns["3_2"]);
   pAddJet->e4_v1_b2   = float(fECF->manager->ecfns["4_1"]);
   pAddJet->e4_v2_b2   = float(fECF->manager->ecfns["4_2"]);
-
+  beta=4;
+  fECF->calcECFN(beta,lFiltered);
+  pAddJet->e2_sdb4      = float(fECF->manager->ecfns["2_2"]);
+  pAddJet->e3_sdb4      = float(fECF->manager->ecfns["3_3"]);
+  pAddJet->e3_v1_sdb4   = float(fECF->manager->ecfns["3_1"]);
+  pAddJet->e3_v2_sdb4   = float(fECF->manager->ecfns["3_2"]);
+  pAddJet->e4_v1_sdb4   = float(fECF->manager->ecfns["4_1"]);
+  pAddJet->e4_v2_sdb4   = float(fECF->manager->ecfns["4_2"]);
+  beta=0.5;
+  fECF->calcECFN(beta,lFiltered);
+  pAddJet->e2_sdb05      = float(fECF->manager->ecfns["2_2"]);
+  pAddJet->e3_sdb05      = float(fECF->manager->ecfns["3_3"]);
+  pAddJet->e3_v1_sdb05   = float(fECF->manager->ecfns["3_1"]);
+  pAddJet->e3_v2_sdb05   = float(fECF->manager->ecfns["3_2"]);
+  pAddJet->e4_v1_sdb05   = float(fECF->manager->ecfns["4_1"]);
+  pAddJet->e4_v2_sdb05   = float(fECF->manager->ecfns["4_2"]);
   double pCorr=1;
   const reco::BasicJet* matchJet = 0;
 
@@ -1071,7 +1124,8 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   else std::cout<< "   not found matched double-b tag info  "<<std::endl;	
   //Secondary Vertices
   
-  //sec vtx                                                                                                                                                                                                                                                           
+  //sec vtx                    
+  pAddJet->svtx.clear();
   if(fComputeSVInfo) { 
     edm::Handle<reco::VertexCompositePtrCandidateCollection> secVertices;
     iEvent.getByToken(fTokSVName, secVertices);
@@ -1081,6 +1135,12 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
     TClonesArray &rSVArray = *iSVArr;
     for (const reco::VertexCompositePtrCandidate &sv : svtx) {
       if (reco::deltaR(sv,itJet)>0.7) { continue; }
+      bool pFind = false;
+      for(int i0 = 0; i0 < iSVArr->GetEntries(); i0++) { 
+	baconhep::TSVtx* pLSV = (baconhep::TSVtx*) iSVArr->At(i0);
+	if(fabs(sv.pt()-pLSV->pt) < 0.01 && fabs(pLSV->eta-sv.eta()) < 0.01 && fabs(pLSV->phi-sv.phi()) < 0.01) {pFind=true; break;}
+      }
+      if(pFind) continue;
       assert(rSVArray.GetEntries() < rSVArray.GetSize());
       const int svIndex = rSVArray.GetEntries();
       new(rSVArray[svIndex]) baconhep::TSVtx();
@@ -1395,6 +1455,12 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr, const r
     TClonesArray &rSVArray = *iSVArr;
     for (const reco::VertexCompositePtrCandidate &sv : svtx) {
       if (reco::deltaR(sv,itJet)>0.7) { continue; }
+      bool pFind = false;
+      for(int i0 = 0; i0 < iSVArr->GetEntries(); i0++) { 
+	baconhep::TSVtx* pLSV = (baconhep::TSVtx*) iSVArr->At(i0);
+	if(fabs(sv.pt()-pLSV->pt) < 0.01 && fabs(pLSV->eta-sv.eta()) < 0.01 && fabs(pLSV->phi-sv.phi()) < 0.01) {pFind=true; break;}
+      }
+      if(pFind) continue;
       assert(rSVArray.GetEntries() < rSVArray.GetSize());
       const int svIndex = rSVArray.GetEntries();
       new(rSVArray[svIndex]) baconhep::TSVtx();
