@@ -193,7 +193,6 @@ if do_alpaca:
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring('/store/data/Run2017D/JetHT/MINIAOD/17Nov2017-v1/40000/4A6E1527-00CC-E711-879D-0025904CF710.root'),
-                            skipEvents = cms.untracked.uint32(3250),
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -615,7 +614,7 @@ process.baconSequence = cms.Sequence(
                                      process.CA15jetsequencePuppiData *
                                      process.btagging                 *
                                      process.fullPatMetSequenceV2     *
-                                     process.fullPatMetSequencePuppi * 
+                                     process.fullPatMetSequencePuppi  *
                                      process.ntupler
                                      )
 
