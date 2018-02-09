@@ -45,3 +45,9 @@ lxplus: /afs/cern.ch/work/p/pharris/public/bacon/prod/CMSSW_8_0_20/src/BaconProd
 lpc: /uscms_data/d3/cmantill/bacon/CMSSW_9_4_0_patch1/src/BaconProd/Ntupler/crab
 ```
 
+For running a list of samples e.g. mc.txt:
+```
+./runList.sh mc.txt
+```
+
+Modify `run.sh` and `crab_template*.py` according to your preferences.
