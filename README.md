@@ -6,6 +6,12 @@ Package for producing bacon files
  * Depends on BaconAna package
  * Place package in `$CMSSW_BASE/src` area
 
+All objects are declared in BaconAna and filled in BaconProd/Ntupler, see e.g.:
+
+[TJet for Jets](https://github.com/ksung25/BaconAna/blob/master/DataFormats/interface/TJet.hh)
+
+[FillerJet for Jets](https://github.com/ksung25/BaconProd/blob/master/Ntupler/src/FillerJet.cc)
+
 Setup
 ----------
 
@@ -21,8 +27,10 @@ $ git clone https://github.com/ksung/BaconAna.git
 $ scram b -j 10
 ```
 
-Production is done through the following config scripts:
+Production
 ----------
+
+Is done through the following config scripts:
 
 ```
 $ makingBacon_MC_25ns_MINIAOD.py
