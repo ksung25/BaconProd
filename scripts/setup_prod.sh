@@ -7,7 +7,7 @@ if test -z $CMSSW_VERSION; then
 fi
 
 CURRDIR=$PWD
-PATCHDIR=/afs/cern.ch/work/k/ksung/public/Development/Run2Packages
+PATCHDIR=/afs/cern.ch/work/c/cmantill/public/94x/
 cd $CMSSW_BASE/src
 
 cp -r ${PATCHDIR}/* ./
