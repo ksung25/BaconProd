@@ -255,18 +255,18 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       */
 
       //New MET Filters
-      edm::Handle<bool> hFilterBadChCand;
-      iEvent.getByToken(fTokBadChCand, hFilterBadChCand);
-      assert(hFilterBadChCand.isValid());
-      if(!(*hFilterBadChCand)) { 
-	evtInfo->metFilterFailBits |= kBadChCandFilter;
-      }
-      edm::Handle<bool> hFilterBadPFMuon;
-      iEvent.getByToken(fTokBadPFMuon, hFilterBadPFMuon);
-      assert(hFilterBadPFMuon.isValid());
-      if(!(*hFilterBadPFMuon)) { 
-	evtInfo->metFilterFailBits |= kBadPFMuonFilter;
-      }
+      // edm::Handle<bool> hFilterBadChCand;
+      // iEvent.getByToken(fTokBadChCand, hFilterBadChCand);
+      // assert(hFilterBadChCand.isValid());
+      // if(!(*hFilterBadChCand)) { 
+      // 	evtInfo->metFilterFailBits |= kBadChCandFilter;
+      // }
+      // edm::Handle<bool> hFilterBadPFMuon;
+      // iEvent.getByToken(fTokBadPFMuon, hFilterBadPFMuon);
+      // assert(hFilterBadPFMuon.isValid());
+      // if(!(*hFilterBadPFMuon)) { 
+      // 	evtInfo->metFilterFailBits |= kBadPFMuonFilter;
+      // }
 
       //edm::InputTag metFiltersTag("TriggerResults","","PAT");
       edm::InputTag metFiltersTag("TriggerResults","","HLT");

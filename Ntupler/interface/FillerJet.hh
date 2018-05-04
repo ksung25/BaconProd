@@ -5,9 +5,9 @@
 #include "BaconProd/Utils/interface/JetPUIDMVACalculator.hh"
 #include "BaconProd/Utils/interface/BoostedBtaggingMVACalculator.hh"
 #include "BaconProd/Utils/interface/BJetRegression.hh"
-#include "BaconProd/Utils/interface/ShowerDeco.hh"
+//#include "BaconProd/Utils/interface/ShowerDeco.hh"
 #include "BaconProd/Utils/interface/EnergyCorrelations.h"
-#include "BaconProd/Utils/interface/RecursiveSoftDrop.hh"
+//#include "BaconProd/Utils/interface/RecursiveSoftDrop.hh"
 #include "BaconAna/DataFormats/interface/TAddJet.hh"
 #include "DataFormats/BTauReco/interface/BoostedDoubleSVTagInfo.h"
 //#include "DataFormats/BTauReco/interface/CandSoftLeptonTagInfo.h"    
@@ -26,6 +26,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "SimDataFormats/JetMatching/interface/JetFlavourInfoMatching.h"
+#include "fastjet/contrib/SoftDrop.hh"
 #include "TRandom2.h"
 #include <vector>
 #include <string>
@@ -92,6 +93,8 @@ namespace baconhep
       void  addJet(baconhep::TAddJet *pAddJet,TClonesArray *iSVArry,  const reco::Vertex &pv,const edm::Event &iEvent, const reco::PFJet &itJet, const reco::JetBaseRef &jetBaseRef);
       void  addJet(baconhep::TAddJet *pAddJet,TClonesArray *iSVArray, const reco::Vertex &pv,const edm::Event &iEvent, const pat::Jet &itJet);
 
+      void softdrop(const reco::GenJet *iJet,float &iMsd,float &ie2,float &ie3);
+
       const reco::PFJet*    matchPF(const reco::PFJet *jet, const reco::PFJetCollection *jets);
       const reco::BasicJet* match(const reco::PFJet *jet, const reco::BasicJetCollection *jets);
       const reco::BasicJet* match(const pat::Jet *iJet,   const reco::BasicJetCollection *jets);
@@ -138,7 +141,7 @@ namespace baconhep
       std::string fHighPtWeightFile;
       std::string fWeightFile;
       std::string fBRegFile;
-      std::string fShowerDecoConf;
+      //std::string fShowerDecoConf;
       double      fConeSize;
       bool        fComputeFullJetInfo;
       bool        fAddPFCand;
@@ -148,7 +151,7 @@ namespace baconhep
       JetPUIDMVACalculator fJetPUIDMVACalc;
       BoostedBtaggingMVACalculator fJetBoostedBtaggingMVACalc;
       BJetRegression               fBReg;
-      ShowerDeco*          fShowerDeco;
+      //ShowerDeco*          fShowerDeco;
 
       // Random number generator for Q-jet volatility
       TRandom2* fRand;
@@ -159,8 +162,9 @@ namespace baconhep
 
       bool fUseAOD;
       EnergyCorrelations* fECF;
-      fastjet::RecursiveSoftDrop *fRecursiveSoftDrop1;
-      fastjet::RecursiveSoftDrop *fRecursiveSoftDrop2;
+      EnergyCorrelations* fECFn;
+      //fastjet::RecursiveSoftDrop *fRecursiveSoftDrop1;
+      //fastjet::RecursiveSoftDrop *fRecursiveSoftDrop2;
 
     edm::EDGetTokenT<reco::PFJetCollection>  fTokJetName;
     edm::EDGetTokenT<reco::JetCorrector>     fTokJECName;
