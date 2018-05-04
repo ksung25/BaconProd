@@ -1,4 +1,5 @@
 #include "BaconProd/Ntupler/interface/FillerGenJets.hh"
+#include "BaconProd/Utils/interface/JetTools.hh"
 #include "BaconAna/DataFormats/interface/TGenEventInfo.hh"
 #include "BaconAna/DataFormats/interface/TGenParticle.hh"
 #include "BaconAna/DataFormats/interface/TGenJet.hh"
@@ -6,6 +7,8 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/Common/interface/RefToPtr.h"
 #include "fastjet/contrib/Njettiness.hh"
+#include "fastjet/contrib/SoftDrop.hh"
+
 #include <TClonesArray.h>
 #include <TMath.h>
 #include <TLorentzVector.h>
@@ -28,6 +31,7 @@ FillerGenJets::FillerGenJets(const edm::ParameterSet &iConfig,edm::ConsumesColle
   fActiveArea           = new fastjet::ActiveAreaSpec (ghostEtaMax,activeAreaRepeats,ghostArea);  
   fAreaDefinition       = new fastjet::AreaDefinition (fastjet::active_area_explicit_ghosts, *fActiveArea );
   fTrimmer1  = new fastjet::Filter( fastjet::Filter(fastjet::JetDefinition(fastjet::kt_algorithm, 0.2),  fastjet::SelectorPtFractionMin(0.05)));
+  fECF = new EnergyCorrelations();
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -133,6 +137,13 @@ void FillerGenJets::fill(TClonesArray *array,TClonesArray *fatJetArray,
       pGenJet->eta     = itGenJ->eta();
       pGenJet->phi     = itGenJ->phi();
       pGenJet->mass    = itGenJ->mass();
+
+      float pMsd = 0; float pe2sdb1 =0; float pe3_v2_sdb1 =0;
+      if(pGenJet->pt > 100) softdrop(&(*itGenJ),pMsd,pe2sdb1,pe3_v2_sdb1);                                                                       
+      pGenJet->msd       = pMsd;                                                                                                                                 
+      pGenJet->e2sdb1    = pe2sdb1;
+      pGenJet->e3_v2_sdb1= pe3_v2_sdb1;     
+
       /*
       double* lElectrons =  genCone(&(*itGenJ),genParticles,0,0.10,  -1);
       double* lMuons     =  genCone(&(*itGenJ),genParticles,0,0.10,  -2);
@@ -249,4 +260,31 @@ void FillerGenJets::trim(const reco::GenJet *iJet,float &iMTrim,float &iTau1,flo
   iTau1 = routine.getTau(1.,lClusterParticles);
   iTau2 = routine.getTau(2.,lClusterParticles);
   delete fClustering;
+}
+void FillerGenJets::softdrop(const reco::GenJet *iJet,float &iMsd,float &ie2,float &ie3) {
+  std::vector<fastjet::PseudoJet>  lClusterParticles; 
+  for (unsigned i = 0;  i < iJet->numberOfDaughters (); i++) {
+    const reco::Candidate * daughter = iJet->daughter( i );
+    fastjet::PseudoJet   pPart(daughter->px(),daughter->py(),daughter->pz(),daughter->energy());                                                                       
+    lClusterParticles.emplace_back(pPart);    
+  }
+  fastjet::JetDefinition lCJet_def(fastjet::cambridge_algorithm, 0.8);
+  fastjet::ClusterSequence lCClust_seq(lClusterParticles, lCJet_def);
+  std::vector<fastjet::PseudoJet>  lOutJets = lCClust_seq.inclusive_jets(0.0);
+  if(lOutJets.size() == 0) {
+    std::cout << "no jets " << std::endl;
+    return;
+  }
+  double beta=1;
+  fastjet::contrib::SoftDrop SD(0.,0.1,0.8);
+  fastjet::PseudoJet SD_jet = SD(lOutJets[0]);
+  iMsd = SD_jet.m();
+  std::cout << iMsd << std::endl;
+  std::vector<fastjet::PseudoJet> lSDClusterParticles = SD_jet.constituents();
+  std::sort(lSDClusterParticles.begin(),lSDClusterParticles.end(),JetTools::orderPseudoJet);
+  int nFilter = TMath::Min(100,(int)lSDClusterParticles.size());
+  std::vector<fastjet::PseudoJet> lSDFilter(lSDClusterParticles.begin(),lSDClusterParticles.begin()+nFilter);
+  fECF->calcECFN(beta,lSDFilter,true);
+  ie2 = float(fECF->manager->ecfns["2_2"]);
+  ie3 = float(fECF->manager->ecfns["3_2"]);
 }

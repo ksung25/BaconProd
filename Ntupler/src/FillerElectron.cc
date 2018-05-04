@@ -246,7 +246,7 @@ void FillerElectron::fill(TClonesArray *array,
     pElectron->isConv = ConversionTools::hasMatchedConversion(*itEle, hConvProduct, bs->position(), true, 2.0, 1e-6, 0);
     
     if(gsfTrack.isNonnull()) {
-      pElectron->nMissingHits = gsfTrack->hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS);
+      pElectron->nMissingHits = gsfTrack->hitPattern().numberOfAllHits(reco::HitPattern::MISSING_INNER_HITS);
     }
 
     pElectron->typeBits=0;
@@ -458,7 +458,7 @@ void FillerElectron::fill(TClonesArray *array,
     pElectron->isConv     = !itEle->passConversionVeto();
 
     if(gsfTrack.isNonnull()) {
-      pElectron->nMissingHits = gsfTrack->hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS);
+      pElectron->nMissingHits = gsfTrack->hitPattern().numberOfAllHits(reco::HitPattern::MISSING_INNER_HITS);
     }
 
     pElectron->typeBits=0;

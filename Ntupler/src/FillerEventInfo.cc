@@ -20,7 +20,7 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig, const bool us
   fPFMETName     (iConfig.getUntrackedParameter<edm::InputTag>("edmPFMETName")),
   fPFMETCName    (iConfig.getUntrackedParameter<std::string>("edmPFMETCorrName","pfType1CorrectedMet")),
   fMVAMETName    (iConfig.getUntrackedParameter<std::string>("edmMVAMETName","pfMEtMVA")),
-  fPUPPETName    (iConfig.getUntrackedParameter<edm::InputTag>("edmPuppETName")),
+  fPUPPETName    (iConfig.getUntrackedParameter<std::string>("edmPuppETName")),
   fPUPPETCName   (iConfig.getUntrackedParameter<std::string>("edmPuppETCorrName","pfType1CorrectedMetPuppi")),
   fALPACAMETName (iConfig.getUntrackedParameter<std::string>("edmAlpacaMETName"    ,"pfMetAlpacaMC")),
   fPALPACAMETName(iConfig.getUntrackedParameter<std::string>("edmPupAlpacaMETName","pfMetPuppiAlpacaMC")),
@@ -255,18 +255,18 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
       */
 
       //New MET Filters
-      edm::Handle<bool> hFilterBadChCand;
-      iEvent.getByToken(fTokBadChCand, hFilterBadChCand);
-      assert(hFilterBadChCand.isValid());
-      if(!(*hFilterBadChCand)) { 
-	evtInfo->metFilterFailBits |= kBadChCandFilter;
-      }
-      edm::Handle<bool> hFilterBadPFMuon;
-      iEvent.getByToken(fTokBadPFMuon, hFilterBadPFMuon);
-      assert(hFilterBadPFMuon.isValid());
-      if(!(*hFilterBadPFMuon)) { 
-	evtInfo->metFilterFailBits |= kBadPFMuonFilter;
-      }
+      // edm::Handle<bool> hFilterBadChCand;
+      // iEvent.getByToken(fTokBadChCand, hFilterBadChCand);
+      // assert(hFilterBadChCand.isValid());
+      // if(!(*hFilterBadChCand)) { 
+      // 	evtInfo->metFilterFailBits |= kBadChCandFilter;
+      // }
+      // edm::Handle<bool> hFilterBadPFMuon;
+      // iEvent.getByToken(fTokBadPFMuon, hFilterBadPFMuon);
+      // assert(hFilterBadPFMuon.isValid());
+      // if(!(*hFilterBadPFMuon)) { 
+      // 	evtInfo->metFilterFailBits |= kBadPFMuonFilter;
+      // }
 
       //edm::InputTag metFiltersTag("TriggerResults","","PAT");
       edm::InputTag metFiltersTag("TriggerResults","","HLT");

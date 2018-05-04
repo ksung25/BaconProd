@@ -264,11 +264,20 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   if(iConfig.existsAs<edm::ParameterSet>("PFCand",false)) {
     edm::ParameterSet cfg(iConfig.getUntrackedParameter<edm::ParameterSet>("PFCand"));
     fIsActivePF = cfg.getUntrackedParameter<bool>("isActive");
+    fPFParArr = new TClonesArray("baconhep::TPFPart",20000); assert(fPFParArr);
     if(fIsActivePF) {
-      fPFParArr = new TClonesArray("baconhep::TPFPart",20000); assert(fPFParArr);
       fFillerPF = new baconhep::FillerPF(cfg,consumesCollector());                assert(fFillerPF);
     }
   } 
+  // if(iConfig.existsAs<edm::ParameterSet>("PFCand",false)) {
+  //   edm::ParameterSet cfg(iConfig.getUntrackedParameter<edm::ParameterSet>("PFCand"));
+  //   fIsActivePF = cfg.getUntrackedParameter<bool>("isActive");
+  //   if(fIsActivePF) {
+  //     fPFParArr = new TClonesArray("baconhep::TPFPart",20000); assert(fPFParArr);
+  //     fFillerPF = new baconhep::FillerPF(cfg,consumesCollector());                assert(fFillerPF);
+  //   }
+  // }
+
   if(iConfig.existsAs<edm::ParameterSet>("AK4CHS",false)) {
     edm::ParameterSet cfg(iConfig.getUntrackedParameter<edm::ParameterSet>("AK4CHS"));
     fIsActiveJet = cfg.getUntrackedParameter<bool>("isActive");

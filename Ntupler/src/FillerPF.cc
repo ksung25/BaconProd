@@ -184,7 +184,7 @@ void FillerPF::fillMiniAOD(TClonesArray *array,TClonesArray *iVtxCol,
   for(pat::PackedCandidateCollection::const_iterator itPF = PFCol->begin(); itPF!=PFCol->end(); itPF++) {
     pId++;
     // construct object and place in array
-    assert(rArray.GetEntries() < rArray.GetSize());
+    //assert(rArray.GetEntries() < rArray.GetSize());
     const int index = rArray.GetEntries();
     new(rArray[index]) baconhep::TPFPart();
     baconhep::TPFPart *pPF = (baconhep::TPFPart*)rArray[index];

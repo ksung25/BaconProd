@@ -1,4 +1,3 @@
-<use name="ShowerDeconstruction/SDAlgorithm"/>
 <use name="RecoEcal/EgammaCoreTools"/>
 <use name="RecoEgamma/EgammaTools"/>
 <use name="DataFormats/JetReco"/>

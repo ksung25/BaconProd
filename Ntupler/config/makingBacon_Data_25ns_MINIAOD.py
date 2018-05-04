@@ -11,9 +11,9 @@ do_alpaca     = False
 cmssw_base = os.environ['CMSSW_BASE']
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if is_data_flag:
-  process.GlobalTag.globaltag = cms.string('90X_upgrade2017_realistic_v20')
+  process.GlobalTag.globaltag = cms.string('94X_dataRun2_ReReco_EOY17_v2')
 else:
-  process.GlobalTag.globaltag = cms.string('90X_upgrade2017_realistic_v20')
+  process.GlobalTag.globaltag = cms.string('94X_mc2017_realistic_v10')
 
 #JEC
 JECTag='Summer16_23Sep2016V4_MC'
@@ -81,6 +81,8 @@ process.btagging = cms.Sequence()
 addBTagging(process,'AK4PFJetsPuppi' ,0.4,'AK4' ,'Puppi')
 addBTagging(process,'AK8PFJetsPuppi' ,0.8,'AK8' ,'Puppi')
 addBTagging(process,'CA15PFJetsPuppi',1.5,'CA15','Puppi')
+process.AK4PFImpactParameterTagInfosPuppi.computeGhostTrack = cms.bool(False)
+process.AK8PFImpactParameterTagInfosPuppi.computeGhostTrack = cms.bool(False)
 process.CA15PFImpactParameterTagInfosPuppi.computeGhostTrack = cms.bool(False)
 
 setMiniAODGenJets(process)
@@ -190,18 +192,7 @@ if do_alpaca:
 #================================================================================
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring(#'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/301/283/00000/E0D8674F-5E84-E711-9158-02163E019B4A.root')
-                            #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/742/00000/8A74859E-757E-E711-A964-02163E019CB5.root'),
-                            #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/806/00000/5EB6B34D-E683-E711-8CBB-02163E0118FB.root'),
-    #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v2/000/300/238/00000/D4B96E4E-3F78-E711-9C3C-02163E01A342.root'),
-    #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v2/000/300/122/00000/1C2E493D-6577-E711-BD30-02163E011B72.root'),
-    #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/742/00000/2E2C8597-B77E-E711-A230-02163E013932.root'),
-#'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/777/00000/0ECEF1BB-CC7E-E711-BB04-02163E01448A.root'),
-    #'/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/817/00000/0EDBC01D-7683-E711-A3B6-02163E019CD5.root'),
-    '/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v3/000/300/777/00000/BCBC9DA1-FD7E-E711-A6BF-02163E0143DC.root'),
-                            skipEvents = cms.untracked.uint32(3250),
-                            #/store/data/Run2017C/JetHT/MINIAOD/PromptReco-v2/000/300/398/00000/EC8C061B-BE7C-E711-A426-02163E0142C5.root')
-                            #fileNames = cms.untracked.vstring('/store/data/Run2017D/SingleElectron/MINIAOD/PromptReco-v1/000/302/030/00000/B21ACAC0-EE8E-E711-A71E-02163E0136F1.root')
+                            fileNames = cms.untracked.vstring('/store/data/Run2017D/JetHT/MINIAOD/17Nov2017-v1/40000/4A6E1527-00CC-E711-879D-0025904CF710.root'),
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -238,7 +229,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmMETName           = cms.untracked.string('slimmedMETs'),
     edmPFMETName         = cms.untracked.InputTag('slimmedMETsV2','','MakingBacon'),
     edmMVAMETName        = cms.untracked.string(''),
-    edmPuppETName        = cms.untracked.InputTag('slimmedMETsPuppi','','MakingBacon'),
+    edmPuppETName        = cms.untracked.string('slimmedMETsPuppi'),
     edmAlpacaMETName     = cms.untracked.string(alpacaMet),
     edmPupAlpacaMETName  = cms.untracked.string(alpacaPuppiMet),
     edmRhoForIsoName     = cms.untracked.string('fixedGridRhoFastjetAll'),
@@ -615,7 +606,7 @@ process.baconSequence = cms.Sequence(
                                      #process.photonMVAValueMapProducer*
                                      process.egmGsfElectronIDSequence *
                                      #process.egmPhotonIDSequence      *
-                                     process.puppiMETSequence         *
+                                     process.puppiMETSequence          *
                                      #process.genjetsequence           *
                                      #process.AK4genjetsequenceCHS     *
                                      process.AK4jetsequencePuppiData  *

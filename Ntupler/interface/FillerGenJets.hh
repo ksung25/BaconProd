@@ -4,7 +4,9 @@
 #include "DataFormats/JetReco/interface/GenJetCollection.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/Candidate/interface/Candidate.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
+#include "BaconProd/Utils/interface/EnergyCorrelations.h"
 #include "fastjet/GhostedAreaSpec.hh"
 #include "fastjet/ClusterSequenceArea.hh"
 #include "fastjet/tools/Filter.hh"
@@ -32,6 +34,8 @@ namespace baconhep
        double* genCone(const reco::GenJet *iJet,const reco::GenParticleCollection &iGenParticles,double iDRMin,double iDRMax,int iType);
        int     flavor (const reco::GenJet *iJet,const reco::GenParticleCollection &iGenParticles);            
        void    trim(const reco::GenJet *iJet,float &iMTrim,float &iTau1,float &iTau2);
+       void softdrop(const reco::GenJet *iJet,float &iMsd,float &ie2,float &ie3);
+
       // EDM object collection names
       std::string fGenParName;
       std::string fGenJetName;
@@ -42,6 +46,7 @@ namespace baconhep
       fastjet::ActiveAreaSpec*      fActiveArea;
       fastjet::AreaDefinition*      fAreaDefinition;
       fastjet::ClusterSequenceArea* fClustering;
+      EnergyCorrelations* fECF;
       edm::EDGetTokenT<reco::GenJetCollection>      fTokGenJet;
       edm::EDGetTokenT<reco::GenJetCollection>      fTokGenFatJet;
       edm::EDGetTokenT<reco::GenParticleCollection> fTokGenPar;

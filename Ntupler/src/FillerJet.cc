@@ -2,7 +2,7 @@
 //#include "BaconProd/Utils/interface/EnergyCorrelator.hh"
 #include "BaconProd/Utils/interface/TriggerTools.hh"
 #include "BaconProd/Utils/interface/JetTools.hh"
-#include "BaconProd/Utils/interface/RecursiveSoftDrop.hh"
+//#include "BaconProd/Utils/interface/RecursiveSoftDrop.hh"
 #include "BaconAna/DataFormats/interface/TJet.hh"
 #include "BaconAna/DataFormats/interface/TPFPart.hh"
 #include "BaconAna/DataFormats/interface/TSVtx.hh"
@@ -56,7 +56,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fJetName            (iConfig.getUntrackedParameter<std::string>("jetName","ak4PFJetsCHS")),
   fJECName            (iConfig.getUntrackedParameter<std::string>("jecName","")),
   fJECUName           (iConfig.getUntrackedParameter<std::string>("jecUncName","")),
-  fGenJetName         (iConfig.getUntrackedParameter<std::string>("genJetName","AK4GenJetsCHS")),
+  fGenJetName         (iConfig.getUntrackedParameter<std::string>("genJetName","slimmedGenJets")),
   fJetFlavorName      (iConfig.getUntrackedParameter<std::string>("jetFlavorName","AK4byValAlgoCHS")),
   fPrunedJetName      (iConfig.getUntrackedParameter<std::string>("prunedJetName","AK4caPFJetsPrunedCHS")),
   fTrimmedJetName     (iConfig.getUntrackedParameter<std::string>("trimmedJetName","AK4caPFJetsTrimmedCHS")),
@@ -79,17 +79,17 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fQGLikelihood       (iConfig.getUntrackedParameter<std::string>("qgLikelihood","QGLikelihood")),
   fQGLikelihoodSubJets(iConfig.getUntrackedParameter<std::string>("qgLikelihoodSubjet","QGLikelihood")),
   fTopTaggerName      (iConfig.getUntrackedParameter<std::string>("topTaggerName","")),
-  fShowerDecoConf     (iConfig.getUntrackedParameter<std::string>("showerDecoConf","")),
+  //fShowerDecoConf     (iConfig.getUntrackedParameter<std::string>("showerDecoConf","")),
   fConeSize           (iConfig.getUntrackedParameter<double>("coneSize",0.4)),
   fComputeFullJetInfo (iConfig.getUntrackedParameter<bool>("doComputeFullJetInfo",false)),  
   fAddPFCand          (iConfig.getUntrackedParameter<bool>("addPFCand",true)),
   fComputeSVInfo      (iConfig.getUntrackedParameter<bool>("doComputeSVInfo",false)),  
-  fShowerDeco         (0),
+  //fShowerDeco         (0),
   fJetCorr            (0),
   fJetUnc             (0),
-  fUseAOD             (useAOD),
-  fRecursiveSoftDrop1 (0),
-  fRecursiveSoftDrop2 (0)
+  fUseAOD             (useAOD)
+  //fRecursiveSoftDrop1 (0),
+  //fRecursiveSoftDrop2 (0)
 {
     std::vector<std::string> empty_vstring;
     /* ===> Switching to DB
@@ -119,9 +119,9 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     }
 
   fRand = new TRandom2();
-  if(fShowerDecoConf.size() > 0) { 
-    fShowerDeco = new ShowerDeco(cmssw_base_src+fShowerDecoConf);
-  }
+  //if(fShowerDecoConf.size() > 0) { 
+  //  fShowerDeco = new ShowerDeco(cmssw_base_src+fShowerDecoConf);
+  //}
   fTokRhoTag        = iC.consumes<double>               (fRhoName);
   if(fUseAOD)  fTokJetName       = iC.consumes<reco::PFJetCollection>(fJetName);
   if(!fUseAOD) fTokPatJetName    = iC.consumes<pat::JetCollection>   (fJetName);
@@ -178,8 +178,8 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fTokCMSTTJetProduct    = iC.consumes<reco::BasicJetCollection>(lTopTag);
     fTokCMSTTSubJetProduct = iC.consumes<reco::PFJetCollection>   (lTopTagSubJet);
     fECF = new EnergyCorrelations();
-    fRecursiveSoftDrop1 = new fastjet::RecursiveSoftDrop( 1. ,0.05,fConeSize,-1); // beta = 1, zcut=0.05, n = Inf
-    fRecursiveSoftDrop2 = new fastjet::RecursiveSoftDrop( 2. ,0.1,fConeSize,-1); // beta = 2, zcut=0.1, n = Inf
+    //fRecursiveSoftDrop1 = new fastjet::RecursiveSoftDrop( 1. ,0.05,fConeSize,-1); // beta = 1, zcut=0.05, n = Inf
+    //fRecursiveSoftDrop2 = new fastjet::RecursiveSoftDrop( 2. ,0.1,fConeSize,-1); // beta = 2, zcut=0.1, n = Inf
   }
 }
 
@@ -188,8 +188,11 @@ FillerJet::~FillerJet()
 {
   delete fJetCorr;
   delete fJetUnc;
-  delete fRecursiveSoftDrop1;
-  delete fRecursiveSoftDrop2;
+  //delete fRecursiveSoftDrop1;
+  //delete fRecursiveSoftDrop2;
+  //delete fShowerDeco;
+  //delete fECF;
+  //delete fRand;
 }
 void FillerJet::initPUJetId() { 
   if(!fUseAOD) return;
@@ -279,6 +282,9 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
   fJetUnc  = new JetCorrectionUncertainty(jetPars);
 
   // Get gen jet collection
+  //std::cout << fGenJetName << std::endl;
+  std::cout << "fTokGenJetName " << fJetName << fGenJetName << fConeSize << std::endl;
+
   edm::Handle<reco::GenJetCollection> hGenJetProduct;
   const reco::GenJetCollection *genJetCol = 0;
   if(fUseGen) { 
@@ -490,6 +496,11 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
       pJet->geneta       = matchGenJet->eta();
       pJet->genphi       = matchGenJet->phi();
       pJet->genm         = matchGenJet->mass();
+      //float pMsd = 0; float pe2sdb1 =0; float pe3_v2_sdb1 =0;
+      //if(pJet->genpt > 100) softdrop(&(*matchGenJet),pMsd,pe2sdb1,pe3_v2_sdb1);
+      //pJet->genmsd       = pMsd;
+      //pJet->gene2sdb1    = pe2sdb1;
+      //pJet->gene3_v2_sdb1= pe3_v2_sdb1;
       lNB = (*hJetFlavourMatch)[jetBaseRef].getbHadrons().size();
       lNC = (*hJetFlavourMatch)[jetBaseRef].getcHadrons().size();
     }
@@ -593,6 +604,8 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
   // Get gen jet collection
   edm::Handle<reco::GenJetCollection> hGenJetProduct;
   const reco::GenJetCollection *genJetCol = 0;
+  std::cout << "fTokGenJetName " << fJetName << fGenJetName << std::endl;
+
   if(fUseGen) {
     iEvent.getByToken(fTokGenJetName,hGenJetProduct);
     assert(hGenJetProduct.isValid());
@@ -731,6 +744,11 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
       pJet->geneta       = matchGenJet->eta();
       pJet->genphi       = matchGenJet->phi();
       pJet->genm         = matchGenJet->mass();
+      //float pMsd = 0; float pe2sdb1 =0; float pe3_v2_sdb1 =0;
+      //if(pJet->genpt > 10) softdrop(&(*matchGenJet),pMsd,pe2sdb1,pe3_v2_sdb1);
+      //pJet->genmsd       = pMsd;
+      //pJet->gene2sdb1    = pe2sdb1;
+      //pJet->gene3_v2_sdb1= pe3_v2_sdb1;
     }
     int lNB = itJet->jetFlavourInfo().getbHadrons().size();
     int lNC = itJet->jetFlavourInfo().getcHadrons().size();
@@ -845,7 +863,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
     lClusterParticles.emplace_back(pPart);                                                                                                                                                       
   }                                                                           
   std::sort(lClusterParticles.begin(),lClusterParticles.end(),JetTools::orderPseudoJet);
-  if(fShowerDeco != 0) pAddJet->topchi2 = fShowerDeco->chi(itJet.pt(),lClusterParticles);
+  //if(fShowerDeco != 0) pAddJet->topchi2 = fShowerDeco->chi(itJet.pt(),lClusterParticles);
   fastjet::JetDefinition lCJet_def(fastjet::cambridge_algorithm, 2.0);
   fastjet::ClusterSequence lCClust_seq(lClusterParticles, lCJet_def);
   std::vector<fastjet::PseudoJet> inclusive_jets = lCClust_seq.inclusive_jets(0);
@@ -944,10 +962,12 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   }
   
   // Recursive Soft drop
+  /*
   fastjet::PseudoJet pRSM1Jet = (*fRecursiveSoftDrop1) (inclusive_jets[0]);
   fastjet::PseudoJet pRSM2Jet = (*fRecursiveSoftDrop2) (inclusive_jets[0]);
   pAddJet->mass_rsd0  = pRSM1Jet.m()*pCorr;
   pAddJet->mass_rsd1  = pRSM2Jet.m()*pCorr;
+  */
   /*
   // Q-Jets
   pAddJet->qjet = 0;
@@ -1254,6 +1274,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
     }
   }
   */
+  /*
   float lepCPt(-100), lepCEta(-100), lepCPhi(-100);
   float lepCId(0);
 
@@ -1298,7 +1319,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   pAddJet->lmdC_2 = JetTools::lsf(lClusterParticles, vSubC_2, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 2, 1);
   pAddJet->lmdC_3 = JetTools::lsf(lClusterParticles, vSubC_3, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 3, 1);
   pAddJet->lmdC_4 = JetTools::lsf(lClusterParticles, vSubC_4, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 4, 1);
-
+  */
 
   //
   // Top Tagging
@@ -1708,6 +1729,36 @@ const reco::GenJet* FillerJet::match(const pat::Jet *iJet, const reco::GenJetCol
     }
   }
   const reco::GenJet* lJet = 0;
-  if(lId != -1) lJet = &((*jets)[lId]);
+  if(lId != -1) {
+    lJet = &((*jets)[lId]);
+  }
   return lJet;
+}
+
+void FillerJet::softdrop(const reco::GenJet *iJet,float &iMsd,float &ie2,float &ie3) {
+  std::vector<fastjet::PseudoJet>  lClusterParticles;
+  for (unsigned i = 0;  i < iJet->numberOfDaughters (); i++) {
+    const reco::Candidate * daughter = iJet->daughter( i );
+    fastjet::PseudoJet   pPart(daughter->px(),daughter->py(),daughter->pz(),daughter->energy());
+    lClusterParticles.emplace_back(pPart);
+  }
+  fastjet::JetDefinition lCJet_def(fastjet::cambridge_algorithm, 0.8);
+  fastjet::ClusterSequence lCClust_seq(lClusterParticles, lCJet_def);
+  std::vector<fastjet::PseudoJet>  lOutJets = lCClust_seq.inclusive_jets(0.0);
+  if(lOutJets.size() == 0) {
+    std::cout << "no jets " << std::endl;
+    return;
+  }
+  double beta=1;
+  fastjet::contrib::SoftDrop SD(0.,0.1,0.8);
+  fastjet::PseudoJet SD_jet = SD(lOutJets[0]);
+  iMsd = SD_jet.m();
+  //std::cout << iMsd << std::endl;
+  std::vector<fastjet::PseudoJet> lSDClusterParticles = SD_jet.constituents();
+  std::sort(lSDClusterParticles.begin(),lSDClusterParticles.end(),JetTools::orderPseudoJet);
+  int nFilter = TMath::Min(100,(int)lSDClusterParticles.size());
+  std::vector<fastjet::PseudoJet> lSDFilter(lSDClusterParticles.begin(),lSDClusterParticles.begin()+nFilter);
+  fECFn->calcECFN(beta,lSDFilter);
+  ie2 = float(fECFn->manager->ecfns["2_2"]);
+  ie3 = float(fECFn->manager->ecfns["3_2"]);
 }
