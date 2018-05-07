@@ -89,6 +89,17 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
 #cms.InputTag(head+"PFImpactParameterTagInfos"+tail), #pfImpactParameterAK8TagInfos
                                              cms.InputTag(head+"PFBoostedDoubleSVTagInfos"+tail) )
                     ))    
+	#Deep Double B
+	setattr(process, head+'PFBoostedDeepDoubleBTagInfos'+tail,
+            pfDeepDoubleBTagInfos.clone(
+	    shallow_tag_infos = cms.InputTag(head+'PFBoostedDoubleSVTagInfos'+tail),
+            jets = cms.InputTag(jets)
+            ))
+        setattr(process, head+'PFBoostedDeepDoubleBJetTags'+tail,
+            pfDeepDoubleBJetTags.clone(
+            src = cms.InputTag(head+"PFBoostedDeepDoubleBTagInfos"+tail)
+            ))
+
     process.btagging *= getattr(process,head+'PFImpactParameterTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFSecondaryVertexTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFInclusiveSecondaryVertexFinderTagInfos'+tail)
@@ -107,6 +118,8 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
         process.btagging *= getattr(process,head+'PFInclusiveSecondaryVertexFinderTagInfosSJ'+tail)
         process.btagging *= getattr(process,head+'PFCombinedInclusiveSecondaryVertexV2BJetTagsSJ'+tail)
         process.btagging *= getattr(process,head+'PFBoostedDoubleSecondaryVertexBJetTags'+tail)
+        process.btagging *= getattr(process,head+'PFBoostedDeepDoubleBTagInfos'+tail)
+        process.btagging *= getattr(process,head+'PFBoostedDeepDoubleBJetTags'+tail)
     if useMiniAOD:
         getattr(process,head+'PFImpactParameterTagInfos'+tail).primaryVertex                   = cms.InputTag("offlineSlimmedPrimaryVertices")
         getattr(process,head+'PFImpactParameterTagInfos'+tail).candidates                      = cms.InputTag("packedPFCandidates")
@@ -121,4 +134,6 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
             getattr(process,head+'PFImpactParameterTagInfosSJ'+tail).primaryVertex                 = cms.InputTag("offlineSlimmedPrimaryVertices")
             getattr(process,head+'PFImpactParameterTagInfosSJ'+tail).candidates                    = cms.InputTag("packedPFCandidates")
             getattr(process,head+'PFInclusiveSecondaryVertexFinderTagInfosSJ'+tail).extSVCollection   = cms.InputTag('slimmedSecondaryVertices')
+            getattr(process,head+'PFBoostedDeepDoubleBTagInfos'+tail).vertices                     = cms.InputTag("offlineSlimmedPrimaryVertices")
+            getattr(process,head+'PFBoostedDeepDoubleBTagInfos'+tail).secondary_vertices           = cms.InputTag("slimmedSecondaryVertices")
 
