@@ -71,7 +71,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fCSVDoubleBtagName  (iConfig.getUntrackedParameter<std::string>("csvDoubleBTagName","AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS")),
   //fSVTagInfoName      (iConfig.getUntrackedParameter<std::string>("svTagInfoName","AK4PFSecondaryVertexTagInfosCHS")),
   fBoostedDoubleSVTagInfoName (iConfig.getUntrackedParameter<std::string>("boostedDoubleSVTagInfoName","AK8PFBoostedDoubleSVTagInfosCHS")),
-  fDeepDoubleBtagName (iConfig.getUntrackedParameter<std::string>("deepDoubleBTagProbHName","AK8PFBoostedDeepDoubleBJetTagsCHS:probH")),
+  fDeepDoubleBtagName (iConfig.getUntrackedParameter<std::string>("deepDoubleBTagName","AK8PFBoostedDeepDoubleBJetTagsCHS:probH")),
   //fMuonName           (iConfig.getUntrackedParameter<std::string>("edmMuonName","muons")),
   //fEleName            (iConfig.getUntrackedParameter<std::string>("edmElectronName","gedGsfElectrons")),
   //fsoftPFMuonTagInfoName    (iConfig.getUntrackedParameter<std::string>("softPFMuonTagInfoName","AK4PFSoftPFMuonsTagInfosCHS")),
