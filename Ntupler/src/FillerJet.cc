@@ -71,6 +71,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fCSVDoubleBtagName  (iConfig.getUntrackedParameter<std::string>("csvDoubleBTagName","AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS")),
   //fSVTagInfoName      (iConfig.getUntrackedParameter<std::string>("svTagInfoName","AK4PFSecondaryVertexTagInfosCHS")),
   fBoostedDoubleSVTagInfoName (iConfig.getUntrackedParameter<std::string>("boostedDoubleSVTagInfoName","AK8PFBoostedDoubleSVTagInfosCHS")),
+  fDeepDoubleBtagName (iConfig.getUntrackedParameter<std::string>("deepDoubleBTagProbHName","AK8PFBoostedDeepDoubleBJetTagsCHS:probH")),
   //fMuonName           (iConfig.getUntrackedParameter<std::string>("edmMuonName","muons")),
   //fEleName            (iConfig.getUntrackedParameter<std::string>("edmElectronName","gedGsfElectrons")),
   //fsoftPFMuonTagInfoName    (iConfig.getUntrackedParameter<std::string>("softPFMuonTagInfoName","AK4PFSoftPFMuonsTagInfosCHS")),
@@ -159,6 +160,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fTokCSVbtagSubJetName = iC.consumes<reco::JetTagCollection>  (fCSVbtagSubJetName);
     fTokCSVDoubleBtagName = iC.consumes<reco::JetTagCollection>  (fCSVDoubleBtagName);
     fTokBoostedDoubleSVTagInfo = iC.consumes<reco::BoostedDoubleSVTagInfoCollection> (fBoostedDoubleSVTagInfoName);
+    fTokDeepDoubleBtagName = iC.consumes<reco::JetTagCollection>  (fDeepDoubleBtagName);
     //fToksoftPFMuonTagInfo     = iC.consumes<reco::CandSoftLeptonTagInfoCollection>     (fsoftPFMuonTagInfoName);
     //fToksoftPFElectronTagInfo = iC.consumes<reco::CandSoftLeptonTagInfoCollection>     (fsoftPFElectronTagInfoName);
     edm::InputTag lTau1(fJettinessName,"tau1");
@@ -283,7 +285,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
 
   // Get gen jet collection
   //std::cout << fGenJetName << std::endl;
-  std::cout << "fTokGenJetName " << fJetName << fGenJetName << fConeSize << std::endl;
+  //std::cout << "fTokGenJetName " << fJetName << fGenJetName << fConeSize << std::endl;
 
   edm::Handle<reco::GenJetCollection> hGenJetProduct;
   const reco::GenJetCollection *genJetCol = 0;
@@ -604,7 +606,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
   // Get gen jet collection
   edm::Handle<reco::GenJetCollection> hGenJetProduct;
   const reco::GenJetCollection *genJetCol = 0;
-  std::cout << "fTokGenJetName " << fJetName << fGenJetName << std::endl;
+  //std::cout << "fTokGenJetName " << fJetName << fGenJetName << std::endl;
 
   if(fUseGen) {
     iEvent.getByToken(fTokGenJetName,hGenJetProduct);
@@ -824,6 +826,11 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   iEvent.getByToken(fTokCSVDoubleBtagName, hCSVDoubleBtag);
   assert(hCSVDoubleBtag.isValid());
 
+  // Get deep double b tag
+  edm::Handle<reco::JetTagCollection> hDeepDoubleBtag;
+  iEvent.getByToken(fTokDeepDoubleBtagName, hDeepDoubleBtag);
+  assert(hDeepDoubleBtag.isValid());
+
   //Get Quark Gluon Likelihood on subjets
   edm::Handle<edm::ValueMap<float> > hQGLikelihoodSubJets;
   iEvent.getByToken(fTokQGLSubJets,hQGLikelihoodSubJets);
@@ -854,6 +861,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   pAddJet->tau3 = (*(hTau3.product()))[jetBaseRef];
   pAddJet->tau4 = (*(hTau4.product()))[jetBaseRef];
   pAddJet->doublecsv = (*(hCSVDoubleBtag.product()))[jetBaseRef];
+  pAddJet->deepdoubleb = (*(hDeepDoubleBtag.product()))[jetBaseRef];
   //if(fShowerDeco != 0) { 
   std::vector<reco::CandidatePtr> pfConstituents = itJet.getJetConstituents();                                                                                                                     
   std::vector<fastjet::PseudoJet>   lClusterParticles;                                                                                                                                     
