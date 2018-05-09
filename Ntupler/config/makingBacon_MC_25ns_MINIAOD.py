@@ -144,32 +144,32 @@ for idmod in my_id_modules:
 
 # PF MET corrections
 from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
-runMetCorAndUncFromMiniAOD(process,
-                           isData=is_data_flag,
-                           manualJetConfig=True,
-                           jetCorLabelL3="ak4chsL1FastL2L3Corrector",
-                           jetCorLabelRes="ak4chsL1FastL2L3ResidualCorrector",
-                           reclusterJets=True,
-                           recoMetFromPFCs=True,
-                           postfix="V2"
-                           )
+#runMetCorAndUncFromMiniAOD(process,
+#                           isData=is_data_flag,
+#                           manualJetConfig=True,
+#                           jetCorLabelL3="ak4chsL1FastL2L3Corrector",
+#                           jetCorLabelRes="ak4chsL1FastL2L3ResidualCorrector",
+#                           reclusterJets=True,
+#                           recoMetFromPFCs=True,
+#                           postfix="V2"
+#                           )
 
 # PUPPI Woof Woof
 from PhysicsTools.PatAlgos.slimming.puppiForMET_cff import makePuppiesFromMiniAOD
 makePuppiesFromMiniAOD (process, True )
 #process.puppi.useExistingWeights = True
-runMetCorAndUncFromMiniAOD(process,
-                           isData=is_data_flag,
-                           manualJetConfig=True,
-                           metType="Puppi",
-                           pfCandColl=cms.InputTag("puppiForMET"),
-                           recoMetFromPFCs=True,
-                           jetFlavor="AK4PFPuppi",
-                           jetCorLabelL3="ak4PuppiL1FastL2L3Corrector",
-                           jetCorLabelRes="ak4PuppiL1FastL2L3ResidualCorrector",
-                           reclusterJets=True,
-                           postfix="Puppi"
-                           )
+#runMetCorAndUncFromMiniAOD(process,
+#                           isData=is_data_flag,
+#                           manualJetConfig=True,
+#                           metType="Puppi",
+#                           pfCandColl=cms.InputTag("puppiForMET"),
+#                           recoMetFromPFCs=True,
+#                           jetFlavor="AK4PFPuppi",
+#                           jetCorLabelL3="ak4PuppiL1FastL2L3Corrector",
+#                           jetCorLabelRes="ak4PuppiL1FastL2L3ResidualCorrector",
+#                           reclusterJets=True,
+#                           postfix="Puppi"
+#                           )
 
 if is_data_flag:
   process.AK4QGTaggerPuppi.jec           = cms.InputTag("ak4PuppiL1FastL2L3ResidualCorrector")
@@ -192,8 +192,9 @@ if do_alpaca:
 #================================================================================
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
 process.source = cms.Source("PoolSource",
-                            #fileNames = cms.untracked.vstring('/store/mc/RunIIFall17MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/EEF28E00-0CEA-E711-8257-02163E0160F1.root'),
-                            fileNames = cms.untracked.vstring('file:EXO-RunIIFall17MiniAOD-00035.root'),
+                            #fileNames = cms.untracked.vstring('/store/mc/RunIISummer16MiniAODv2/ZprimeToTT_M-4000_W-40_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/02DEA6C9-19B7-E611-B22D-A0000420FE80.root'),
+                            fileNames = cms.untracked.vstring('/store/mc/RunIIFall17MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/EEF28E00-0CEA-E711-8257-02163E0160F1.root'),
+                            #fileNames = cms.untracked.vstring('file:EXO-RunIIFall17MiniAOD-00035.root'),
                             #skipEvents = cms.untracked.uint32(0),
 )
 
@@ -230,7 +231,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     #edmPileupInfoName    = cms.untracked.string('addPileupInfo'),
     edmBeamspotName      = cms.untracked.string('offlineBeamSpot'),
     edmMETName           = cms.untracked.string('slimmedMETs'),
-    edmPFMETName         = cms.untracked.InputTag('slimmedMETsV2','','MakingBacon'),
+    edmPFMETName         = cms.untracked.InputTag('slimmedMETs'),
+    #edmPFMETName         = cms.untracked.InputTag('slimmedMETsV2','','MakingBacon'),
     edmMVAMETName        = cms.untracked.string(''),
     edmPuppETName        = cms.untracked.string('slimmedMETsPuppi'),
     edmAlpacaMETName     = cms.untracked.string(alpacaMet),
@@ -604,6 +606,7 @@ process.baconSequence = cms.Sequence(
                                      process.ak4PuppiL1FastL2L3Chain  *
                                      process.ak8PuppiL1FastL2L3Chain  *
                                      process.QGTagger                 *
+                                     #process.patJetsV2                *
                                      process.pfNoPileUpJME            *
                                      process.electronMVAValueMapProducer *
                                      #process.photonIDValueMapProducer *
@@ -617,8 +620,8 @@ process.baconSequence = cms.Sequence(
                                      process.AK8jetsequencePuppi      *
                                      process.CA15jetsequencePuppi     *
                                      process.btagging                 *
-                                     process.fullPatMetSequenceV2     *
-                                     process.fullPatMetSequencePuppi * 
+                                     #process.fullPatMetSequenceV2     *
+                                     #process.fullPatMetSequencePuppi * 
                                      process.ntupler
                                      )
 
