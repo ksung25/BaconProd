@@ -97,8 +97,16 @@ namespace baconhep {
       //leptons
       static float leadPt(const pat::Jet &jet);
       static float leadPt(const reco::PFJet &jet);
+      static float leadTrkPt(const pat::Jet &jet);
+      static float leadTrkPt(const reco::PFJet &jet);
+      static int   nDaughters(const pat::Jet &jet,float minPt);
+      static int   nDaughters(const reco::PFJet &jet,float minPt);
+      static void  energyRings(const pat::Jet &jet,std::vector<float> &chvec,std::vector<float> &emvec,std::vector<float> &nevec,std::vector<float> &muvec);
+      static void  energyRings(const reco::PFJet &jet,std::vector<float> &chvec,std::vector<float> &emvec,std::vector<float> &nevec,std::vector<float> &muvec);
       static float leptons(const pat::Jet &jet,int iId);
       static float leptons(const reco::PFJet &jet,int iId);
+      static float ptD(const pat::Jet &jet);
+      static float ptD(const reco::PFJet &jet);
       static float lsf(std::vector<fastjet::PseudoJet> iCParticles,std::vector<fastjet::PseudoJet> &ljets,
 		       float ilPt, float ilEta, float ilPhi, int ilId, double dr, int nsj, int iId = 0);
   };

@@ -190,9 +190,10 @@ if do_alpaca:
 #--------------------------------------------------------------------------------
 # input settings
 #================================================================================
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring('/store/mc/RunIIFall17MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/EEF28E00-0CEA-E711-8257-02163E0160F1.root'),
+                            #fileNames = cms.untracked.vstring('/store/mc/RunIIFall17MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/EEF28E00-0CEA-E711-8257-02163E0160F1.root'),
+                            fileNames = cms.untracked.vstring('/store/mc/RunIIFall17MiniAOD/GluGluHToBB_M125_13TeV_amcatnloFXFX_pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/80000/B21F99BD-4B06-E811-ADDA-0CC47AF9B2E6.root'),
                             #fileNames = cms.untracked.vstring('file:EXO-RunIIFall17MiniAOD-00035.root'),
                             #skipEvents = cms.untracked.uint32(0),
 )
@@ -362,6 +363,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
     jetBoostedBtaggingFiles = cms.untracked.string('BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
+    BRegNNFileName          = cms.untracked.string('BaconProd/Utils/data/breg_training_2017.pb'),
     # names of various jet-related collections
     jetName            = cms.untracked.string('AK4PFJetsPuppi'),
     genJetName         = cms.untracked.string('slimmedGenJets'),
@@ -399,6 +401,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
     jetBoostedBtaggingFiles = cms.untracked.string('BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
+    BRegNNFileName          = cms.untracked.string('BaconProd/Utils/data/breg_training_2017.pb'),
 
     edmPVName   = cms.untracked.string('offlineSlimmedPrimaryVertices'),
     jecName     = (cms.untracked.string('ak8chsL1FastL2L3ResidualCorrector') if is_data_flag else cms.untracked.string('ak8chsL1FastL2L3Corrector') ),
@@ -482,6 +485,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
     jetBoostedBtaggingFiles = cms.untracked.string('BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
+    BRegNNFileName          = cms.untracked.string('BaconProd/Utils/data/breg_training_2017.pb'),
     
     # names of various jet-related collections
     jetName            = cms.untracked.string('AK8PFJetsPuppi'),
@@ -526,6 +530,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
     jetBoostedBtaggingFiles = cms.untracked.string('BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
+    BRegNNFileName          = cms.untracked.string('BaconProd/Utils/data/breg_training_2017.pb'),
 
     # names of various jet-related collections
     jetName            = cms.untracked.string('CA15PFJetsCHS'),
@@ -567,6 +572,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     jetPUIDFiles = cms.untracked.vstring('',
                                          'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
     jetBoostedBtaggingFiles = cms.untracked.string('BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
+    BRegNNFileName          = cms.untracked.string('BaconProd/Utils/data/breg_training_2017.pb'),
     showerDecoConf     = cms.untracked.string(''),
     # names of various jet-related collections
     jetName            = cms.untracked.string('CA15PFJetsPuppi'),
