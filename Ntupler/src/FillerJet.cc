@@ -73,6 +73,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   //fSVTagInfoName      (iConfig.getUntrackedParameter<std::string>("svTagInfoName","AK4PFSecondaryVertexTagInfosCHS")),
   fBoostedDoubleSVTagInfoName (iConfig.getUntrackedParameter<std::string>("boostedDoubleSVTagInfoName","AK8PFBoostedDoubleSVTagInfosCHS")),
   fDeepDoubleBtagName (iConfig.getUntrackedParameter<std::string>("deepDoubleBTagName","AK8PFBoostedDeepDoubleBJetTagsCHS:probH")),
+  fDeepDoubleBNoMassSculptPentagName (iConfig.getUntrackedParameter<std::string>("deepDoubleBNoMassSculptPenTagName","AK8PFBoostedDeepDoubleBNoMassSculptPenJetTagsCHS:probH")),
   fBRegNNFile         (iConfig.getUntrackedParameter<std::string>("BRegNNFileName","BaconProd/Utils/data/breg_training_2017.pb")),
   fBRegNNMean         (iConfig.getUntrackedParameter<double>("BRegNNMean",1.0610932111740112)),
   fBRegNNStd          (iConfig.getUntrackedParameter<double>("BRegNNStd",0.39077115058898926)),
@@ -169,6 +170,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fTokCSVDoubleBtagName = iC.consumes<reco::JetTagCollection>  (fCSVDoubleBtagName);
     fTokBoostedDoubleSVTagInfo = iC.consumes<reco::BoostedDoubleSVTagInfoCollection> (fBoostedDoubleSVTagInfoName);
     fTokDeepDoubleBtagName = iC.consumes<reco::JetTagCollection>  (fDeepDoubleBtagName);
+    fTokDeepDoubleBNoMassSculptPentagName = iC.consumes<reco::JetTagCollection>  (fDeepDoubleBNoMassSculptPentagName);
     //fToksoftPFMuonTagInfo     = iC.consumes<reco::CandSoftLeptonTagInfoCollection>     (fsoftPFMuonTagInfoName);
     //fToksoftPFElectronTagInfo = iC.consumes<reco::CandSoftLeptonTagInfoCollection>     (fsoftPFElectronTagInfoName);
     edm::InputTag lTau1(fJettinessName,"tau1");
@@ -974,6 +976,9 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   edm::Handle<reco::JetTagCollection> hDeepDoubleBtag;
   iEvent.getByToken(fTokDeepDoubleBtagName, hDeepDoubleBtag);
   assert(hDeepDoubleBtag.isValid());
+  edm::Handle<reco::JetTagCollection> hDeepDoubleBNoMassSculptPentag;
+  iEvent.getByToken(fTokDeepDoubleBNoMassSculptPentagName, hDeepDoubleBNoMassSculptPentag);
+  assert(hDeepDoubleBNoMassSculptPentag.isValid());
 
   //Get Quark Gluon Likelihood on subjets
   edm::Handle<edm::ValueMap<float> > hQGLikelihoodSubJets;
@@ -1006,6 +1011,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   pAddJet->tau4 = (*(hTau4.product()))[jetBaseRef];
   pAddJet->doublecsv = (*(hCSVDoubleBtag.product()))[jetBaseRef];
   pAddJet->deepdoubleb = (*(hDeepDoubleBtag.product()))[jetBaseRef];
+  pAddJet->deepdoubleb_nomasssculptpen = (*(hDeepDoubleBNoMassSculptPentag.product()))[jetBaseRef];
   //if(fShowerDeco != 0) { 
   std::vector<reco::CandidatePtr> pfConstituents = itJet.getJetConstituents();                                                                                                                     
   std::vector<fastjet::PseudoJet>   lClusterParticles;                                                                                                                                     
