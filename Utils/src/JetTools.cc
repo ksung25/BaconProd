@@ -1384,12 +1384,12 @@ float JetTools::leptons(const pat::Jet &jet,int iId) {
     return std::max(float(0.),lepjetdr);
   }
   if(iId == 8){
-    float softLepPtRel = ( jet.px()*float(lPx) + jet.py()*float(lPy) + jet.pz()*float(lPz) ) / jet.p();
-    softLepPtRel = sqrt( float(lP*lP) - softLepPtRel*softLepPtRel );
+    float softLepPtRel = ( jet.px()*lPx + jet.py()*lPy + jet.pz()*lPz ) / jet.p();
+    softLepPtRel = sqrt( lP*lP - softLepPtRel*softLepPtRel );
     return std::max(float(0.),softLepPtRel);
   }
   if(iId == 9){
-    float softLepPtRelInv = ( jet.px()*float(lPx) + jet.py()*float(lPy) + jet.pz()*float(lPz) ) / float(lP);
+    float softLepPtRelInv = ( jet.px()*lPx + jet.py()*lPy + jet.pz()*lPz ) / lP;
     softLepPtRelInv = sqrt( jet.p()*jet.p() - softLepPtRelInv*softLepPtRelInv );
     return std::max(float(0.),softLepPtRelInv);
   }
@@ -1466,12 +1466,12 @@ float JetTools::leptons(const reco::PFJet &jet,int iId) {
     return std::max(float(0.),lepjetdr);
   }
   if(iId == 8){
-    float softLepPtRel = ( jet.px()*float(lPx) + jet.py()*float(lPy) + jet.pz()*float(lPz) ) / jet.p();
-    softLepPtRel = sqrt( float(lP*lP) - softLepPtRel*softLepPtRel );
+    float softLepPtRel = ( jet.px()*lPx + jet.py()*lPy + jet.pz()*lPz ) / jet.p();
+    softLepPtRel = sqrt( lP*lP - softLepPtRel*softLepPtRel );
     return std::max(float(0.),softLepPtRel);
   }
   if(iId == 9){
-    float softLepPtRelInv = ( jet.px()*float(lPx) + jet.py()*float(lPy) + jet.pz()*float(lPz) ) / float(lP);
+    float softLepPtRelInv = ( jet.px()*lPx + jet.py()*lPy + jet.pz()*lPz ) / lP;
     softLepPtRelInv = sqrt( jet.p()*jet.p() - softLepPtRelInv*softLepPtRelInv );
     return std::max(float(0.),softLepPtRelInv);
   }
