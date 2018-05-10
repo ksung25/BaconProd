@@ -5,6 +5,7 @@
 #include "BaconProd/Utils/interface/JetPUIDMVACalculator.hh"
 #include "BaconProd/Utils/interface/BoostedBtaggingMVACalculator.hh"
 #include "BaconProd/Utils/interface/BJetRegression.hh"
+#include "BaconProd/Utils/interface/BJetNNRegression.hh"
 //#include "BaconProd/Utils/interface/ShowerDeco.hh"
 #include "BaconProd/Utils/interface/EnergyCorrelations.h"
 //#include "BaconProd/Utils/interface/RecursiveSoftDrop.hh"
@@ -83,6 +84,7 @@ namespace baconhep
      void  initPUJetId();
      void  initBoostedBtaggingJetId();
      void  initBReg();
+     void  initBRegNN();
     static Measurement1D vertexDxy(const reco::VertexCompositePtrCandidate &svcand, const reco::Vertex &pv)  ;
     static Measurement1D vertexD3d(const reco::VertexCompositePtrCandidate &svcand, const reco::Vertex &pv)  ;
 
@@ -134,6 +136,9 @@ namespace baconhep
       //std::string fEleName;
       //std::string fsoftPFMuonTagInfoName;
       //std::string fsoftPFElectronTagInfoName;
+      std::string fBRegNNFile;
+      double      fBRegNNMean;
+      double      fBRegNNStd;
       std::string fJettinessName;
       std::string fQGLikelihood;
       std::string fQGLikelihoodSubJets;
@@ -152,6 +157,7 @@ namespace baconhep
       JetPUIDMVACalculator fJetPUIDMVACalc;
       BoostedBtaggingMVACalculator fJetBoostedBtaggingMVACalc;
       BJetRegression               fBReg;
+      BJetNNRegression             fBRegNN;
       //ShowerDeco*          fShowerDeco;
 
       // Random number generator for Q-jet volatility
