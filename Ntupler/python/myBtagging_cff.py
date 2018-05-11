@@ -99,6 +99,12 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
             pfDeepDoubleBJetTags.clone(
             src = cms.InputTag(head+"PFBoostedDeepDoubleBTagInfos"+tail)
             ))
+	#Deep Double B - No Mass Sculpting Penalty
+        setattr(process, head+'PFBoostedDeepDoubleBNoMassSculptPenJetTags'+tail,
+            pfDeepDoubleBJetTags.clone(
+            src = cms.InputTag(head+"PFBoostedDeepDoubleBTagInfos"+tail),
+            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleB/V01/constant_graph_PtCut.pb')
+            ))
 
     process.btagging *= getattr(process,head+'PFImpactParameterTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFSecondaryVertexTagInfos'+tail)
@@ -120,6 +126,7 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
         process.btagging *= getattr(process,head+'PFBoostedDoubleSecondaryVertexBJetTags'+tail)
         process.btagging *= getattr(process,head+'PFBoostedDeepDoubleBTagInfos'+tail)
         process.btagging *= getattr(process,head+'PFBoostedDeepDoubleBJetTags'+tail)
+        process.btagging *= getattr(process,head+'PFBoostedDeepDoubleBNoMassSculptPenJetTags'+tail)
     if useMiniAOD:
         getattr(process,head+'PFImpactParameterTagInfos'+tail).primaryVertex                   = cms.InputTag("offlineSlimmedPrimaryVertices")
         getattr(process,head+'PFImpactParameterTagInfos'+tail).candidates                      = cms.InputTag("packedPFCandidates")
