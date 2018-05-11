@@ -334,6 +334,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     jecName     = (cms.untracked.string('ak4chsL1FastL2L3ResidualCorrector') if is_data_flag else cms.untracked.string('ak4chsL1FastL2L3Corrector') ),
     jecUncName  = (cms.untracked.string('AK4chs')),
     edmRhoName  = cms.untracked.string('fixedGridRhoFastjetAll'),
+    BRegNNFileName          = cms.untracked.string('BaconProd/Utils/data/breg_training_2017.pb'),
+    BRegNNMean              = cms.untracked.double(1.0610932111740112),
+    BRegNNStd               = cms.untracked.double(0.39077115058898926),
 
     # names of various jet-related collections
     jetName              = cms.untracked.string('slimmedJets'),

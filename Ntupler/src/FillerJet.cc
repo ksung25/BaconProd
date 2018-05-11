@@ -452,7 +452,6 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     //
     // Bjet NN Regression
     //
-
     fBRegNN.Jet_pt = ptRaw;
     fBRegNN.Jet_eta = itJet->eta();
     fBRegNN.rho = *hRho;
@@ -783,7 +782,6 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     //
     // Bjet NN Regression
     //
-
     fBRegNN.Jet_pt = ptRaw;
     fBRegNN.Jet_eta = itJet->eta();
     fBRegNN.rho = *hRho;
@@ -845,7 +843,6 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     //std::cout<<"NN BJet Correction = "<<bjetnnout.first<<std::endl;
     pJet->bjetcorr = bjetnnout.first;
     pJet->bjetres  = bjetnnout.second;
-
     //
     // Identification
     //==============================
@@ -1015,11 +1012,8 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   pAddJet->tau4 = (*(hTau4.product()))[jetBaseRef];
   pAddJet->doublecsv = (*(hCSVDoubleBtag.product()))[jetBaseRef];
   pAddJet->deepdoubleb = (*(hDeepDoubleBtag.product()))[jetBaseRef];
-<<<<<<< HEAD
-  
-=======
   pAddJet->deepdoubleb_nomasssculptpen = (*(hDeepDoubleBNoMassSculptPentag.product()))[jetBaseRef];
->>>>>>> c4b0f4b532cea99db75d27d71b241b0896d7ff37
+
   //if(fShowerDeco != 0) { 
   std::vector<reco::CandidatePtr> pfConstituents = itJet.getJetConstituents();                                                                                                                     
   std::vector<fastjet::PseudoJet>   lClusterParticles;                                                                                                                                     
