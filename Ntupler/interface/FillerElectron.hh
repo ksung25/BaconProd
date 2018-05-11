@@ -94,8 +94,9 @@ namespace baconhep
       edm::InputTag fEleTightIdIsoMapTag;
       edm::InputTag fMVAValuesIsoMapTag;
       edm::InputTag fMVACatsIsoMapTag;
+      bool fUseTO;
+      bool fUseAOD;
 
-       bool fUseAOD;
       edm::EDGetTokenT<reco::GsfElectronCollection>  fTokEleName;
       edm::EDGetTokenT<pat::ElectronCollection>      fTokPatEleName;
       edm::EDGetTokenT<reco::BeamSpot>               fTokBSName;

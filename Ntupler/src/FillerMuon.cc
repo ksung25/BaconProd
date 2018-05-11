@@ -25,6 +25,7 @@ FillerMuon::FillerMuon(const edm::ParameterSet &iConfig, const bool useAOD,edm::
   fPuppiName     (iConfig.getUntrackedParameter<std::string>("edmPuppiName","puppi")),
   fPuppiNoLepName(iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppiNoLep")),
   fUsePuppi      (iConfig.getUntrackedParameter<bool>("usePuppi",true)),
+  fUseTO         (iConfig.getUntrackedParameter<bool>("useTriggerObject",false)),
   fUseAOD        (useAOD)
 {
   if(fUseAOD)  fTokMuonName       = iC.consumes<reco::MuonCollection>       (fMuonName);
@@ -224,7 +225,7 @@ void FillerMuon::fill(TClonesArray *array,
       }
     }
     
-    pMuon->hltMatchBits = TriggerTools::matchHLT(pMuon->eta, pMuon->phi, triggerRecords, triggerEvent);
+    if(fUseTO) pMuon->hltMatchBits = TriggerTools::matchHLT(pMuon->eta, pMuon->phi, triggerRecords, triggerEvent);
   }
 
   //
@@ -323,7 +324,7 @@ void FillerMuon::fill(TClonesArray *array,
       pMuon->nPixLayers   = itTrk->hitPattern().pixelLayersWithMeasurement();
       pMuon->nMatchStn    = 0;
       pMuon->trkID        = trkIndex;
-      pMuon->hltMatchBits = TriggerTools::matchHLT(pMuon->eta, pMuon->phi, triggerRecords, triggerEvent);
+      if(fUseTO) pMuon->hltMatchBits = TriggerTools::matchHLT(pMuon->eta, pMuon->phi, triggerRecords, triggerEvent);
     }    
   } 
 }
@@ -479,7 +480,7 @@ void FillerMuon::fill(TClonesArray *array,
     // Obtain a track ID, unique per event. The track ID is the index in the general tracks collection
     pMuon->trkID = -1;  // general tracks not in MINIAOD
 
-    pMuon->hltMatchBits = TriggerTools::matchHLT(pMuon->eta, pMuon->phi, triggerRecords, triggerObjects);
+    if(fUseTO) pMuon->hltMatchBits = TriggerTools::matchHLT(pMuon->eta, pMuon->phi, triggerRecords, triggerObjects);
   }
 }
 void FillerMuon::computeIso(double &iEta,double &iPhi, const double extRadius,

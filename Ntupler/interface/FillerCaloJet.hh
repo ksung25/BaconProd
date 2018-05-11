@@ -58,6 +58,7 @@ namespace baconhep
       std::string fGenJetName;
       std::string fJetFlavorName;
       double      fConeSize;
+      bool fUseTO;
 
       // JEC corrector
       FactorizedJetCorrector   *fJetCorr;

@@ -90,6 +90,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fComputeFullJetInfo (iConfig.getUntrackedParameter<bool>("doComputeFullJetInfo",false)),  
   fAddPFCand          (iConfig.getUntrackedParameter<bool>("addPFCand",true)),
   fComputeSVInfo      (iConfig.getUntrackedParameter<bool>("doComputeSVInfo",false)),  
+  fUseTO              (iConfig.getUntrackedParameter<bool>("useTriggerObject",false)),
   //fShowerDeco         (0),
   fJetCorr            (0),
   fJetUnc             (0),
@@ -412,6 +413,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->ptRaw = ptRaw;
     pJet->area  = itJet->jetArea();
     pJet->unc   = jetunc;
+
     //
     // Impact Parameter and leptons
     //==============================
@@ -420,7 +422,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->leadPt = JetTools::leadPt(*itJet);
     pJet->lepPt  = JetTools::leptons(*itJet,0);
     pJet->lepDR  = JetTools::leptons(*itJet,2);
-
+    
     edm::Handle<reco::VertexCompositePtrCandidateCollection> secVertices;
     iEvent.getByToken(fTokSVName, secVertices);
     const reco::VertexCompositePtrCandidateCollection svtx=*secVertices;
@@ -450,7 +452,6 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     //
     // Bjet NN Regression
     //
-
     fBRegNN.Jet_pt = ptRaw;
     fBRegNN.Jet_eta = itJet->eta();
     fBRegNN.rho = *hRho;
@@ -589,11 +590,12 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->nCharged   = itJet->chargedMultiplicity();
     pJet->nNeutrals  = itJet->neutralMultiplicity();
     pJet->nParticles = itJet->nConstituents ();
-    if(triggerEvent      != 0) {pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, *triggerEvent); } 
-    else                       {pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, *patTriggerObjects); }
-
-    pJet->pfCands.clear();
-    if(fAddPFCand) { 
+    if(fUseTO) { 
+      if(triggerEvent      != 0) {pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, *triggerEvent); } 
+      else                       {pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, *patTriggerObjects); }
+    }
+     if(fAddPFCand) { 
+      pJet->pfCands.clear();
       std::vector<reco::CandidatePtr> pfConstituents = itJet->getJetConstituents();                                                                                                   
       for(unsigned int i0 = 0; i0 < pfConstituents.size(); i0++) { 
 	reco::CandidatePtr pfcand = pfConstituents[i0]; 
@@ -741,6 +743,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->ptRaw = ptRaw;
     pJet->area  = itJet->jetArea();
     pJet->unc   = jetunc;
+
     //
     // Impact Parameter
     //==============================
@@ -749,7 +752,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->leadPt = JetTools::leadPt(*itJet);
     pJet->lepPt  = JetTools::leptons(*itJet,0);
     pJet->lepDR  = JetTools::leptons(*itJet,2);
-
+    
     edm::Handle<reco::VertexCompositePtrCandidateCollection> secVertices;
     iEvent.getByToken(fTokSVName, secVertices);
     const reco::VertexCompositePtrCandidateCollection svtx=*secVertices;
@@ -779,7 +782,6 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     //
     // Bjet NN Regression
     //
-
     fBRegNN.Jet_pt = ptRaw;
     fBRegNN.Jet_eta = itJet->eta();
     fBRegNN.rho = *hRho;
@@ -841,7 +843,6 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     //std::cout<<"NN BJet Correction = "<<bjetnnout.first<<std::endl;
     pJet->bjetcorr = bjetnnout.first;
     pJet->bjetres  = bjetnnout.second;
-
     //
     // Identification
     //==============================
@@ -904,10 +905,10 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->nCharged   = itJet->chargedMultiplicity();
     pJet->nNeutrals  = itJet->neutralMultiplicity();
     pJet->nParticles = itJet->numberOfDaughters();
-    
-    pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, triggerObjects);
-    pJet->pfCands.clear();
+    if(fUseTO) pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, triggerObjects);
+
     if(fAddPFCand) { 
+      pJet->pfCands.clear();
       std::vector<reco::CandidatePtr> pfConstituents = itJet->getJetConstituents();
       for(unsigned int i0 = 0; i0 < pfConstituents.size(); i0++) { 
 	reco::CandidatePtr pfcand = pfConstituents[i0];    
@@ -1012,6 +1013,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   pAddJet->doublecsv = (*(hCSVDoubleBtag.product()))[jetBaseRef];
   pAddJet->deepdoubleb = (*(hDeepDoubleBtag.product()))[jetBaseRef];
   pAddJet->deepdoubleb_nomasssculptpen = (*(hDeepDoubleBNoMassSculptPentag.product()))[jetBaseRef];
+
   //if(fShowerDeco != 0) { 
   std::vector<reco::CandidatePtr> pfConstituents = itJet.getJetConstituents();                                                                                                                     
   std::vector<fastjet::PseudoJet>   lClusterParticles;                                                                                                                                     
@@ -1048,6 +1050,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   pAddJet->e3_v2_b1   = float(fECF->manager->ecfns["3_2"]);
   pAddJet->e4_v1_b1   = float(fECF->manager->ecfns["4_1"]);
   pAddJet->e4_v2_b1   = float(fECF->manager->ecfns["4_2"]);
+  /*
   beta=2;
   fECF->calcECFN(beta,lFiltered);
   pAddJet->e2_b2      = float(fECF->manager->ecfns["2_2"]);
@@ -1057,7 +1060,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   pAddJet->e4_v1_b2   = float(fECF->manager->ecfns["4_1"]);
   pAddJet->e4_v2_b2   = float(fECF->manager->ecfns["4_2"]);
   beta=4;
-  fECF->calcECFN(beta,lFiltered);
+  fECF->calcECFN(beta,lFiltered); 
   pAddJet->e2_sdb4      = float(fECF->manager->ecfns["2_2"]);
   pAddJet->e3_sdb4      = float(fECF->manager->ecfns["3_3"]);
   pAddJet->e3_v1_sdb4   = float(fECF->manager->ecfns["3_1"]);
@@ -1072,9 +1075,9 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   pAddJet->e3_v2_sdb05   = float(fECF->manager->ecfns["3_2"]);
   pAddJet->e4_v1_sdb05   = float(fECF->manager->ecfns["4_1"]);
   pAddJet->e4_v2_sdb05   = float(fECF->manager->ecfns["4_2"]);
+  */
   double pCorr=1;
   const reco::BasicJet* matchJet = 0;
-
   // Pruning
   matchJet = match(&itJet,prunedJetCol);
   if(matchJet) {
@@ -1102,6 +1105,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
     std::sort(lSDClusterParticles.begin(),lSDClusterParticles.end(),JetTools::orderPseudoJet);
     nFilter = TMath::Min(100,(int)lSDClusterParticles.size());
     std::vector<fastjet::PseudoJet> lSDFiltered(lSDClusterParticles.begin(),lSDClusterParticles.begin()+nFilter);
+
     fECF->calcECFN(beta,lSDFiltered,true);
     pAddJet->e2_sdb1      = float(fECF->manager->ecfns["2_2"]);
     pAddJet->e3_sdb1      = float(fECF->manager->ecfns["3_3"]);
@@ -1109,6 +1113,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
     pAddJet->e3_v2_sdb1   = float(fECF->manager->ecfns["3_2"]);
     pAddJet->e4_v1_sdb1   = float(fECF->manager->ecfns["4_1"]);
     pAddJet->e4_v2_sdb1   = float(fECF->manager->ecfns["4_2"]);
+    /*
     beta=2;
     fECF->calcECFN(beta,lSDFiltered);
     pAddJet->e2_sdb2      = float(fECF->manager->ecfns["2_2"]);
@@ -1117,6 +1122,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
     pAddJet->e3_v2_sdb2   = float(fECF->manager->ecfns["3_2"]);
     pAddJet->e4_v1_sdb2   = float(fECF->manager->ecfns["4_1"]);
     pAddJet->e4_v2_sdb2   = float(fECF->manager->ecfns["4_2"]);
+    */
   }
   
   // Recursive Soft drop
@@ -1432,7 +1438,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
     }
   }
   */
-  /*
+
   float lepCPt(-100), lepCEta(-100), lepCPhi(-100);
   float lepCId(0);
 
@@ -1477,7 +1483,6 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   pAddJet->lmdC_2 = JetTools::lsf(lClusterParticles, vSubC_2, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 2, 1);
   pAddJet->lmdC_3 = JetTools::lsf(lClusterParticles, vSubC_3, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 3, 1);
   pAddJet->lmdC_4 = JetTools::lsf(lClusterParticles, vSubC_4, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 4, 1);
-  */
 
   //
   // Top Tagging

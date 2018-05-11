@@ -101,6 +101,7 @@ namespace baconhep
     //edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3newwoRaw;
       edm::EDGetTokenT<reco::PFTauDiscriminator>            fTokIsoMVA3newwRaw;
       bool fUsePuppi;
+      bool fUseTO;
       bool fUseAOD;
   };
 }

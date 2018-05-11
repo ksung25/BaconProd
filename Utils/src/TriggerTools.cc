@@ -13,6 +13,7 @@ TriggerObjects TriggerTools::matchHLT(const double eta, const double phi,
   const double dRMax = 0.2;
 
   TriggerObjects matchBits;
+  //return matchBits;
   for(unsigned int irec=0; irec<triggerRecords.size(); irec++) {     
     for(unsigned int iobj=0; iobj<triggerRecords[irec].objectMap.size(); iobj++) {
       const std::string   filterName = triggerRecords[irec].objectMap[iobj].first;
@@ -29,6 +30,7 @@ TriggerObjects TriggerTools::matchHLT(const double eta, const double phi,
           const trigger::TriggerObject& tobj(toc[hltf]);
           if(reco::deltaR(eta,phi,tobj.eta(),tobj.phi()) < dRMax) {
             matchBits[filterBit] = 1;
+	    break;
           }
         }
       }
@@ -45,6 +47,7 @@ TriggerObjects TriggerTools::matchHLT(const double eta, const double phi,
   const double dRMax = 0.2;
 
   TriggerObjects matchBits;
+  //return matchBits;
   for(unsigned int irec=0; irec<triggerRecords.size(); irec++) {     
     for(unsigned int iobj=0; iobj<triggerRecords[irec].objectMap.size(); iobj++) {
       const std::string   filterName = triggerRecords[irec].objectMap[iobj].first;
@@ -54,6 +57,7 @@ TriggerObjects TriggerTools::matchHLT(const double eta, const double phi,
         if(tobj.hasFilterLabel(filterName)) {
           if(reco::deltaR(eta,phi,tobj.eta(),tobj.phi()) < dRMax) {
 	    matchBits[filterBit] = 1; 
+	    break;
           }
         }
       }

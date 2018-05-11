@@ -15,6 +15,7 @@ FillerTau::FillerTau(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fPuppiName     (iConfig.getUntrackedParameter<std::string>("edmPuppiName","puppi")),
   fPuppiNoLepName(iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppiNoLep")),
   fUsePuppi      (iConfig.getUntrackedParameter<bool>("usePuppi",true)),
+  fUseTO         (iConfig.getUntrackedParameter<bool>("useTriggerObject",false)),
   fUseAOD (useAOD)
 {
   if(fUseAOD) {
@@ -298,7 +299,7 @@ void FillerTau::fill(TClonesArray *array,
     pTau->antiEleMVA6Cat   = hMVA6EleRejCat.isValid() ? (*hMVA6EleRejCat)[tauRef] : 0;
     pTau->rawMuonRejection = hMVAMuonRejRaw.isValid() ? (*hMVAMuonRejRaw)[tauRef] : 0;
     
-    pTau->hltMatchBits = TriggerTools::matchHLT(pTau->eta, pTau->phi, triggerRecords, triggerEvent);
+    if(fUseTO) pTau->hltMatchBits = TriggerTools::matchHLT(pTau->eta, pTau->phi, triggerRecords, triggerEvent);
   } 
 }
 
@@ -355,7 +356,6 @@ void FillerTau::fill(TClonesArray *array,
     pTau->e   = itTau->energy();
     pTau->q   = itTau->charge();
 
-
     //
     // Impact Parameter (!) how to get in MINIAOD?
     //==============================
@@ -364,9 +364,7 @@ void FillerTau::fill(TClonesArray *array,
     pat::PackedCandidate const* packedLeadTauCand = dynamic_cast<pat::PackedCandidate const*>(itTau->leadChargedHadrCand().get());
     pTau->dzLeadChHad = (packedLeadTauCand)?packedLeadTauCand->dz():-999;
     pTau->d0LeadChHad = (packedLeadTauCand)?-packedLeadTauCand->dxy():-999;
-
-
-
+    
     //
     // Isolation
     //==============================
@@ -401,18 +399,16 @@ void FillerTau::fill(TClonesArray *array,
     pTau->nSignalChHad = itTau->signalPFChargedHadrCands().size();
     pTau->nSignalGamma = itTau->signalPFGammaCands().size();
     pTau->decaymode    = itTau->decayMode();
-
     pTau->hpsDisc=0;
     for(unsigned int idisc=0; idisc<fMyTauDiscHandles.size(); idisc++) {
       if(itTau->tauID(fMyTauDiscHandles[idisc]->name)>0.0) {
         pTau->hpsDisc |= fMyTauDiscHandles[idisc]->flag;
       }
     }
-
     pTau->antiEleMVA6      = itTau->tauID("againstElectronMVA6Raw");
     pTau->antiEleMVA6Cat   = itTau->tauID("againstElectronMVA6category");
     //pTau->rawMuonRejection = itTau->tauID("againstMuonMVAraw");
-    pTau->hltMatchBits = TriggerTools::matchHLT(pTau->eta, pTau->phi, triggerRecords, triggerObjects);
+    if(fUseTO) pTau->hltMatchBits = TriggerTools::matchHLT(pTau->eta, pTau->phi, triggerRecords, triggerObjects);
   }
 }
 void FillerTau::computeIso(double &iEta,double &iPhi,const std::vector<reco::PFCandidatePtr>& iCands, const double extRadius,

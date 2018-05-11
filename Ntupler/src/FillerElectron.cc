@@ -41,6 +41,7 @@ FillerElectron::FillerElectron(const edm::ParameterSet &iConfig, const bool useA
   fEleTightIdIsoMapTag   (iConfig.getUntrackedParameter<edm::InputTag>("edmEleTightIdIsoMapTag")),
   fMVAValuesIsoMapTag    (iConfig.getUntrackedParameter<edm::InputTag>("edmMVAValuesIsoTag")),
   fMVACatsIsoMapTag      (iConfig.getUntrackedParameter<edm::InputTag>("edmMVACatsIsoTag")),
+  fUseTO                 (iConfig.getUntrackedParameter<bool>("useTriggerObject",false)),
   fUseAOD                (useAOD)
 {
   if(fUseAOD)  fTokEleName        = iC.consumes<reco::GsfElectronCollection>(fEleName);
@@ -300,7 +301,7 @@ void FillerElectron::fill(TClonesArray *array,
       }
     }
     
-    pElectron->hltMatchBits = TriggerTools::matchHLT(pElectron->eta, pElectron->phi, triggerRecords, triggerEvent);
+    if(fUseTO) pElectron->hltMatchBits = TriggerTools::matchHLT(pElectron->eta, pElectron->phi, triggerRecords, triggerEvent);
   }
 }
 
@@ -529,7 +530,7 @@ void FillerElectron::fill(TClonesArray *array,
 
     // Obtain a track ID, unique per event. The track ID is the index in the general tracks collection
     pElectron->trkID = -1;  // general tracks not in MINIAOD
-    pElectron->hltMatchBits = TriggerTools::matchHLT(pElectron->eta, pElectron->phi, triggerRecords, triggerObjects);
+    if(fUseTO) pElectron->hltMatchBits = TriggerTools::matchHLT(pElectron->eta, pElectron->phi, triggerRecords, triggerObjects);
   }
 }
 
