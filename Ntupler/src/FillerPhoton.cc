@@ -35,6 +35,7 @@ FillerPhoton::FillerPhoton(const edm::ParameterSet &iConfig, const bool useAOD,e
   fNeuHadIsoMapTag   (iConfig.getUntrackedParameter<edm::InputTag>("edmNeuHadIsoMapTag")),
   fGammaIsoMapTag    (iConfig.getUntrackedParameter<edm::InputTag>("edmGammaIsoMapTag")),
   fPhoMVAMapTag      (iConfig.getUntrackedParameter<edm::InputTag>("edmPhoMVAIdTag")),
+  fUseTO             (iConfig.getUntrackedParameter<bool>("useTriggerObject",false)),
   fUseAOD            (useAOD)
 {
 //  fPhotonMVA = new PhotonMVACalculator();
@@ -210,7 +211,7 @@ void FillerPhoton::fill(TClonesArray *array,
     // Photon MVA ID: https://twiki.cern.ch/twiki/bin/view/CMS/MultivariatePhotonIdentificationRun2
     pPhoton->mva = (*hPhoMVAMap)[phoBaseRef]; //(!) fPhotonMVA->mvaValue((*itPho),lazyTools,*hRho,pPhoton->gammaIso03,pPhoton->chHadIso03SelVtx,pPhoton->chHadIso03WstVtx,lRR);
     
-    pPhoton->hltMatchBits = TriggerTools::matchHLT(pPhoton->eta, pPhoton->phi, triggerRecords, triggerEvent);
+    if(fUseTO) pPhoton->hltMatchBits = TriggerTools::matchHLT(pPhoton->eta, pPhoton->phi, triggerRecords, triggerEvent);
   }
 }
 
@@ -341,7 +342,7 @@ void FillerPhoton::fill(TClonesArray *array,
     // Photon MVA ID: https://twiki.cern.ch/twiki/bin/view/CMS/MultivariatePhotonIdentificationRun2
     if(fPhoMVAMapTag.label().size() > 0) pPhoton->mva = (*hPhoMVAMap)[phoBaseRef];//itPho->photonID("egmPhotonIDs:mvaPhoID-Spring15-25ns-nonTrig-V2-wp90");
 
-    pPhoton->hltMatchBits = TriggerTools::matchHLT(pPhoton->eta, pPhoton->phi, triggerRecords, triggerObjects);
+    if(fUseTO) pPhoton->hltMatchBits = TriggerTools::matchHLT(pPhoton->eta, pPhoton->phi, triggerRecords, triggerObjects);
   }
 }
 /*

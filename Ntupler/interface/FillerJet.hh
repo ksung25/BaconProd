@@ -156,11 +156,11 @@ namespace baconhep
 
       // Random number generator for Q-jet volatility
       TRandom2* fRand;
+      bool fUseTO;
 
       // JEC corrector
       FactorizedJetCorrector   *fJetCorr;
       JetCorrectionUncertainty *fJetUnc;
-
       bool fUseAOD;
       EnergyCorrelations* fECF;
       EnergyCorrelations* fECFn;

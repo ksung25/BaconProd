@@ -28,6 +28,7 @@ FillerCaloJet::FillerCaloJet(const edm::ParameterSet &iConfig,edm::ConsumesColle
   fGenJetName         (iConfig.getUntrackedParameter<std::string>("genJetName","AK4GenJetsCHS")),
   fJetFlavorName      (iConfig.getUntrackedParameter<std::string>("jetFlavorName","AK4byValAlgoCHS")),
   fConeSize           (iConfig.getUntrackedParameter<double>("coneSize",0.4)),
+  fUseTO              (iConfig.getUntrackedParameter<bool>("useTriggerObject",false)),
   fJetCorr            (0),
   fJetUnc             (0)
 {
@@ -171,7 +172,7 @@ void FillerCaloJet::fill(TClonesArray *array,
       pJet->genm         = matchGenJet->mass();
     }
     
-    pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, triggerEvent);
+    if(fUseTO) pJet->hltMatchBits = TriggerTools::matchHLT(pJet->eta, pJet->phi, triggerRecords, triggerEvent);
   } 
 }
 const reco::BasicJet* FillerCaloJet::match( const reco::CaloJet *iJet,const reco::BasicJetCollection *jets ) { 
