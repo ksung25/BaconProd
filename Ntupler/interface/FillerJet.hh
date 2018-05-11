@@ -5,6 +5,7 @@
 #include "BaconProd/Utils/interface/JetPUIDMVACalculator.hh"
 #include "BaconProd/Utils/interface/BoostedBtaggingMVACalculator.hh"
 #include "BaconProd/Utils/interface/BJetRegression.hh"
+#include "BaconProd/Utils/interface/BJetNNRegression.hh"
 //#include "BaconProd/Utils/interface/ShowerDeco.hh"
 #include "BaconProd/Utils/interface/EnergyCorrelations.h"
 //#include "BaconProd/Utils/interface/RecursiveSoftDrop.hh"
@@ -83,6 +84,7 @@ namespace baconhep
      void  initPUJetId();
      void  initBoostedBtaggingJetId();
      void  initBReg();
+     void  initBRegNN();
     static Measurement1D vertexDxy(const reco::VertexCompositePtrCandidate &svcand, const reco::Vertex &pv)  ;
     static Measurement1D vertexD3d(const reco::VertexCompositePtrCandidate &svcand, const reco::Vertex &pv)  ;
 
@@ -130,10 +132,14 @@ namespace baconhep
     //std::string fSVTagInfoName;
       std::string fBoostedDoubleSVTagInfoName;
       std::string fDeepDoubleBtagName;
+      std::string fDeepDoubleBNoMassSculptPentagName;
       //std::string fMuonName;
       //std::string fEleName;
       //std::string fsoftPFMuonTagInfoName;
       //std::string fsoftPFElectronTagInfoName;
+      std::string fBRegNNFile;
+      double      fBRegNNMean;
+      double      fBRegNNStd;
       std::string fJettinessName;
       std::string fQGLikelihood;
       std::string fQGLikelihoodSubJets;
@@ -152,6 +158,7 @@ namespace baconhep
       JetPUIDMVACalculator fJetPUIDMVACalc;
       BoostedBtaggingMVACalculator fJetBoostedBtaggingMVACalc;
       BJetRegression               fBReg;
+      BJetNNRegression             fBRegNN;
       //ShowerDeco*          fShowerDeco;
 
       // Random number generator for Q-jet volatility
@@ -187,6 +194,7 @@ namespace baconhep
     edm::EDGetTokenT<reco::JetTagCollection>   fTokCSVbtagSubJetName;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokCSVDoubleBtagName;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepDoubleBtagName;
+    edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepDoubleBNoMassSculptPentagName;
     edm::EDGetTokenT<edm::ValueMap<float> >    fTokQGLikelihood     ;
     edm::EDGetTokenT<edm::ValueMap<float> >    fTokQGLAxis2         ;
     edm::EDGetTokenT<edm::ValueMap<float> >    fTokQGLPtD           ;

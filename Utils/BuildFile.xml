@@ -6,6 +6,8 @@
 <use name="roottmva"/>
 <use name="fastjet"/>
 <use name="fastjet-contrib"/>
+<use name="tensorflow-cc"/>
+<use name="PhysicsTools/TensorFlow"/>
 <flags CXXFLAGS="-g -Wall"/>
 <export>
   <lib name="1"/>

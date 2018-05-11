@@ -2,6 +2,7 @@
 //#include "BaconProd/Utils/interface/EnergyCorrelator.hh"
 #include "BaconProd/Utils/interface/TriggerTools.hh"
 #include "BaconProd/Utils/interface/JetTools.hh"
+#include "BaconProd/Utils/interface/BJetNNRegression.hh"
 //#include "BaconProd/Utils/interface/RecursiveSoftDrop.hh"
 #include "BaconAna/DataFormats/interface/TJet.hh"
 #include "BaconAna/DataFormats/interface/TPFPart.hh"
@@ -72,6 +73,10 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   //fSVTagInfoName      (iConfig.getUntrackedParameter<std::string>("svTagInfoName","AK4PFSecondaryVertexTagInfosCHS")),
   fBoostedDoubleSVTagInfoName (iConfig.getUntrackedParameter<std::string>("boostedDoubleSVTagInfoName","AK8PFBoostedDoubleSVTagInfosCHS")),
   fDeepDoubleBtagName (iConfig.getUntrackedParameter<std::string>("deepDoubleBTagName","AK8PFBoostedDeepDoubleBJetTagsCHS:probH")),
+  fDeepDoubleBNoMassSculptPentagName (iConfig.getUntrackedParameter<std::string>("deepDoubleBNoMassSculptPenTagName","AK8PFBoostedDeepDoubleBNoMassSculptPenJetTagsCHS:probH")),
+  fBRegNNFile         (iConfig.getUntrackedParameter<std::string>("BRegNNFileName","BaconProd/Utils/data/breg_training_2017.pb")),
+  fBRegNNMean         (iConfig.getUntrackedParameter<double>("BRegNNMean",1.0610932111740112)),
+  fBRegNNStd          (iConfig.getUntrackedParameter<double>("BRegNNStd",0.39077115058898926)),
   //fMuonName           (iConfig.getUntrackedParameter<std::string>("edmMuonName","muons")),
   //fEleName            (iConfig.getUntrackedParameter<std::string>("edmElectronName","gedGsfElectrons")),
   //fsoftPFMuonTagInfoName    (iConfig.getUntrackedParameter<std::string>("softPFMuonTagInfoName","AK4PFSoftPFMuonsTagInfosCHS")),
@@ -111,6 +116,10 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
    fBRegFile  =  (cmssw_base_src + "BaconProd/Utils/data/ttbar-G25-500k-13d-300t.weights.xml");
    std::cout<<"BJet Regression "<< fBRegFile <<std::endl;
    initBReg();
+   
+   fBRegNNFile  =  (cmssw_base_src + fBRegNNFile);
+   std::cout<<"BJet NN Regression "<< fBRegNNFile <<std::endl;
+   initBRegNN();
    
    if(fUseAOD) {
       std::vector<std::string> puIDFiles = iConfig.getUntrackedParameter< std::vector<std::string> >("jetPUIDFiles",empty_vstring);
@@ -162,6 +171,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
     fTokCSVDoubleBtagName = iC.consumes<reco::JetTagCollection>  (fCSVDoubleBtagName);
     fTokBoostedDoubleSVTagInfo = iC.consumes<reco::BoostedDoubleSVTagInfoCollection> (fBoostedDoubleSVTagInfoName);
     fTokDeepDoubleBtagName = iC.consumes<reco::JetTagCollection>  (fDeepDoubleBtagName);
+    fTokDeepDoubleBNoMassSculptPentagName = iC.consumes<reco::JetTagCollection>  (fDeepDoubleBNoMassSculptPentagName);
     //fToksoftPFMuonTagInfo     = iC.consumes<reco::CandSoftLeptonTagInfoCollection>     (fsoftPFMuonTagInfoName);
     //fToksoftPFElectronTagInfo = iC.consumes<reco::CandSoftLeptonTagInfoCollection>     (fsoftPFElectronTagInfoName);
     edm::InputTag lTau1(fJettinessName,"tau1");
@@ -208,6 +218,9 @@ void FillerJet::initPUJetId() {
 }
 void FillerJet::initBReg(){
   fBReg.initialize("BDT",fBRegFile);
+}
+void FillerJet::initBRegNN(){
+  fBRegNN.initialize(fBRegNNFile,fBRegNNMean,fBRegNNStd);
 }
 void FillerJet::initBoostedBtaggingJetId(){
   fJetBoostedBtaggingMVACalc.initialize("BDT",fWeightFile,fWeightFile.find("Subjet") < std::string::npos);
@@ -413,7 +426,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     edm::Handle<reco::VertexCompositePtrCandidateCollection> secVertices;
     iEvent.getByToken(fTokSVName, secVertices);
     const reco::VertexCompositePtrCandidateCollection svtx=*secVertices;
-    float vtxPt=-1,vtxMass=-1,vtx3DVal=-1,vtx3DeVal=-1,vtxNTrks=-1,maxFoundSignificance=0;
+    float vtxPt=0,vtxMass=0,vtx3DVal=0,vtx3DeVal=0,vtxNTrks=0,maxFoundSignificance=0;
     for (const reco::VertexCompositePtrCandidate &sv : svtx) {
       GlobalVector flightDir(sv.vertex().x() - pv.x(), sv.vertex().y() - pv.y(),sv.vertex().z() - pv.z());
       GlobalVector jetDir(itJet->px(),itJet->py(),itJet->pz());
@@ -436,6 +449,72 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->vtx3DVal = vtx3DVal;
     pJet->ptreg    = fBReg.mvaValue(iNPV,jetcorr,*itJet,vtxPt,vtxMass,vtx3DVal,vtxNTrks,vtx3DeVal);
       
+    //
+    // Bjet NN Regression
+    //
+
+    fBRegNN.Jet_pt = ptRaw;
+    fBRegNN.Jet_eta = itJet->eta();
+    fBRegNN.rho = *hRho;
+    fBRegNN.Jet_mt = sqrt(itJet->energy()*itJet->energy()-itJet->pz()*itJet->pz());
+    fBRegNN.Jet_leadTrackPt = JetTools::leadTrkPt(*itJet);
+    fBRegNN.Jet_leptonDeltaR = JetTools::leptons(*itJet,7);
+    if (fBRegNN.Jet_leptonDeltaR<1e-4) {
+      fBRegNN.Jet_leptonPtRel = 0.;
+      fBRegNN.Jet_leptonPtRelInv = 0.;
+    }
+    else {
+      fBRegNN.Jet_leptonPtRel = JetTools::leptons(*itJet,8);
+      fBRegNN.Jet_leptonPtRelInv = JetTools::leptons(*itJet,9);
+    }
+    fBRegNN.Jet_neHEF = itJet->neutralHadronEnergyFraction();
+    fBRegNN.Jet_neEmEF = itJet->neutralEmEnergyFraction();
+    fBRegNN.Jet_vtxPt = vtxPt;
+    fBRegNN.Jet_vtxMass = vtxMass;
+    fBRegNN.Jet_vtx3dL = vtx3DVal;
+    fBRegNN.Jet_vtxNtrk = vtxNTrks;
+    fBRegNN.Jet_vtx3deL = vtx3DeVal;
+    fBRegNN.Jet_numDaughters_pt03 = JetTools::nDaughters(*itJet,0.03);
+    std::vector<float> chvec, emvec, nevec, muvec;
+    JetTools::energyRings(*itJet,chvec,emvec,nevec,muvec);
+    fBRegNN.Jet_energyRing_dR0_em_Jet_e = emvec[0]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR1_em_Jet_e = emvec[1]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR2_em_Jet_e = emvec[2]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR3_em_Jet_e = emvec[3]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR4_em_Jet_e = emvec[4]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR0_neut_Jet_e = nevec[0]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR1_neut_Jet_e = nevec[1]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR2_neut_Jet_e = nevec[2]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR3_neut_Jet_e = nevec[3]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR4_neut_Jet_e = nevec[4]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR0_ch_Jet_e = chvec[0]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR1_ch_Jet_e = chvec[1]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR2_ch_Jet_e = chvec[2]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR3_ch_Jet_e = chvec[3]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR4_ch_Jet_e = chvec[4]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR0_mu_Jet_e = muvec[0]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR1_mu_Jet_e = muvec[1]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR2_mu_Jet_e = muvec[2]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR3_mu_Jet_e = muvec[3]/(itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR4_mu_Jet_e = muvec[4]/(itJet->energy()) ;
+    fBRegNN.Jet_chHEF = itJet->chargedHadronEnergyFraction();
+    fBRegNN.Jet_chEmEF = itJet->chargedEmEnergyFraction();
+    fBRegNN.isEle = 0;
+    fBRegNN.isMu = 0;
+    fBRegNN.isOther = 1;
+    int softLepID = abs(JetTools::leptons(*itJet,4));
+    if (softLepID==13) fBRegNN.isMu = 1;
+    else if (softLepID==11) fBRegNN.isEle = 1;
+    fBRegNN.Jet_mass = itJet->mass();
+    fBRegNN.Jet_withPtd = JetTools::ptD(*itJet);
+
+
+    fBRegNN.SetNNVectorVar();
+    std::pair<float,float> bjetnnout = fBRegNN.EvaluateNN();
+    //std::cout<<"NN BJet Correction = "<<bjetnnout.first<<std::endl;
+    pJet->bjetcorr = bjetnnout.first;
+    pJet->bjetres  = bjetnnout.second;
+
     //
     // Identification
     //==============================
@@ -623,6 +702,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
 
     edm::RefToBase<pat::Jet> jetBaseRef( edm::Ref<pat::JetCollection>(hJetProduct, itJet - jetCol->begin()) );
 
+    float uncorr = itJet->jecFactor("Uncorrected");
     double ptRaw = itJet->pt()*itJet->jecFactor("Uncorrected");
     if(ptRaw < fMinPt) continue;
     // input to jet corrections
@@ -677,7 +757,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     edm::Handle<reco::VertexCompositePtrCandidateCollection> secVertices;
     iEvent.getByToken(fTokSVName, secVertices);
     const reco::VertexCompositePtrCandidateCollection svtx=*secVertices;
-    float vtxPt=-1,vtxMass=-1,vtx3DVal=-1,vtx3DeVal=-1,vtxNTrks=-1,maxFoundSignificance=0;
+    float vtxPt=0,vtxMass=0,vtx3DVal=0,vtx3DeVal=0,vtxNTrks=0,maxFoundSignificance=0;
     for (const reco::VertexCompositePtrCandidate &sv : svtx) {
       GlobalVector flightDir(sv.vertex().x() - pv.x(), sv.vertex().y() - pv.y(),sv.vertex().z() - pv.z());
       GlobalVector jetDir(itJet->px(),itJet->py(),itJet->pz());
@@ -699,6 +779,72 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->vtxNtk   = vtxNTrks;
     pJet->vtx3DVal = vtx3DVal;
     pJet->ptreg    = fBReg.mvaValue(iNPV,jetcorr,*itJet,vtxPt,vtxMass,vtx3DVal,vtxNTrks,vtx3DeVal);
+      
+    //
+    // Bjet NN Regression
+    //
+
+    fBRegNN.Jet_pt = ptRaw;
+    fBRegNN.Jet_eta = itJet->eta();
+    fBRegNN.rho = *hRho;
+    fBRegNN.Jet_mt = uncorr*sqrt(itJet->energy()*itJet->energy()-itJet->pz()*itJet->pz());
+    fBRegNN.Jet_leadTrackPt = JetTools::leadTrkPt(*itJet);
+    fBRegNN.Jet_leptonDeltaR = JetTools::leptons(*itJet,7);
+    if (fBRegNN.Jet_leptonDeltaR<1e-4) {
+      fBRegNN.Jet_leptonPtRel = 0.;
+      fBRegNN.Jet_leptonPtRelInv = 0.;
+    }
+    else {
+      fBRegNN.Jet_leptonPtRel = JetTools::leptons(*itJet,8);
+      fBRegNN.Jet_leptonPtRelInv = uncorr*JetTools::leptons(*itJet,9);
+    }
+    fBRegNN.Jet_neHEF = itJet->neutralHadronEnergyFraction();
+    fBRegNN.Jet_neEmEF = itJet->neutralEmEnergyFraction();
+    fBRegNN.Jet_vtxPt = vtxPt;
+    fBRegNN.Jet_vtxMass = vtxMass;
+    fBRegNN.Jet_vtx3dL = vtx3DVal;
+    fBRegNN.Jet_vtxNtrk = vtxNTrks;
+    fBRegNN.Jet_vtx3deL = vtx3DeVal;
+    fBRegNN.Jet_numDaughters_pt03 = JetTools::nDaughters(*itJet,0.03);
+    std::vector<float> chvec, emvec, nevec, muvec;
+    JetTools::energyRings(*itJet,chvec,emvec,nevec,muvec);
+    fBRegNN.Jet_energyRing_dR0_em_Jet_e = emvec[0]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR1_em_Jet_e = emvec[1]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR2_em_Jet_e = emvec[2]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR3_em_Jet_e = emvec[3]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR4_em_Jet_e = emvec[4]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR0_neut_Jet_e = nevec[0]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR1_neut_Jet_e = nevec[1]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR2_neut_Jet_e = nevec[2]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR3_neut_Jet_e = nevec[3]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR4_neut_Jet_e = nevec[4]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR0_ch_Jet_e = chvec[0]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR1_ch_Jet_e = chvec[1]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR2_ch_Jet_e = chvec[2]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR3_ch_Jet_e = chvec[3]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR4_ch_Jet_e = chvec[4]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR0_mu_Jet_e = muvec[0]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR1_mu_Jet_e = muvec[1]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR2_mu_Jet_e = muvec[2]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR3_mu_Jet_e = muvec[3]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_energyRing_dR4_mu_Jet_e = muvec[4]/(uncorr*itJet->energy()) ;
+    fBRegNN.Jet_chHEF = itJet->chargedHadronEnergyFraction();
+    fBRegNN.Jet_chEmEF = itJet->chargedEmEnergyFraction();
+    fBRegNN.isEle = 0;
+    fBRegNN.isMu = 0;
+    fBRegNN.isOther = 1;
+    int softLepID = abs(JetTools::leptons(*itJet,4));
+    if (softLepID==13) fBRegNN.isMu = 1;
+    else if (softLepID==11) fBRegNN.isEle = 1;
+    fBRegNN.Jet_mass = itJet->mass()*uncorr;
+    fBRegNN.Jet_withPtd = JetTools::ptD(*itJet);
+
+
+    fBRegNN.SetNNVectorVar();
+    std::pair<float,float> bjetnnout = fBRegNN.EvaluateNN();
+    //std::cout<<"NN BJet Correction = "<<bjetnnout.first<<std::endl;
+    pJet->bjetcorr = bjetnnout.first;
+    pJet->bjetres  = bjetnnout.second;
 
     //
     // Identification
@@ -834,6 +980,9 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   edm::Handle<reco::JetTagCollection> hDeepDoubleBtag;
   iEvent.getByToken(fTokDeepDoubleBtagName, hDeepDoubleBtag);
   assert(hDeepDoubleBtag.isValid());
+  edm::Handle<reco::JetTagCollection> hDeepDoubleBNoMassSculptPentag;
+  iEvent.getByToken(fTokDeepDoubleBNoMassSculptPentagName, hDeepDoubleBNoMassSculptPentag);
+  assert(hDeepDoubleBNoMassSculptPentag.isValid());
 
   //Get Quark Gluon Likelihood on subjets
   edm::Handle<edm::ValueMap<float> > hQGLikelihoodSubJets;
@@ -866,7 +1015,11 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   pAddJet->tau4 = (*(hTau4.product()))[jetBaseRef];
   pAddJet->doublecsv = (*(hCSVDoubleBtag.product()))[jetBaseRef];
   pAddJet->deepdoubleb = (*(hDeepDoubleBtag.product()))[jetBaseRef];
+<<<<<<< HEAD
   
+=======
+  pAddJet->deepdoubleb_nomasssculptpen = (*(hDeepDoubleBNoMassSculptPentag.product()))[jetBaseRef];
+>>>>>>> c4b0f4b532cea99db75d27d71b241b0896d7ff37
   //if(fShowerDeco != 0) { 
   std::vector<reco::CandidatePtr> pfConstituents = itJet.getJetConstituents();                                                                                                                     
   std::vector<fastjet::PseudoJet>   lClusterParticles;                                                                                                                                     
@@ -1291,7 +1444,7 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
     }
   }
   */
-  /*
+
   float lepCPt(-100), lepCEta(-100), lepCPhi(-100);
   float lepCId(0);
 
@@ -1336,7 +1489,6 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   pAddJet->lmdC_2 = JetTools::lsf(lClusterParticles, vSubC_2, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 2, 1);
   pAddJet->lmdC_3 = JetTools::lsf(lClusterParticles, vSubC_3, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 3, 1);
   pAddJet->lmdC_4 = JetTools::lsf(lClusterParticles, vSubC_4, lepCPt, lepCEta, lepCPhi, lepCId, 2.0, 4, 1);
-  */
 
   //
   // Top Tagging

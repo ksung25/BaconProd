@@ -1206,9 +1206,138 @@ float JetTools::leadPt(const reco::PFJet &jet) {
   float lFPt = lPt;
   return lFPt;
 }
+float JetTools::leadTrkPt(const pat::Jet &jet) {
+  double lPt = -1;
+  for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
+    double pPt = jet.daughter(ida)->pt();
+    int pQ = jet.daughter(ida)->charge();
+    if(pQ != 0 || pPt < lPt) continue;
+    lPt = pPt;
+  }
+  float lFPt = lPt;
+  return lFPt;
+}
+float JetTools::leadTrkPt(const reco::PFJet &jet) { 
+  double lPt = -1;
+
+  const unsigned int nPFCands = jet.nConstituents ();
+  for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
+    const reco::Candidate* cand = jet.getJetConstituentsQuick ()[ipf];
+    const pat::PackedCandidate *packCand = dynamic_cast<const pat::PackedCandidate *>(cand);
+    if(packCand != 0) { 
+      if(packCand->charge() != 0 || lPt < packCand->pt()) lPt = packCand->pt();
+    } else { 
+      const reco::PFCandidatePtr pfcand    = jet.getPFConstituents().at(ipf);
+      if(pfcand->charge() != 0 || lPt < pfcand->pt()) lPt = pfcand->pt();
+    }
+  }
+  float lFPt = lPt;
+  return lFPt;
+}
+int JetTools::nDaughters(const pat::Jet &jet,float minPt) {
+  int numDaughters = 0;
+  for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
+    if (jet.daughter(ida)->pt()>minPt) numDaughters++;
+  }
+  return numDaughters;
+}
+int JetTools::nDaughters(const reco::PFJet &jet,float minPt) {
+  int numDaughters = 0;
+  const unsigned int nPFCands = jet.nConstituents();
+  for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
+    const reco::Candidate* cand = jet.getJetConstituentsQuick ()[ipf];
+    const pat::PackedCandidate *packCand = dynamic_cast<const pat::PackedCandidate *>(cand);
+    if(packCand != 0) {
+      if(packCand->pt() > minPt) numDaughters++;
+    } else {
+      if(jet.getPFConstituents().at(ipf)->pt() > minPt) numDaughters++;
+    }
+  }
+  return numDaughters;
+}
+void JetTools::energyRings(const pat::Jet &jet,std::vector<float> &chvec,std::vector<float> &emvec,std::vector<float> &nevec,std::vector<float> &muvec) {
+  float cone_boundaries[] = { 0.05, 0.1, 0.2, 0.3, 0.4 }; // hardcoded boundaries: should be made configurable
+  size_t ncone_boundaries = sizeof(cone_boundaries)/sizeof(float);
+  std::vector<float> chEnergies(ncone_boundaries+1,0.);
+  std::vector<float> emEnergies(ncone_boundaries+1,0.); 
+  std::vector<float> neEnergies(ncone_boundaries+1,0.); 
+  std::vector<float> muEnergies(ncone_boundaries+1,0.);
+  for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
+    const reco::Candidate* pPart = jet.daughter(ida);
+    float candDr = reco::deltaR(jet.eta(),jet.phi(),pPart->eta(),pPart->phi());
+    int pdgid = abs(pPart->pdgId());
+    size_t icone = std::lower_bound(&cone_boundaries[0],&cone_boundaries[ncone_boundaries],candDr) - &cone_boundaries[0];
+    float candEnergy = pPart->energy();
+    if( pdgid == 22 || pdgid == 11 ) {
+       // std::cout << " fill EM" << std::endl;
+       emEnergies[icone] += candEnergy;
+    } else if ( pdgid == 13 ) { 
+       // std::cout << " fill mu" << std::endl;
+       muEnergies[icone] += candEnergy;
+    } else if ( pPart->charge() != 0 ) {
+       // std::cout << " fill ch" << std::endl;
+      chEnergies[icone] += candEnergy;
+    } else {
+      // std::cout << " fill ne" << std::endl;
+      neEnergies[icone] += candEnergy;
+    }
+  }
+  chvec = chEnergies;
+  emvec = emEnergies;
+  nevec = neEnergies;
+  muvec = muEnergies;
+}
+void JetTools::energyRings(const reco::PFJet &jet,std::vector<float> &chvec,std::vector<float> &emvec,std::vector<float> &nevec,std::vector<float> &muvec) {
+  float cone_boundaries[] = { 0.05, 0.1, 0.2, 0.3, 0.4 }; // hardcoded boundaries: should be made configurable
+  size_t ncone_boundaries = sizeof(cone_boundaries)/sizeof(float);
+  std::vector<float> chEnergies(ncone_boundaries+1,0.);
+  std::vector<float> emEnergies(ncone_boundaries+1,0.); 
+  std::vector<float> neEnergies(ncone_boundaries+1,0.); 
+  std::vector<float> muEnergies(ncone_boundaries+1,0.);
+  const unsigned int nPFCands = jet.nConstituents ();
+  for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
+    const reco::Candidate* cand = jet.getJetConstituentsQuick ()[ipf];
+    const pat::PackedCandidate *packCand = dynamic_cast<const pat::PackedCandidate *>(cand);
+    float candDr = 0.;
+    int pdgid = 0;
+    float candEnergy = 0.;
+    int candCharge = 0;
+    if(packCand != 0) { 
+      candDr = reco::deltaR(jet.eta(),jet.phi(),packCand->eta(),packCand->phi());
+      pdgid = abs(packCand->pdgId());
+      candEnergy = packCand->energy();
+      candCharge = packCand->charge();      
+    } else { 
+      const reco::PFCandidatePtr pfcand    = jet.getPFConstituents().at(ipf);
+      candDr = reco::deltaR(jet.eta(),jet.phi(),pfcand->eta(),pfcand->phi());
+      pdgid = abs(pfcand->pdgId());
+      candEnergy = pfcand->energy();
+      candCharge = pfcand->charge();      
+    }
+    size_t icone = std::lower_bound(&cone_boundaries[0],&cone_boundaries[ncone_boundaries],candDr) - &cone_boundaries[0];
+    if( pdgid == 22 || pdgid == 11 ) {
+       // std::cout << " fill EM" << std::endl;
+       emEnergies[icone] += candEnergy;
+    } else if ( pdgid == 13 ) { 
+       // std::cout << " fill mu" << std::endl;
+       muEnergies[icone] += candEnergy;
+    } else if ( candCharge != 0 ) {
+       // std::cout << " fill ch" << std::endl;
+      chEnergies[icone] += candEnergy;
+    } else {
+      // std::cout << " fill ne" << std::endl;
+      neEnergies[icone] += candEnergy;
+    }
+  }
+  chvec = chEnergies;
+  emvec = emEnergies;
+  nevec = neEnergies;
+  muvec = muEnergies;
+}
 float JetTools::leptons(const pat::Jet &jet,int iId) {
   TLorentzVector lVec; lVec.SetPtEtaPhiM(0.,0.,0.,0.);
   double lPt(-1), lEta(-1), lPhi(-1), lId(-1);
+  double lPx(-1), lPy(-1), lPz(-1), lP(-1);
   for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
     const reco::Candidate* pPart = jet.daughter(ida);
     if(fabs(pPart->pdgId()) != 11 && fabs(pPart->pdgId()) != 13) continue;
@@ -1216,6 +1345,10 @@ float JetTools::leptons(const pat::Jet &jet,int iId) {
       lPt = pPart->pt(); 
       lEta = pPart->eta();
       lPhi = pPart->phi();
+      lPx = pPart->px();
+      lPy = pPart->py();
+      lPz = pPart->pz();
+      lP = pPart->p();
       lId = fabs(pPart->pdgId()); }
     TLorentzVector pVec; pVec.SetPtEtaPhiM(pPart->pt(),pPart->eta(),pPart->phi(),pPart->mass());
     lVec += pVec;
@@ -1246,12 +1379,27 @@ float JetTools::leptons(const pat::Jet &jet,int iId) {
     float lLPhi = lPhi;
     return lLPhi;
   }
+  if(iId == 7){
+    float lepjetdr = reco::deltaR(jet.eta(),jet.phi(),lEta,lPhi);
+    return std::max(float(0.),lepjetdr);
+  }
+  if(iId == 8){
+    float softLepPtRel = ( jet.px()*lPx + jet.py()*lPy + jet.pz()*lPz ) / jet.p();
+    softLepPtRel = sqrt( lP*lP - softLepPtRel*softLepPtRel );
+    return std::max(float(0.),softLepPtRel);
+  }
+  if(iId == 9){
+    float softLepPtRelInv = ( jet.px()*lPx + jet.py()*lPy + jet.pz()*lPz ) / lP;
+    softLepPtRelInv = sqrt( jet.p()*jet.p() - softLepPtRelInv*softLepPtRelInv );
+    return std::max(float(0.),softLepPtRelInv);
+  }
   float lFPt = lVec.Pt();
   return lFPt;
 }
 float JetTools::leptons(const reco::PFJet &jet,int iId) {
   TLorentzVector lVec; lVec.SetPtEtaPhiM(0.,0.,0.,0.);
   double lPt(-1), lEta(-1), lPhi(-1), lId(-1);
+  double lPx(-1), lPy(-1), lPz(-1), lP(-1);
   const unsigned int nPFCands = jet.nConstituents ();
   for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
     const reco::Candidate* cand = jet.getJetConstituentsQuick ()[ipf];
@@ -1262,6 +1410,10 @@ float JetTools::leptons(const reco::PFJet &jet,int iId) {
 	lPt = packCand->pt(); 
 	lEta = packCand->eta();
 	lPhi = packCand->phi();
+        lPx = packCand->px();
+        lPy = packCand->py();
+        lPz = packCand->pz();
+        lP = packCand->p();
 	lId = fabs(packCand->pdgId()); 
       }
       TLorentzVector pVec; pVec.SetPtEtaPhiM(packCand->pt(),packCand->eta(),packCand->phi(),packCand->mass());
@@ -1273,6 +1425,10 @@ float JetTools::leptons(const reco::PFJet &jet,int iId) {
 	lPt = pfcand->pt();
 	lEta = pfcand->eta();
         lPhi = pfcand->phi();
+        lPx = pfcand->px();
+        lPy = pfcand->py();
+        lPz = pfcand->pz();
+        lP = pfcand->p();
 	lId = fabs(pfcand->pdgId()); 
       }
       TLorentzVector pVec; pVec.SetPtEtaPhiM(pfcand->pt(),pfcand->eta(),pfcand->phi(),pfcand->mass());
@@ -1305,8 +1461,50 @@ float JetTools::leptons(const reco::PFJet &jet,int iId) {
     float lLPhi = lPhi;
     return lLPhi;
   }
+  if(iId == 7){
+    float lepjetdr = reco::deltaR(jet.eta(),jet.phi(),lEta,lPhi);
+    return std::max(float(0.),lepjetdr);
+  }
+  if(iId == 8){
+    float softLepPtRel = ( jet.px()*lPx + jet.py()*lPy + jet.pz()*lPz ) / jet.p();
+    softLepPtRel = sqrt( lP*lP - softLepPtRel*softLepPtRel );
+    return std::max(float(0.),softLepPtRel);
+  }
+  if(iId == 9){
+    float softLepPtRelInv = ( jet.px()*lPx + jet.py()*lPy + jet.pz()*lPz ) / lP;
+    softLepPtRelInv = sqrt( jet.p()*jet.p() - softLepPtRelInv*softLepPtRelInv );
+    return std::max(float(0.),softLepPtRelInv);
+  }
   float lFPt = lVec.Pt();
   return lFPt;  
+}
+float JetTools::ptD(const pat::Jet &jet) {
+  float sumWeight=0;
+  float sumPt=0;
+  for(unsigned int ida=0; ida<jet.numberOfDaughters(); ida++) {
+    float dpt = jet.daughter(ida)->pt();
+    sumWeight+=(dpt*dpt);
+    sumPt+=dpt;
+  }
+  return (sumWeight > 0 ? sqrt(sumWeight)/sumPt : 0.);
+}
+float JetTools::ptD(const reco::PFJet &jet) {
+  float sumWeight=0;
+  float sumPt=0;
+  const unsigned int nPFCands = jet.nConstituents();
+  for(unsigned int ipf=0; ipf<nPFCands; ipf++) {
+    const reco::Candidate* cand = jet.getJetConstituentsQuick ()[ipf];
+    const pat::PackedCandidate *packCand = dynamic_cast<const pat::PackedCandidate *>(cand);
+    float dpt = 0;
+    if(packCand != 0) {
+      dpt = packCand->pt();
+    } else {
+      dpt = jet.getPFConstituents().at(ipf)->pt();
+    }
+    sumWeight+=(dpt*dpt);
+    sumPt+=dpt;
+  }
+  return (sumWeight > 0 ? sqrt(sumWeight)/sumPt : 0.);
 }
 float JetTools::lsf(std::vector<fastjet::PseudoJet> iCParticles, std::vector<fastjet::PseudoJet> &ljets, 
 		    float ilPt, float ilEta, float ilPhi, int ilId, double dr, int nsj, int iId) {
