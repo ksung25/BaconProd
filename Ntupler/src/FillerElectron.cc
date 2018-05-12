@@ -453,7 +453,7 @@ void FillerElectron::fill(TClonesArray *array,
 
     pElectron->mvaBit     = 0; 
     if((*hEleMediumIdMap)[eleBaseRef]) pElectron->mvaBit     |=  baconhep::kEleMVAMedBit;
-    if((*hEleTightIdMap) [eleBaseRef]) pElectron->mvaBit     |=  baconhep::kEleMVATrightBit;
+    if((*hEleTightIdMap) [eleBaseRef]) pElectron->mvaBit     |=  baconhep::kEleMVATightBit;
     pElectron->mva        =  (*hMVAValuesMap)[eleBaseRef];
     pElectron->mvaCat     =  (*hMVACatsMap)[eleBaseRef];
     pElectron->isConv     = !itEle->passConversionVeto();
