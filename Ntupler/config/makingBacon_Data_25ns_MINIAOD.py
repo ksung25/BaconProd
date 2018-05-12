@@ -62,6 +62,7 @@ process.load("RecoBTag.SecondaryVertex.secondaryVertex_cff")
 process.load("RecoBTag.SoftLepton.softLepton_cff")
 process.load("RecoBTag.Combined.combinedMVA_cff")
 process.load("RecoBTag.CTagging.cTagging_cff")
+process.load("RecoBTag.Combined.deepFlavour_cff")
 
 from BaconProd.Ntupler.myBtagging_cff           import addBTagging
 from BaconProd.Ntupler.myGenJets_cff            import setMiniAODGenJets

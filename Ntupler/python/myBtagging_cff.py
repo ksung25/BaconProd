@@ -37,14 +37,16 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
                                       cms.InputTag(head+"PFSoftPFMuonsTagInfos"+tail),
                                       cms.InputTag(head+"PFSoftPFElectronsTagInfos"+tail)
                                       )))
-    setattr(process, head+'PFDeepCSVTagInfos'+tail,
-            pfDeepCSVTagInfos.clone(
-            shallow_tag_infos = cms.InputTag(head+'PFDeepCSVTagInfos'+tail),
-            jets = cms.InputTag(jets)
-            ))
+    #setattr(process, head+'PFDeepCSVTagInfos'+tail,
+     #       pfDeepCSVTagInfos.clone(
+      #      shallow_tag_infos = cms.InputTag(head+'PFDeepCSVTagInfos'+tail),
+       #     jets = cms.InputTag(jets)
+        #    ))
     setattr(process, head+'PFDeepCSVJetTags'+tail,
             pfDeepCSVJetTags.clone(
-            src = cms.InputTag(head+"PFDeepCSVTagInfos"+tail),
+            shallow_tag_infos = cms.VInputTag(cms.InputTag(head+"PFImpactParameterTagInfos"+tail),
+                                      cms.InputTag(head+"PFInclusiveSecondaryVertexFinderTagInfos"+tail))
+            #src = cms.InputTag(head+"PFDeepCSVTagInfos"+tail),
             #tagInfos = cms.VInputTag( cms.InputTag(head+"PFDeepCSVTagInfos"+tail)),
             ))
     #C-taggers
@@ -129,7 +131,7 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
     process.btagging *= getattr(process,head+'PFCombinedMVAV2BJetTags'+tail)
     process.btagging *= getattr(process,head+'PFCombinedCvsLJetTags'+tail)
     process.btagging *= getattr(process,head+'PFCombinedCvsBJetTags'+tail)
-    process.btagging *= getattr(process,head+'PFDeepCSVJetTagInfos'+tail)
+    #process.btagging *= getattr(process,head+'PFDeepCSVJetTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFDeepCSVJetTags'+tail)
     if not dropSub:
         process.btagging *= getattr(process,head+'PFImpactParameterTagInfosSJ'+tail)
@@ -149,8 +151,8 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
         getattr(process,head+'PFSoftPFMuonsTagInfos'+tail).primaryVertex                 = cms.InputTag("offlineSlimmedPrimaryVertices")
         getattr(process,head+'PFSoftPFElectronsTagInfos'+tail).electrons                 = cms.InputTag("slimmedElectrons")
         getattr(process,head+'PFSoftPFElectronsTagInfos'+tail).primaryVertex             = cms.InputTag("offlineSlimmedPrimaryVertices")
-        getattr(process,head+'PFDeepCSVJetTagInfos'+tail).vertices                       = cms.InputTag("offlineSlimmedPrimaryVertices")
-        getattr(process,head+'PFDeepCSVJetTagInfos'+tail).secondary_vertices             = cms.InputTag("slimmedSecondaryVertices")
+        #getattr(process,head+'PFDeepCSVJetTagInfos'+tail).vertices                       = cms.InputTag("offlineSlimmedPrimaryVertices")
+        #getattr(process,head+'PFDeepCSVJetTagInfos'+tail).secondary_vertices             = cms.InputTag("slimmedSecondaryVertices")
         if not dropSub:
             getattr(process,head+'PFImpactParameterTagInfosSJ'+tail).primaryVertex                 = cms.InputTag("offlineSlimmedPrimaryVertices")
             getattr(process,head+'PFImpactParameterTagInfosSJ'+tail).candidates                    = cms.InputTag("packedPFCandidates")
