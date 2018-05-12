@@ -129,6 +129,7 @@ namespace baconhep
       std::string fCSVbtagName;
       std::string fCSVbtagSubJetName;
       std::string fCSVDoubleBtagName;
+      std::string fDeepCSVBtagName;
     //std::string fSVTagInfoName;
       std::string fBoostedDoubleSVTagInfoName;
       std::string fDeepDoubleBtagName;

@@ -70,6 +70,7 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fCSVbtagName        (iConfig.getUntrackedParameter<std::string>("csvBTagName","combinedInclusiveSecondaryVertexV2BJetTags")),
   fCSVbtagSubJetName  (iConfig.getUntrackedParameter<std::string>("csvBTagSubJetName","AK4CombinedInclusiveSecondaryVertexV2BJetTagsSJCHS")),
   fCSVDoubleBtagName  (iConfig.getUntrackedParameter<std::string>("csvDoubleBTagName","AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS")),
+  fDeepCSVBtagName    (iConfig.getUntrackedParameter<std::string>("deepCSVBTagName","pfDeepCSVBJetTags")),
   //fSVTagInfoName      (iConfig.getUntrackedParameter<std::string>("svTagInfoName","AK4PFSecondaryVertexTagInfosCHS")),
   fBoostedDoubleSVTagInfoName (iConfig.getUntrackedParameter<std::string>("boostedDoubleSVTagInfoName","AK8PFBoostedDoubleSVTagInfosCHS")),
   fDeepDoubleBtagName (iConfig.getUntrackedParameter<std::string>("deepDoubleBTagName","AK8PFBoostedDeepDoubleBJetTagsCHS:probH")),
@@ -850,6 +851,12 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->bmva = itJet->bDiscriminator(fMVAbtagName);
     pJet->cvb  = itJet->bDiscriminator(fCVBctagName);
     pJet->cvl  = itJet->bDiscriminator(fCVLctagName);
+
+    // Deep-CSV
+    pJet->deepcsvb = itJet->bDiscriminator((fDeepCSVBtagName+":probb").c_str());
+    pJet->deepcsvc = itJet->bDiscriminator((fDeepCSVBtagName+":probc").c_str());
+    pJet->deepcsvl = itJet->bDiscriminator((fDeepCSVBtagName+":probudsg").c_str());
+    pJet->deepcsvbb = itJet->bDiscriminator((fDeepCSVBtagName+":probbb").c_str());
 
     if(fQGLikelihood.size() > 0) { 
       pJet->qgid  = (*hQGLikelihood)[jetBaseRef];
