@@ -194,6 +194,7 @@ namespace baconhep
     edm::EDGetTokenT<reco::BasicJetCollection> fTokSoftDropJetName;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokCSVbtagSubJetName;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokCSVDoubleBtagName;
+    edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepCSVBtagName;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepDoubleBtagName;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepDoubleBNoMassSculptPentagName;
     edm::EDGetTokenT<edm::ValueMap<float> >    fTokQGLikelihood     ;
