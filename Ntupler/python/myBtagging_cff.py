@@ -39,8 +39,8 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
                                       )))
     setattr(process, head+'PFDeepCSVTagInfos'+tail,
             pfDeepCSVTagInfos.clone(
-            svTagInfos = cms.InputTag(head+'PFInclusiveSecondaryVertexFinderTagInfos'+tail),
-            ))
+            svTagInfos = cms.InputTag(head+'PFInclusiveSecondaryVertexFinderTagInfos'+tail)
+            )),
     setattr(process, head+'PFDeepCSVJetTags'+tail,
             pfDeepCSVJetTags.clone(
             src = cms.InputTag(head+'PFDeepCSVTagInfos'+tail),
