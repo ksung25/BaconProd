@@ -134,6 +134,11 @@ namespace baconhep
       std::string fDeepCSVBtagNamec;
       std::string fDeepCSVBtagNamel;
       std::string fDeepCSVBtagNamebb;
+      std::string fDeepCMVABtagName;
+      std::string fDeepCMVABtagNameb;
+      std::string fDeepCMVABtagNamec;
+      std::string fDeepCMVABtagNamel;
+      std::string fDeepCMVABtagNamebb;
     //std::string fSVTagInfoName;
       std::string fBoostedDoubleSVTagInfoName;
       std::string fDeepDoubleBtagName;
@@ -198,11 +203,14 @@ namespace baconhep
     edm::EDGetTokenT<reco::BasicJetCollection> fTokSoftDropJetName;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokCSVbtagSubJetName;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokCSVDoubleBtagName;
-    edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepCSVBtagName;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepCSVBtagNameb;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepCSVBtagNamec;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepCSVBtagNamel;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepCSVBtagNamebb;
+    edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepCMVABtagNameb;
+    edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepCMVABtagNamec;
+    edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepCMVABtagNamel;
+    edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepCMVABtagNamebb;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepDoubleBtagName;
     edm::EDGetTokenT<reco::JetTagCollection>   fTokDeepDoubleBNoMassSculptPentagName;
     edm::EDGetTokenT<edm::ValueMap<float> >    fTokQGLikelihood     ;
