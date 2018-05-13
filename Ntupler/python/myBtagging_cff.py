@@ -37,6 +37,27 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
                                       cms.InputTag(head+"PFSoftPFMuonsTagInfos"+tail),
                                       cms.InputTag(head+"PFSoftPFElectronsTagInfos"+tail)
                                       )))
+    setattr(process, head+'PFDeepCSVTagInfos'+tail,
+            pfDeepCSVTagInfos.clone(
+            svTagInfos = cms.InputTag(head+'PFInclusiveSecondaryVertexFinderTagInfos'+tail)
+            )),
+    setattr(process, head+'PFDeepCSVJetTags'+tail,
+            pfDeepCSVJetTags.clone(
+            src = cms.InputTag(head+'PFDeepCSVTagInfos'+tail),
+            ))
+    setattr(process, head+'PFDeepCMVATagInfos'+tail,
+            pfDeepCMVATagInfos.clone(
+            tagInfos =cms.VInputTag( cms.InputTag(head+'PFDeepCSVTagInfos'+tail),
+                                     cms.InputTag(head+"PFImpactParameterTagInfos"+tail),
+                                     cms.InputTag(head+"PFInclusiveSecondaryVertexFinderTagInfos"+tail),
+                                     cms.InputTag(head+"PFSecondaryVertexTagInfos"+tail),
+                                     cms.InputTag(head+"PFSoftPFMuonsTagInfos"+tail),
+                                     cms.InputTag(head+"PFSoftPFElectronsTagInfos"+tail)
+                                     )))
+    setattr(process, head+'PFDeepCMVAJetTags'+tail,  
+            pfDeepCMVAJetTags.clone(
+            src = cms.InputTag('pfDeepCMVATagInfos')
+            ))
     #C-taggers
     setattr(process, head+'PFCombinedCvsLJetTags'+tail,
             pfCombinedCvsLJetTags.clone(
@@ -119,6 +140,10 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
     process.btagging *= getattr(process,head+'PFCombinedMVAV2BJetTags'+tail)
     process.btagging *= getattr(process,head+'PFCombinedCvsLJetTags'+tail)
     process.btagging *= getattr(process,head+'PFCombinedCvsBJetTags'+tail)
+    process.btagging *= getattr(process,head+'PFDeepCSVTagInfos'+tail)
+    process.btagging *= getattr(process,head+'PFDeepCSVJetTags'+tail)
+    #process.btagging *= getattr(process,head+'PFDeepCMVATagInfos'+tail)
+    #process.btagging *= getattr(process,head+'PFDeepCMVAJetTags'+tail)
     if not dropSub:
         process.btagging *= getattr(process,head+'PFImpactParameterTagInfosSJ'+tail)
         process.btagging *= getattr(process,head+'PFInclusiveSecondaryVertexFinderTagInfosSJ'+tail)

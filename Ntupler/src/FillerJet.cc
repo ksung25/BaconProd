@@ -70,6 +70,12 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fCSVbtagName        (iConfig.getUntrackedParameter<std::string>("csvBTagName","combinedInclusiveSecondaryVertexV2BJetTags")),
   fCSVbtagSubJetName  (iConfig.getUntrackedParameter<std::string>("csvBTagSubJetName","AK4CombinedInclusiveSecondaryVertexV2BJetTagsSJCHS")),
   fCSVDoubleBtagName  (iConfig.getUntrackedParameter<std::string>("csvDoubleBTagName","AK8PFBoostedDoubleSecondaryVertexBJetTagsCHS")),
+  fDeepCSVBtagName    (iConfig.getUntrackedParameter<std::string>("deepCSVBTagName","AK4PFDeepCSVJetTagsCHS")),
+  fDeepCSVBtagNameb   (iConfig.getUntrackedParameter<std::string>("deepCSVBTagNameb","AK4PFDeepCSVJetTagsCHS:probb")),
+  fDeepCSVBtagNamec   (iConfig.getUntrackedParameter<std::string>("deepCSVBTagNamec","AK4PFDeepCSVJetTagsCHS:probc")),
+  fDeepCSVBtagNamel   (iConfig.getUntrackedParameter<std::string>("deepCSVBTagNamel","AK4PFDeepCSVJetTagsCHS:probudsg")),
+  fDeepCSVBtagNamebb  (iConfig.getUntrackedParameter<std::string>("deepCSVBTagNamebb","AK4PFDeepCSVJetTagsCHS:probbb")),
+  //fDeepCMVABtagName   (iConfig.getUntrackedParameter<std::string>("deepCMVABTagName","AK4PFDeepCMVAJetTagsCHS")),
   //fSVTagInfoName      (iConfig.getUntrackedParameter<std::string>("svTagInfoName","AK4PFSecondaryVertexTagInfosCHS")),
   fBoostedDoubleSVTagInfoName (iConfig.getUntrackedParameter<std::string>("boostedDoubleSVTagInfoName","AK8PFBoostedDoubleSVTagInfosCHS")),
   fDeepDoubleBtagName (iConfig.getUntrackedParameter<std::string>("deepDoubleBTagName","AK8PFBoostedDeepDoubleBJetTagsCHS:probH")),
@@ -163,6 +169,10 @@ FillerJet::FillerJet(const edm::ParameterSet &iConfig, const bool useAOD,edm::Co
   fTokQGLAxis2            = iC.consumes<edm::ValueMap<float> >   (lQGLAxis2);
   fTokQGLPtD              = iC.consumes<edm::ValueMap<float> >   (lQGLPtD);
   fTokQGLMult             = iC.consumes<edm::ValueMap<int> >     (lQGLMult);
+  fTokDeepCSVBtagNameb    = iC.consumes<reco::JetTagCollection>  (fDeepCSVBtagNameb);
+  fTokDeepCSVBtagNamec    = iC.consumes<reco::JetTagCollection>  (fDeepCSVBtagNamec);
+  fTokDeepCSVBtagNamel    = iC.consumes<reco::JetTagCollection>  (fDeepCSVBtagNamel);
+  fTokDeepCSVBtagNamebb   = iC.consumes<reco::JetTagCollection>  (fDeepCSVBtagNamebb);
   if(fComputeFullJetInfo) { 
     fTokPrunedJetName     = iC.consumes<reco::BasicJetCollection>(fPrunedJetName);
     fTokTrimmedJetName    = iC.consumes<reco::BasicJetCollection>(fTrimmedJetName);
@@ -363,6 +373,23 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
   iEvent.getByToken(fTokQGLMult,hQGLmult);
   assert(hQGLmult.isValid());
 
+  // Get DeepCSV b-tagger
+  edm::Handle<reco::JetTagCollection> hDeepCSVBtagb;
+  iEvent.getByToken(fTokDeepCSVBtagNameb, hDeepCSVBtagb);
+  assert(hDeepCSVBtagb.isValid());
+
+  edm::Handle<reco::JetTagCollection> hDeepCSVBtagc;
+  iEvent.getByToken(fTokDeepCSVBtagNamec, hDeepCSVBtagc);
+  assert(hDeepCSVBtagc.isValid());
+
+  edm::Handle<reco::JetTagCollection> hDeepCSVBtagl;
+  iEvent.getByToken(fTokDeepCSVBtagNamel, hDeepCSVBtagl);
+  assert(hDeepCSVBtagl.isValid());
+
+  edm::Handle<reco::JetTagCollection> hDeepCSVBtagbb;
+  iEvent.getByToken(fTokDeepCSVBtagNamebb, hDeepCSVBtagbb);
+  assert(hDeepCSVBtagbb.isValid());
+
   //edm::Handle<std::vector<reco::CandIPTagInfo> > hSVTagInfoCollection;
   //iEvent.getByToken(fTokSVTagInfoCollection, hSVTagInfoCollection);
   //assert(hSVTagInfoCollection.isValid());
@@ -531,6 +558,11 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->mult  = (*(hQGLmult.product()))[jetBaseRef];
     pJet->q = JetTools::jetCharge(*itJet);
     
+    pJet->deepcsvb = (*(hDeepCSVBtagb.product()))[jetBaseRef];
+    pJet->deepcsvc = (*(hDeepCSVBtagc.product()))[jetBaseRef];
+    pJet->deepcsvl = (*(hDeepCSVBtagl.product()))[jetBaseRef];
+    pJet->deepcsvbb = (*(hDeepCSVBtagbb.product()))[jetBaseRef];
+
     pJet->beta     = JetTools::beta(*itJet, pv);
     pJet->betaStar = JetTools::betaStar(*itJet, pv, pvCol);
     pJet->dR2Mean  = JetTools::dR2Mean(*itJet);
@@ -850,6 +882,12 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->bmva = itJet->bDiscriminator(fMVAbtagName);
     pJet->cvb  = itJet->bDiscriminator(fCVBctagName);
     pJet->cvl  = itJet->bDiscriminator(fCVLctagName);
+
+    // Deep-CSV
+    pJet->deepcsvb = itJet->bDiscriminator((fDeepCSVBtagName+":probb").c_str());
+    pJet->deepcsvc = itJet->bDiscriminator((fDeepCSVBtagName+":probc").c_str());
+    pJet->deepcsvl = itJet->bDiscriminator((fDeepCSVBtagName+":probudsg").c_str());
+    pJet->deepcsvbb = itJet->bDiscriminator((fDeepCSVBtagName+":probbb").c_str());
 
     if(fQGLikelihood.size() > 0) { 
       pJet->qgid  = (*hQGLikelihood)[jetBaseRef];

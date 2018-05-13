@@ -62,6 +62,7 @@ process.load("RecoBTag.SecondaryVertex.secondaryVertex_cff")
 process.load("RecoBTag.SoftLepton.softLepton_cff")
 process.load("RecoBTag.Combined.combinedMVA_cff")
 process.load("RecoBTag.CTagging.cTagging_cff")
+process.load("RecoBTag.Combined.deepFlavour_cff")
 
 from BaconProd.Ntupler.myBtagging_cff           import addBTagging
 from BaconProd.Ntupler.myGenJets_cff            import setMiniAODGenJets
@@ -194,7 +195,7 @@ if do_alpaca:
 #--------------------------------------------------------------------------------
 # input settings
 #================================================================================
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 process.source = cms.Source("PoolSource",
                             #fileNames = cms.untracked.vstring('/store/mc/RunIISummer16MiniAODv2/ZprimeToTT_M-4000_W-40_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/02DEA6C9-19B7-E611-B22D-A0000420FE80.root'),
                             #fileNames = cms.untracked.vstring('/store/mc/RunIIFall17MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/EEF28E00-0CEA-E711-8257-02163E0160F1.root'),
@@ -369,7 +370,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     mvaBTagName          = cms.untracked.string('pfCombinedMVAV2BJetTags'),
     cvlcTagName          = cms.untracked.string('pfCombinedCvsLJetTags'),
     cvbcTagName          = cms.untracked.string('pfCombinedCvsBJetTags'),
-    qgLikelihood         = cms.untracked.string('QGTagger')
+    qgLikelihood         = cms.untracked.string('QGTagger'),
+    deepCSVBTagName      = cms.untracked.string('pfDeepCSVJetTags'),
     ),
 
   AK4Puppi = cms.untracked.PSet(
@@ -411,6 +413,11 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     cvbcTagName        = cms.untracked.string('AK4PFCombinedCvsBJetTagsPuppi'),
     csvBTagSubJetName  = cms.untracked.string('AK4PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi'),
     csvDoubleBTagName  = cms.untracked.string('AK4PFBoostedDoubleSecondaryVertexBJetTagsPuppi'),
+    deepCSVBTagName    = cms.untracked.string('AK4PFDeepCSVJetTagsPuppi'),
+    deepCSVBTagNameb   = cms.untracked.string('AK4PFDeepCSVJetTagsPuppi:probb'),
+    deepCSVBTagNamec   = cms.untracked.string('AK4PFDeepCSVJetTagsPuppi:probc'),
+    deepCSVBTagNamel   = cms.untracked.string('AK4PFDeepCSVJetTagsPuppi:probudsg'),
+    deepCSVBTagNamebb   = cms.untracked.string('AK4PFDeepCSVJetTagsPuppi:probbb'),
     deepDoubleBTagName = cms.untracked.string('AK4PFBoostedDeepDoubleBJetTagsPuppi:probH'),
     deepDoubleBNoMassSculptPenTagName   = cms.untracked.string('AK4PFBoostedDeepDoubleBNoMassSculptPenJetTagsPuppi:probH'),
     boostedDoubleSVTagInfoName = cms.untracked.string('AK4PFBoostedDoubleSVTagInfosPuppi'), 
@@ -551,6 +558,11 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     cvbcTagName        = cms.untracked.string('AK8PFCombinedCvsBJetTagsPuppi'),
     csvBTagSubJetName  = cms.untracked.string('AK8PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi'),
     csvDoubleBTagName  = cms.untracked.string('AK8PFBoostedDoubleSecondaryVertexBJetTagsPuppi'),
+    deepCSVBTagName    = cms.untracked.string('AK8PFDeepCSVJetTagsPuppi'),
+    deepCSVBTagNameb   = cms.untracked.string('AK8PFDeepCSVJetTagsPuppi:probb'),
+    deepCSVBTagNamec   = cms.untracked.string('AK8PFDeepCSVJetTagsPuppi:probc'),
+    deepCSVBTagNamel   = cms.untracked.string('AK8PFDeepCSVJetTagsPuppi:probudsg'),
+    deepCSVBTagNamebb   = cms.untracked.string('AK8PFDeepCSVJetTagsPuppi:probbb'),
     deepDoubleBTagName = cms.untracked.string('AK8PFBoostedDeepDoubleBJetTagsPuppi:probH'),
     deepDoubleBNoMassSculptPenTagName   = cms.untracked.string('AK8PFBoostedDeepDoubleBNoMassSculptPenJetTagsPuppi:probH'),
     boostedDoubleSVTagInfoName = cms.untracked.string('AK8PFBoostedDoubleSVTagInfosPuppi'),
@@ -648,6 +660,11 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     cvbcTagName        = cms.untracked.string('CA15PFCombinedCvsBJetTagsPuppi'),
     csvBTagSubJetName  = cms.untracked.string('CA15PFCombinedInclusiveSecondaryVertexV2BJetTagsSJPuppi'),
     csvDoubleBTagName  = cms.untracked.string('CA15PFBoostedDoubleSecondaryVertexBJetTagsPuppi'),
+    deepCSVBTagName    = cms.untracked.string('CA15PFDeepCSVJetTagsPuppi'),
+    deepCSVBTagNameb   = cms.untracked.string('CA15PFDeepCSVJetTagsPuppi:probb'),
+    deepCSVBTagNamec   = cms.untracked.string('CA15PFDeepCSVJetTagsPuppi:probc'),
+    deepCSVBTagNamel   = cms.untracked.string('CA15PFDeepCSVJetTagsPuppi:probudsg'),
+    deepCSVBTagNamebb   = cms.untracked.string('CA15PFDeepCSVJetTagsPuppi:probbb'),
     deepDoubleBTagName = cms.untracked.string('CA15PFBoostedDeepDoubleBJetTagsPuppi:probH'),
     deepDoubleBNoMassSculptPenTagName   = cms.untracked.string('CA15PFBoostedDeepDoubleBNoMassSculptPenJetTagsPuppi:probH'),
     boostedDoubleSVTagInfoName = cms.untracked.string('CA15PFBoostedDoubleSVTagInfosPuppi'),
