@@ -47,16 +47,14 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
             ))
     setattr(process, head+'PFDeepCMVATagInfos'+tail,
             pfDeepCMVATagInfos.clone(
-            tagInfos =cms.VInputTag( cms.InputTag(head+'PFDeepCSVTagInfos'+tail),
-                                     cms.InputTag(head+"PFImpactParameterTagInfos"+tail),
-                                     cms.InputTag(head+"PFInclusiveSecondaryVertexFinderTagInfos"+tail),
-                                     cms.InputTag(head+"PFSecondaryVertexTagInfos"+tail),
-                                     cms.InputTag(head+"PFSoftPFMuonsTagInfos"+tail),
-                                     cms.InputTag(head+"PFSoftPFElectronsTagInfos"+tail)
-                                     )))
+            deepNNTagInfos = cms.InputTag(head+'PFDeepCSVTagInfos'+tail),
+            ipInfoSrc = cms.InputTag(head+"PFImpactParameterTagInfos"+tail),
+            muInfoSrc = cms.InputTag(head+"PFSoftPFMuonsTagInfos"+tail),
+            elInfoSrc = cms.InputTag(head+"PFSoftPFElectronsTagInfos"+tail),
+            ))
     setattr(process, head+'PFDeepCMVAJetTags'+tail,  
             pfDeepCMVAJetTags.clone(
-            src = cms.InputTag('pfDeepCMVATagInfos')
+            src = cms.InputTag(head+'PFDeepCMVATagInfos'+tail)
             ))
     #C-taggers
     setattr(process, head+'PFCombinedCvsLJetTags'+tail,
@@ -142,8 +140,8 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
     process.btagging *= getattr(process,head+'PFCombinedCvsBJetTags'+tail)
     process.btagging *= getattr(process,head+'PFDeepCSVTagInfos'+tail)
     process.btagging *= getattr(process,head+'PFDeepCSVJetTags'+tail)
-    #process.btagging *= getattr(process,head+'PFDeepCMVATagInfos'+tail)
-    #process.btagging *= getattr(process,head+'PFDeepCMVAJetTags'+tail)
+    process.btagging *= getattr(process,head+'PFDeepCMVATagInfos'+tail)
+    process.btagging *= getattr(process,head+'PFDeepCMVAJetTags'+tail)
     if not dropSub:
         process.btagging *= getattr(process,head+'PFImpactParameterTagInfosSJ'+tail)
         process.btagging *= getattr(process,head+'PFInclusiveSecondaryVertexFinderTagInfosSJ'+tail)
