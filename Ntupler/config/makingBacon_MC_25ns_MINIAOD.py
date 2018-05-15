@@ -333,8 +333,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     #FOR 2016 (8X)
     #edmPhoMVAIdTag        = cms.untracked.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring16NonTrigV1Values"),
     #FOR 2017 (8X)
-    #edmPhoMVAIdTag        = cms.untracked.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRunIIFall17v1Values"),
-    edmPhoMVAIdTag        = cms.untracked.InputTag(""),
+    edmPhoMVAIdTag        = cms.untracked.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRunIIFall17v1Values"),
+    #edmPhoMVAIdTag        = cms.untracked.InputTag(""),
     useTriggerObject      = cms.untracked.bool(False),
   ),
   
@@ -747,10 +747,10 @@ process.baconSequence = cms.Sequence(
                                      process.QGTagger                 *
                                      process.pfNoPileUpJME            *
                                      process.electronMVAValueMapProducer *
-                                     #process.photonIDValueMapProducer *
-                                     #process.photonMVAValueMapProducer*
+                                     process.photonIDValueMapProducer *
+                                     process.photonMVAValueMapProducer*
                                      process.egmGsfElectronIDSequence *
-                                     #process.egmPhotonIDSequence      *
+                                     process.egmPhotonIDSequence      *
                                      process.puppiMETSequence          *
                                      process.genjetsequence            *
                                      process.AK4genjetsequenceCHS      *
