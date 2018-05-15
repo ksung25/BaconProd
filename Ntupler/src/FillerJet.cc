@@ -728,6 +728,24 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
   iEvent.getByToken(fTokRhoTag,hRho);
   assert(hRho.isValid()); 
 
+  // Get DeepCSV tagger
+  /*
+  edm::Handle<reco::JetTagCollection> hDeepCMVABtagb;
+  iEvent.getByToken(fTokDeepCMVABtagNameb, hDeepCMVABtagb);
+  assert(hDeepCMVABtagb.isValid());
+
+  edm::Handle<reco::JetTagCollection> hDeepCMVABtagc;
+  iEvent.getByToken(fTokDeepCSVBtagNamec, hDeepCSVBtagc);
+  assert(hDeepCSVBtagc.isValid());
+
+  edm::Handle<reco::JetTagCollection> hDeepCMVABtagl;
+  iEvent.getByToken(fTokDeepCSVBtagNamel, hDeepCSVBtagl);
+  assert(hDeepCSVBtagl.isValid());
+
+  edm::Handle<reco::JetTagCollection> hDeepCMVABtagbb;
+  iEvent.getByToken(fTokDeepCSVBtagNamebb, hDeepCSVBtagbb);
+  assert(hDeepCSVBtagbb.isValid());
+  */
   // Get Quark Gluon Likelihood
   edm::Handle<edm::ValueMap<float> > hQGLikelihood;
   edm::Handle<edm::ValueMap<float> > hQGLaxis2;
@@ -760,8 +778,6 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
   TClonesArray &rExtraArray = *iExtraArray;
   VertexDistance3D vdist;
   for(pat::JetCollection::const_iterator itJet = jetCol->begin(); itJet!=jetCol->end(); ++itJet) {
-
-    edm::RefToBase<pat::Jet> jetBaseRef( edm::Ref<pat::JetCollection>(hJetProduct, itJet - jetCol->begin()) );
 
     float uncorr = itJet->jecFactor("Uncorrected");
     double ptRaw = itJet->pt()*itJet->jecFactor("Uncorrected");
@@ -923,7 +939,8 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->deepcmvac = itJet->bDiscriminator((fDeepCMVABtagName+":probc").c_str());
     pJet->deepcmval = itJet->bDiscriminator((fDeepCMVABtagName+":probudsg").c_str());
     pJet->deepcmvabb = itJet->bDiscriminator((fDeepCMVABtagName+":probbb").c_str());
-
+    edm::RefToBase<pat::Jet> jetBaseRef( edm::Ref<pat::JetCollection>(hJetProduct, itJet - jetCol->begin()) );
+    //std::cout << "===> deep cmva" << pJet->deepcmvab << " -- " << pJet->deepcmvac << " -- " <<  pJet->deepcmval << " -- " << pJet->deepcmvabb << " -- " << pJet->deepcsvb  << std::endl;
     if(fQGLikelihood.size() > 0) { 
       pJet->qgid  = (*hQGLikelihood)[jetBaseRef];
       pJet->axis2 = (*hQGLaxis2)[jetBaseRef];

@@ -139,13 +139,16 @@ AK4jetsequenceCHSData = cms.Sequence(
 
 def setMiniAODAK4CHS(process) :
     process.load("RecoJets/JetProducers/QGTagger_cfi")
-    process.QGTagger.srcJets               = cms.InputTag('slimmedJets')
+    process.QGTagger.srcJets               = cms.InputTag('selectedUpdatedPatJets')
+    #process.QGTagger.srcJets               = cms.InputTag('slimmedJets')
     process.QGTagger.jetsLabel             = cms.string('QGL_AK4PFchs')
     process.QGTagger.jec                   = cms.InputTag('')
     process.QGTagger.systematicsLabel      = cms.string('')
     process.QGTagger.useQualityCuts        = cms.bool(False)
-    process.AK4FlavorCHS.jets              = cms.InputTag('slimmedJets')
-    process.AK4PUJetIdCHS.jets             = cms.InputTag("slimmedJets")
+    process.AK4FlavorCHS.jets              = cms.InputTag('selectedUpdatedPatJets')
+    process.AK4PUJetIdCHS.jets             = cms.InputTag('selectedUpdatedPatJets')
+    #process.AK4FlavorCHS.jets              = cms.InputTag('slimmedJets')
+    #process.AK4PUJetIdCHS.jets             = cms.InputTag("slimmedJets")
     process.AK4PUJetIdCHS.inputIsCorrected = True
     process.AK4PUJetIdCHS.vertexes         = cms.InputTag("offlineSlimmedPrimaryVertices")
     process.load("PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff")
@@ -155,6 +158,7 @@ def setMiniAODAK4CHS(process) :
         )
     process.updatedJets = process.updatedPatJets.clone(
         jetSource = cms.InputTag("slimmedJets"),
-        jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJEC"))
+        jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJEC")),
+        #btagDiscriminators = ['pfDeepCSVJetTags:probb','pfDeepCSVJetTags:probc','pfDeepCSVJetTags:probudsg','pfDeepCSVJetTags:probbb']
         )
     process.updatedJets.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']

@@ -64,7 +64,7 @@ process.load("RecoBTag.Combined.combinedMVA_cff")
 process.load("RecoBTag.CTagging.cTagging_cff")
 process.load("RecoBTag.Combined.deepFlavour_cff")
 
-from BaconProd.Ntupler.myBtagging_cff           import addBTagging
+from BaconProd.Ntupler.myBtagging_cff           import addBTagging,addBTaggingAK4CHS
 from BaconProd.Ntupler.myGenJets_cff            import setMiniAODGenJets
 from BaconProd.Ntupler.myJetExtrasAK4CHS_cff    import setMiniAODAK4CHS
 from BaconProd.Ntupler.myJetExtrasAK8CHS_cff    import setMiniAODAK8CHS
@@ -82,7 +82,7 @@ process.btagging = cms.Sequence()
 addBTagging(process,'AK4PFJetsPuppi' ,0.4,'AK4' ,'Puppi')
 addBTagging(process,'AK8PFJetsPuppi' ,0.8,'AK8' ,'Puppi')
 addBTagging(process,'CA15PFJetsPuppi',1.5,'CA15','Puppi')
-
+addBTaggingAK4CHS(process,'updatedPatJets'    ,0.4,'AK4' ,'CHS',True,True)
 
 
 
@@ -179,6 +179,15 @@ if is_data_flag:
   process.AK4QGTaggerSubJetsPuppi.jec    = cms.InputTag("ak4PuppiL1FastL2L3ResidualCorrector")
   process.AK8QGTaggerSubJetsPuppi.jec    = cms.InputTag("ak8PuppiL1FastL2L3ResidualCorrector")
   process.CA15QGTaggerSubJetsPuppi.jec   = cms.InputTag("ak8PuppiL1FastL2L3ResidualCorrector")
+
+from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
+updateJetCollection(
+  process,
+  jetSource = cms.InputTag('slimmedJets'),
+  jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None'),
+  btagDiscriminators = ['pfDeepCMVAJetTags:probb','pfDeepCMVAJetTags:probc','pfDeepCMVAJetTags:probudsg','pfDeepCMVAJetTags:probbb',
+                        'pfDeepCSVJetTags:probb' ,'pfDeepCSVJetTags:probc' ,'pfDeepCSVJetTags:probudsg' ,'pfDeepCSVJetTags:probbb']
+  )
 
 # ALPACA
 #process.load('BaconProd/Ntupler/myAlpacaCorrections_cff')
@@ -361,14 +370,14 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     BRegNNStd               = cms.untracked.double(0.31628304719924927),
 
     # names of various jet-related collections
-    jetName              = cms.untracked.string('slimmedJets'),
+    jetName              = cms.untracked.string('selectedUpdatedPatJets'),#selectedUpdatedPatJets'),#updatedPatJetsTransientCorrected'),#updatedPatJets'),#slimmedJets'),
     genJetName           = cms.untracked.string('slimmedGenJets'),
     csvBTagName          = cms.untracked.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
     mvaBTagName          = cms.untracked.string('pfCombinedMVAV2BJetTags'),
     cvlcTagName          = cms.untracked.string('pfCombinedCvsLJetTags'),
     cvbcTagName          = cms.untracked.string('pfCombinedCvsBJetTags'),
+    qgLikelihood         = cms.untracked.string('QGTagger'),
     deepCSVBTagName      = cms.untracked.string('pfDeepCSVJetTags'),
-    qgLikelihood         = cms.untracked.string('QGTagger')
     ),
 
   AK4Puppi = cms.untracked.PSet(
@@ -737,7 +746,6 @@ process.baconSequence = cms.Sequence(
                                      process.ak8PuppiL1FastL2L3ResidualChain*
                                      process.ak4chsL1FastL2L3Corrector*
                                      process.ak4PuppiL1FastL2L3Corrector*
-                                     process.QGTagger                 *
                                      process.pfNoPileUpJME            *
                                      process.electronMVAValueMapProducer *
                                      #process.photonIDValueMapProducer *
@@ -750,9 +758,15 @@ process.baconSequence = cms.Sequence(
                                      process.AK4jetsequencePuppiData  *
                                      process.AK8jetsequencePuppiData  *
                                      process.CA15jetsequencePuppiData *
+                                     process.patJetCorrFactors*
+                                     process.updatedPatJets*
                                      process.btagging                 *
                                      process.fullPatMetSequenceV2     *
                                      process.fullPatMetSequencePuppi  *
+                                     process.patJetCorrFactorsTransientCorrected*
+                                     process.updatedPatJetsTransientCorrected*
+                                     process.selectedUpdatedPatJets*
+                                     process.QGTagger                 *
                                      process.ntupler
                                      )
 
