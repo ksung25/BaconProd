@@ -188,6 +188,7 @@ updateJetCollection(
   btagDiscriminators = ['pfDeepCMVAJetTags:probb','pfDeepCMVAJetTags:probc','pfDeepCMVAJetTags:probudsg','pfDeepCMVAJetTags:probbb',
                         'pfDeepCSVJetTags:probb' ,'pfDeepCSVJetTags:probc' ,'pfDeepCSVJetTags:probudsg' ,'pfDeepCSVJetTags:probbb']
   )
+process.pfDeepCSVJetTags.NNConfig = cms.FileInPath('BaconProd/Utils/data/DeepFlavourNoSL.json')
 
 # ALPACA
 #process.load('BaconProd/Ntupler/myAlpacaCorrections_cff')

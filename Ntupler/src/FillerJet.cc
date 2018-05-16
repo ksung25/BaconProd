@@ -626,7 +626,7 @@ void FillerJet::fill(TClonesArray *array, TClonesArray *iExtraArray,TClonesArray
     pJet->chHadFrac  = itJet->chargedHadronEnergy() / itJet->energy();
     pJet->neuHadFrac = itJet->neutralHadronEnergy() / itJet->energy();
     pJet->muonFrac   = itJet->muonEnergy() / itJet->energy();
-
+        
     //
     // Generator matching
     //==============================

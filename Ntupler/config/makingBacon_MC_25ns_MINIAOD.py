@@ -206,7 +206,7 @@ if do_alpaca:
 #--------------------------------------------------------------------------------
 # input settings
 #================================================================================
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 process.source = cms.Source("PoolSource",
                             #fileNames = cms.untracked.vstring('/store/mc/RunIISummer16MiniAODv2/ZprimeToTT_M-4000_W-40_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/02DEA6C9-19B7-E611-B22D-A0000420FE80.root'),
                             #fileNames = cms.untracked.vstring('/store/mc/RunIIFall17MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/EEF28E00-0CEA-E711-8257-02163E0160F1.root'),
@@ -745,7 +745,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   ),
   
   PFCand = cms.untracked.PSet(
-    isActive       = cms.untracked.bool(True),
+    isActive       = cms.untracked.bool(False),
     edmName        = cms.untracked.string('packedPFCandidates'),
     edmPVName      = cms.untracked.string('offlineSlimmedPrimaryVertices'),
     doAddDepthTime = cms.untracked.bool(False)
@@ -810,9 +810,7 @@ if is_data_flag:
   assert process.ntupler.CA15CHS.doGenJet == cms.untracked.bool(False)
 
 
-process.out = cms.OutputModule("PoolOutputModule",                                                                                                                                                   
-                                  outputCommands = cms.untracked.vstring('keep *'),                                                                                                                      
-                                  fileName       = cms.untracked.string ("test_output.root")                                                                                                                    
-                                  )   
-
-process.endpath = cms.EndPath(process.out)
+#process.out = cms.OutputModule("PoolOutputModule",                                                                                                                                                   
+#                                  outputCommands = cms.untracked.vstring('keep *'),                                                                                                                   #                                  fileName       = cms.untracked.string ("test_output.root")                                                                                                          #          
+#                                  )   
+#process.endpath = cms.EndPath(process.out)

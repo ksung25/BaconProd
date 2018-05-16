@@ -731,7 +731,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
   ),
   
   PFCand = cms.untracked.PSet(
-    isActive       = cms.untracked.bool(True),
+    isActive       = cms.untracked.bool(False),
     edmName        = cms.untracked.string('packedPFCandidates'),
     edmPVName      = cms.untracked.string('offlineSlimmedPrimaryVertices'),
     doAddDepthTime = cms.untracked.bool(False)
