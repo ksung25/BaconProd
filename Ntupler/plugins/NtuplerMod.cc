@@ -703,8 +703,8 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     fFillerRH->fill(fRHParArr,iEvent,iSetup);
   }
   fEventTree->Fill();
-  delete hTrgObjsDummy;
   delete hTrgEvtDummy;
+  delete hTrgObjsDummy;
 }
 
 //--------------------------------------------------------------------------------------------------
