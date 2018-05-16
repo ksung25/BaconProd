@@ -63,6 +63,7 @@ process.load("RecoBTag.SoftLepton.softLepton_cff")
 process.load("RecoBTag.Combined.combinedMVA_cff")
 process.load("RecoBTag.CTagging.cTagging_cff")
 process.load("RecoBTag.Combined.deepFlavour_cff")
+process.pfDeepCSVJetTags.NNConfig = cms.FileInPath('BaconProd/Utils/data/DeepFlavourNoSL.json')
 
 from BaconProd.Ntupler.myBtagging_cff           import addBTagging,addBTaggingAK4CHS
 from BaconProd.Ntupler.myGenJets_cff            import setMiniAODGenJets
@@ -188,7 +189,6 @@ updateJetCollection(
   btagDiscriminators = ['pfDeepCMVAJetTags:probb','pfDeepCMVAJetTags:probc','pfDeepCMVAJetTags:probudsg','pfDeepCMVAJetTags:probbb',
                         'pfDeepCSVJetTags:probb' ,'pfDeepCSVJetTags:probc' ,'pfDeepCSVJetTags:probudsg' ,'pfDeepCSVJetTags:probbb']
   )
-process.pfDeepCSVJetTags.NNConfig = cms.FileInPath('BaconProd/Utils/data/DeepFlavourNoSL.json')
 
 # ALPACA
 #process.load('BaconProd/Ntupler/myAlpacaCorrections_cff')
