@@ -59,7 +59,7 @@ void FillerRH::fill(TClonesArray *array,const edm::Event &iEvent,const edm::Even
     const int index = rArray.GetEntries();
     new(rArray[index]) baconhep::TRHPart();
     baconhep::TRHPart *pRH = (baconhep::TRHPart*) rArray[index];
-    const CaloCellGeometry *pCell = fHCAL->getGeometry(itRH->detid());
+    std::shared_ptr<const CaloCellGeometry> pCell = fHCAL->getGeometry(itRH->detid());
     TLorentzVector pVec; 
     double pR = sqrt(pCell->getPosition().x()*pCell->getPosition().x() + pCell->getPosition().y()*pCell->getPosition().y() + pCell->getPosition().z()*pCell->getPosition().z());
     pVec.SetPxPyPzE( pCell->getPosition().x()/pR * itRH->energy(),       pCell->getPosition().y()/pR * itRH->energy(),       pCell->getPosition().z()/pR * itRH->energy(),itRH->energy()); 

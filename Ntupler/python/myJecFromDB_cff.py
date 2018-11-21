@@ -25,6 +25,10 @@ def setupJEC(process,isData,label) :
                                    ),
                           cms.PSet(record  = cms.string('JetCorrectionsRecord'),
                                    tag     = cms.string('JetCorrectorParametersCollection_'+label+'_AK4PFchs'),
+                                   label   = cms.untracked.string('AK4PFchs')
+                                   ),
+                          cms.PSet(record  = cms.string('JetCorrectionsRecord'),
+                                   tag     = cms.string('JetCorrectorParametersCollection_'+label+'_AK4PFchs'),
                                    label   = cms.untracked.string('AK4PFDummychs')
                                    ),
                           cms.PSet(record  = cms.string('JetCorrectionsRecord'),

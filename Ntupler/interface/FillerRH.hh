@@ -13,7 +13,7 @@
 #include "DataFormats/ParticleFlowReco/interface/PFRecHitFwd.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
-#include "DataFormats/HcalRecHit/interface/HcalRecHitFwd.h"
+//#include "DataFormats/HcalRecHit/interface/HcalRecHitFwd.h"
 
 class TClonesArray;
 
