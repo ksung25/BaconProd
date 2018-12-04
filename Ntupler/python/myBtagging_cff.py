@@ -1,5 +1,6 @@
 from RecoBTag.Configuration.RecoBTag_cff import *
 from RecoBTag.SoftLepton.SoftLeptonByMVAComputers_cff import *
+from RecoBTag.TensorFlow.pfDeepDoubleX_cff import *
 #from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
 
 def addBTaggingAK4CHS(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMiniAOD=True,dropSub=False):
@@ -192,40 +193,40 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
             ))
 
         setattr(process, head+'PFBoostedDeepDoubleBvLJetTags'+tail,
-            pfDeepDoubleBvLJetTags.clone(
+            pfDeepDoubleBJetTags.clone(
             src = cms.InputTag(head+"PFBoostedDeepDoubleBTagInfos"+tail),
-            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDB.pb')
+            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDB_mass_independent.pb')
             ))
 	#Deep Double B - No Mass Sculpting Penalty
         setattr(process, head+'PFBoostedDeepDoubleBvLNoMassSculptPenJetTags'+tail,
-            pfDeepDoubleBvLJetTags.clone(
+            pfDeepDoubleBJetTags.clone(
             src = cms.InputTag(head+"PFBoostedDeepDoubleBTagInfos"+tail),
-            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDB_mass_independent.pb')
+            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDB.pb')
             #graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleB/V01/constant_graph_PtCut.pb')
             ))
         #Deep Double C
         setattr(process, head+'PFBoostedDeepDoubleCvLJetTags'+tail,
             pfDeepDoubleCvLJetTags.clone(
             src = cms.InputTag(head+"PFBoostedDeepDoubleBTagInfos"+tail),
-            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDC.pb')
+            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDC_mass_independent.pb')
             ))
 	#Deep Double C - No Mass Sculpting Penalty
         setattr(process, head+'PFBoostedDeepDoubleCvLNoMassSculptPenJetTags'+tail,
             pfDeepDoubleCvLJetTags.clone(
             src = cms.InputTag(head+"PFBoostedDeepDoubleBTagInfos"+tail),
-            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDC_mass_independent.pb')
+            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDC.pb')
             ))
         #Deep Double CvB
         setattr(process, head+'PFBoostedDeepDoubleCvBJetTags'+tail,
             pfDeepDoubleCvBJetTags.clone(
             src = cms.InputTag(head+"PFBoostedDeepDoubleBTagInfos"+tail),
-            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDCvB.pb')
+            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDCvB_mass_independent.pb')
             ))
 	#Deep Double CvB - No Mass Sculpting Penalty
         setattr(process, head+'PFBoostedDeepDoubleCvBNoMassSculptPenJetTags'+tail,
             pfDeepDoubleCvBJetTags.clone(
             src = cms.InputTag(head+"PFBoostedDeepDoubleBTagInfos"+tail),
-            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDCvB_mass_independent.pb')
+            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDCvB.pb')
             ))
 
     process.btagging *= getattr(process,head+'PFImpactParameterTagInfos'+tail)

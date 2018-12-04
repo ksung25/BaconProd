@@ -129,6 +129,7 @@ class NtuplerMod : public edm::EDAnalyzer {
     bool fIsActivePF;
     bool fIsActiveRH;
     bool fUseTrigger;
+    bool fUseTriggerObject;
   
     // Objects and arrays for output file
     std::string              fOutputName;

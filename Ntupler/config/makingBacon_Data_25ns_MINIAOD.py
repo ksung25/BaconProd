@@ -11,14 +11,16 @@ do_alpaca     = False
 cmssw_base = os.environ['CMSSW_BASE']
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if is_data_flag:
-  process.GlobalTag.globaltag = cms.string('94X_dataRun2_ReReco_EOY17_v2')
+  #process.GlobalTag.globaltag = cms.string('94X_mc2017_realistic_v14')
+  #process.GlobalTag.globaltag = cms.string('101X_dataRun2_HLT_v7')
+  process.GlobalTag.globaltag = cms.string('101X_dataRun2_Prompt_v11')
 else:
-  process.GlobalTag.globaltag = cms.string('94X_mc2017_realistic_v10')
+  process.GlobalTag.globaltag = cms.string('94X_mc2017_realistic_v14')
 
 #JEC
-JECTag='Fall17_17Nov2017_V6_MC'
+JECTag='Fall17_17Nov2017_V32_102X_MC'
 if is_data_flag: 
-  JECTag='Fall17_17Nov2017BCDEF_V6_DATA'
+  JECTag='Fall17_17Nov2017_V32_102X_DATA'
 
 from BaconProd.Ntupler.myJecFromDB_cff    import setupJEC
 setupJEC(process,is_data_flag,JECTag)
@@ -37,6 +39,7 @@ process.load('Configuration/StandardSequences/GeometryDB_cff')
 process.load('Configuration/StandardSequences/MagneticField_38T_cff')
 
 process.load('TrackingTools/TransientTrack/TransientTrackBuilder_cfi')
+process.load('RecoBTag.SoftLepton.SoftLeptonByMVAComputers_cff')
 
 process.pfNoPileUpJME = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates"), cut = cms.string("fromPV"))
 process.load('BaconProd/Ntupler/myPUPPICorrections_cff')
@@ -57,6 +60,7 @@ process.load('BaconProd/Ntupler/myJetExtrasAK4Puppi_cff')
 process.load('BaconProd/Ntupler/myJetExtrasAK8Puppi_cff')
 process.load('BaconProd/Ntupler/myJetExtrasCA15Puppi_cff')
 
+process.load("RecoBTag.Configuration.RecoBTag_cff")
 process.load("RecoBTag.ImpactParameter.impactParameter_cff")
 process.load("RecoBTag.SecondaryVertex.secondaryVertex_cff")
 process.load("RecoBTag.SoftLepton.softLepton_cff")
@@ -190,8 +194,8 @@ updateJetCollection(
   process,
   jetSource = cms.InputTag('slimmedJets'),
   jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None'),
-  btagDiscriminators = ['pfDeepCMVAJetTags:probb','pfDeepCMVAJetTags:probc','pfDeepCMVAJetTags:probudsg','pfDeepCMVAJetTags:probbb']
-#                        'pfDeepCSVJetTags:probb' ,'pfDeepCSVJetTags:probc' ,'pfDeepCSVJetTags:probudsg' ,'pfDeepCSVJetTags:probbb']
+  btagDiscriminators = ['pfDeepCMVAJetTags:probb','pfDeepCMVAJetTags:probc','pfDeepCMVAJetTags:probudsg','pfDeepCMVAJetTags:probbb',
+                        'pfDeepCSVJetTags:probb' ,'pfDeepCSVJetTags:probc' ,'pfDeepCSVJetTags:probudsg' ,'pfDeepCSVJetTags:probbb']
   )
 
 # ALPACA
@@ -207,7 +211,7 @@ if do_alpaca:
 #================================================================================
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring('file:data.root')
+                            fileNames = cms.untracked.vstring('file:test.root')
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -228,6 +232,7 @@ process.options = cms.untracked.PSet(
 process.ntupler = cms.EDAnalyzer('NtuplerMod',
   skipOnHLTFail     = cms.untracked.bool(do_hlt_filter),
   useTrigger        = cms.untracked.bool(True),
+  useTriggerObject  = cms.untracked.bool(False),
   TriggerObject     = cms.untracked.string("slimmedPatTrigger"),
   TriggerFile       = cms.untracked.string(hlt_filename),
   useAOD            = cms.untracked.bool(False),
@@ -430,8 +435,12 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     deepCMVABTagNamec  = cms.untracked.string('AK4PFDeepCMVAJetTagsPuppi:probc'),
     deepCMVABTagNamel  = cms.untracked.string('AK4PFDeepCMVAJetTagsPuppi:probudsg'),
     deepCMVABTagNamebb = cms.untracked.string('AK4PFDeepCMVAJetTagsPuppi:probbb'),
-    deepDoubleBTagName = cms.untracked.string('AK4PFBoostedDeepDoubleBJetTagsPuppi:probH'),
-    deepDoubleBNoMassSculptPenTagName   = cms.untracked.string('AK4PFBoostedDeepDoubleBNoMassSculptPenJetTagsPuppi:probH'),
+    deepDoubleBvLTagName = cms.untracked.string('AK4PFBoostedDeepDoubleBvLJetTagsPuppi:probHbb'),
+    deepDoubleCvLTagName = cms.untracked.string('AK4PFBoostedDeepDoubleCvLJetTagsPuppi:probHcc'),
+    deepDoubleCvBTagName = cms.untracked.string('AK4PFBoostedDeepDoubleCvBJetTagsPuppi:probHcc'),
+    deepDoubleBvLNoMassSculptPenTagName   = cms.untracked.string('AK4PFBoostedDeepDoubleBvLNoMassSculptPenJetTagsPuppi:probHbb'),
+    deepDoubleCvLNoMassSculptPenTagName   = cms.untracked.string('AK4PFBoostedDeepDoubleCvLNoMassSculptPenJetTagsPuppi:probHcc'),
+    deepDoubleCvBNoMassSculptPenTagName   = cms.untracked.string('AK4PFBoostedDeepDoubleCvBNoMassSculptPenJetTagsPuppi:probHcc'),
     boostedDoubleSVTagInfoName = cms.untracked.string('AK4PFBoostedDoubleSVTagInfosPuppi'), 
     secVertices        = cms.untracked.string('slimmedSecondaryVertices'),
     edmMuonName        = cms.untracked.string('slimmedMuons'),
@@ -491,8 +500,12 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     deepCMVABTagNamec    = cms.untracked.string('AK8PFDeepCMVAJetTagsCHS:probc'),
     deepCMVABTagNamel    = cms.untracked.string('AK8PFDeepCMVAJetTagsCHS:probudsg'),
     deepCMVABTagNamebb   = cms.untracked.string('AK8PFDeepCMVAJetTagsCHS:probbb'),
-    deepDoubleBTagName   = cms.untracked.string('AK8PFBoostedDeepDoubleBJetTagsCHS:probH'),
-    deepDoubleBNoMassSculptPenTagName   = cms.untracked.string('AK8PFBoostedDeepDoubleBNoMassSculptPenJetTagsCHS:probH'),
+    deepDoubleBvLTagName = cms.untracked.string('AK8PFBoostedDeepDoubleBvLJetTagsCHS:probHbb'),
+    deepDoubleCvLTagName = cms.untracked.string('AK8PFBoostedDeepDoubleCvLJetTagsCHS:probHcc'),
+    deepDoubleCvBTagName = cms.untracked.string('AK8PFBoostedDeepDoubleCvBJetTagsCHS:probHcc'),
+    deepDoubleBvLNoMassSculptPenTagName   = cms.untracked.string('AK8PFBoostedDeepDoubleBvLNoMassSculptPenJetTagsCHS:probHbb'),
+    deepDoubleCvLNoMassSculptPenTagName   = cms.untracked.string('AK8PFBoostedDeepDoubleCvLNoMassSculptPenJetTagsCHS:probHcc'),
+    deepDoubleCvBNoMassSculptPenTagName   = cms.untracked.string('AK8PFBoostedDeepDoubleCvBNoMassSculptPenJetTagsCHS:probHcc'),
     boostedDoubleSVTagInfoName = cms.untracked.string('AK8PFBoostedDoubleSVTagInfosCHS'),
     jettiness            = cms.untracked.string('AK8NjettinessCHS'),
     edmMuonName          = cms.untracked.string('slimmedMuons'),
@@ -525,7 +538,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     subJetName           = cms.untracked.string('SoftDrop'),
     csvBTagName          = cms.untracked.string('CA8PFCombinedInclusiveSecondaryVertexV2BJetTags'),
     csvDoubleBTagName    = cms.untracked.string('CA8PFBoostedDoubleSecondaryVertexBJetTagsCHS'),
-    deepDoubleBTagName   = cms.untracked.string('CA8PFBoostedDeepDoubleBJetTagsCHS:probH'),
+    deepDoubleBTagName   = cms.untracked.string('CA8PFBoostedDeepDoubleBJetTagsCHS:probHbb'),
     deepCSVBTagName      = cms.untracked.string('CA8PFDeepCSVJetTagsCHS'),
     deepCSVBTagNameb     = cms.untracked.string('CA8PFDeepCSVJetTagsCHS:probb'),
     deepCSVBTagNamec     = cms.untracked.string('CA8PFDeepCSVJetTagsCHS:probc'),
@@ -536,7 +549,12 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     deepCMVABTagNamec    = cms.untracked.string('CA8PFDeepCMVAJetTagsCHS:probc'),
     deepCMVABTagNamel    = cms.untracked.string('CA8PFDeepCMVAJetTagsCHS:probudsg'),
     deepCMVABTagNamebb   = cms.untracked.string('CA8PFDeepCMVAJetTagsCHS:probbb'),
-    deepDoubleBNoMassSculptPenTagName   = cms.untracked.string('CA8PFBoostedDeepDoubleBNoMassSculptPenJetTagsCHS:probH'),
+    deepDoubleBvLTagName = cms.untracked.string('CA8PFBoostedDeepDoubleBvLJetTagsCHS:probHbb'),
+    deepDoubleCvLTagName = cms.untracked.string('CA8PFBoostedDeepDoubleCvLJetTagsCHS:probHcc'),
+    deepDoubleCvBTagName = cms.untracked.string('CA8PFBoostedDeepDoubleCvBJetTagsCHS:probHcc'),
+    deepDoubleBvLNoMassSculptPenTagName   = cms.untracked.string('CA8PFBoostedDeepDoubleBvLNoMassSculptPenJetTagsCHS:probHbb'),
+    deepDoubleCvLNoMassSculptPenTagName   = cms.untracked.string('CA8PFBoostedDeepDoubleCvLNoMassSculptPenJetTagsCHS:probHcc'),
+    deepDoubleCvBNoMassSculptPenTagName   = cms.untracked.string('CA8PFBoostedDeepDoubleCvBNoMassSculptPenJetTagsCHS:probHcc'),
     boostedDoubleSVTagInfoName = cms.untracked.string('CA8PFBoostedDoubleSVTagInfosCHS'),
     svTagInfoName        = cms.untracked.string('CA8PFSecondaryVertexTagInfosCHS'),
     edmMuonName          = cms.untracked.string('slimmedMuons'),
@@ -600,8 +618,12 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     deepCMVABTagNamec  = cms.untracked.string('AK8PFDeepCMVAJetTagsPuppi:probc'),
     deepCMVABTagNamel  = cms.untracked.string('AK8PFDeepCMVAJetTagsPuppi:probudsg'),
     deepCMVABTagNamebb = cms.untracked.string('AK8PFDeepCMVAJetTagsPuppi:probbb'),
-    deepDoubleBTagName = cms.untracked.string('AK8PFBoostedDeepDoubleBJetTagsPuppi:probH'),
-    deepDoubleBNoMassSculptPenTagName   = cms.untracked.string('AK8PFBoostedDeepDoubleBNoMassSculptPenJetTagsPuppi:probH'),
+    deepDoubleBvLTagName = cms.untracked.string('AK8PFBoostedDeepDoubleBvLJetTagsPuppi:probHbb'),
+    deepDoubleCvLTagName = cms.untracked.string('AK8PFBoostedDeepDoubleCvLJetTagsPuppi:probHcc'),
+    deepDoubleCvBTagName = cms.untracked.string('AK8PFBoostedDeepDoubleCvBJetTagsPuppi:probHcc'),
+    deepDoubleBvLNoMassSculptPenTagName   = cms.untracked.string('AK8PFBoostedDeepDoubleBvLNoMassSculptPenJetTagsPuppi:probHbb'),
+    deepDoubleCvLNoMassSculptPenTagName   = cms.untracked.string('AK8PFBoostedDeepDoubleCvLNoMassSculptPenJetTagsPuppi:probHcc'),
+    deepDoubleCvBNoMassSculptPenTagName   = cms.untracked.string('AK8PFBoostedDeepDoubleCvBNoMassSculptPenJetTagsPuppi:probHcc'),
     boostedDoubleSVTagInfoName = cms.untracked.string('AK8PFBoostedDoubleSVTagInfosPuppi'),
     edmMuonName        = cms.untracked.string('slimmedMuons'),
     edmElectronName    = cms.untracked.string('slimmedElectrons'),
@@ -659,8 +681,12 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     deepCMVABTagNamec  = cms.untracked.string('CA15PFDeepCMVAJetTagsCHS:probc'),
     deepCMVABTagNamel  = cms.untracked.string('CA15PFDeepCMVAJetTagsCHS:probudsg'),
     deepCMVABTagNamebb = cms.untracked.string('CA15PFDeepCMVAJetTagsCHS:probbb'),
-    deepDoubleBTagName = cms.untracked.string('CA15PFBoostedDeepDoubleBJetTagsCHS:probH'),
-    deepDoubleBNoMassSculptPenTagName   = cms.untracked.string('CA15PFBoostedDeepDoubleBNoMassSculptPenJetTagsCHS:probH'),
+    deepDoubleBvLTagName = cms.untracked.string('CA15PFBoostedDeepDoubleBvLJetTagsCHS:probHbb'),
+    deepDoubleCvLTagName = cms.untracked.string('CA15PFBoostedDeepDoubleCvLJetTagsCHS:probHcc'),
+    deepDoubleCvBTagName = cms.untracked.string('CA15PFBoostedDeepDoubleCvBJetTagsCHS:probHcc'),
+    deepDoubleBvLNoMassSculptPenTagName   = cms.untracked.string('CA15PFBoostedDeepDoubleBvLNoMassSculptPenJetTagsCHS:probHbb'),
+    deepDoubleCvLNoMassSculptPenTagName   = cms.untracked.string('CA15PFBoostedDeepDoubleCvLNoMassSculptPenJetTagsCHS:probHcc'),
+    deepDoubleCvBNoMassSculptPenTagName   = cms.untracked.string('CA15PFBoostedDeepDoubleCvBNoMassSculptPenJetTagsCHS:probHcc'),
     boostedDoubleSVTagInfoName = cms.untracked.string('CA15PFBoostedDoubleSVTagInfosCHS'),
     edmMuonName               = cms.untracked.string('slimmedMuons'),
     edmElectronName           = cms.untracked.string('slimmedElectrons'), 
@@ -717,8 +743,12 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     deepCMVABTagNamec  = cms.untracked.string('CA15PFDeepCMVAJetTagsPuppi:probc'),
     deepCMVABTagNamel  = cms.untracked.string('CA15PFDeepCMVAJetTagsPuppi:probudsg'),
     deepCMVABTagNamebb = cms.untracked.string('CA15PFDeepCMVAJetTagsPuppi:probbb'),
-    deepDoubleBTagName = cms.untracked.string('CA15PFBoostedDeepDoubleBJetTagsPuppi:probH'),
-    deepDoubleBNoMassSculptPenTagName   = cms.untracked.string('CA15PFBoostedDeepDoubleBNoMassSculptPenJetTagsPuppi:probH'),
+    deepDoubleBvLTagName = cms.untracked.string('CA15PFBoostedDeepDoubleBvLJetTagsPuppi:probHbb'),
+    deepDoubleCvLTagName = cms.untracked.string('CA15PFBoostedDeepDoubleCvLJetTagsPuppi:probHcc'),
+    deepDoubleCvBTagName = cms.untracked.string('CA15PFBoostedDeepDoubleCvBJetTagsPuppi:probHcc'),
+    deepDoubleBvLNoMassSculptPenTagName   = cms.untracked.string('CA15PFBoostedDeepDoubleBvLNoMassSculptPenJetTagsPuppi:probHbb'),
+    deepDoubleCvLNoMassSculptPenTagName   = cms.untracked.string('CA15PFBoostedDeepDoubleCvLNoMassSculptPenJetTagsPuppi:probHcc'),
+    deepDoubleCvBNoMassSculptPenTagName   = cms.untracked.string('CA15PFBoostedDeepDoubleCvBNoMassSculptPenJetTagsPuppi:probHcc'),
     boostedDoubleSVTagInfoName = cms.untracked.string('CA15PFBoostedDoubleSVTagInfosPuppi'),
     edmMuonName               = cms.untracked.string('slimmedMuons'),
     edmElectronName           = cms.untracked.string('slimmedElectrons'),
@@ -766,7 +796,7 @@ process.baconSequence = cms.Sequence(
                                      process.fullPatMetSequencePuppi  *
                                      process.patJetCorrFactorsTransientCorrected*
                                      process.updatedPatJetsTransientCorrected*
-                                     process.selectedUpdatedPatJets*
+                                     process.selectedUpdatedPatJets   *
                                      process.QGTagger                 *
                                      process.ntupler
                                      )

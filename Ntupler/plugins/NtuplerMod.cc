@@ -113,6 +113,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fIsActivePF        (false),
   fIsActiveRH        (false),
   fUseTrigger        (false),
+  fUseTriggerObject  (false),
   fOutputName        (iConfig.getUntrackedParameter<std::string>("outputName", "ntuple.root")),
   fOutputFile        (0),
   fTotalEvents       (0),
@@ -146,6 +147,7 @@ NtuplerMod::NtuplerMod(const edm::ParameterSet &iConfig):
   fSVArr             (0)
 {
   fUseTrigger          = iConfig.getUntrackedParameter<bool>("useTrigger",true);
+  fUseTriggerObject    = iConfig.getUntrackedParameter<bool>("useTriggerObject",true);
   fTokGenRunInfo       = consumes<GenRunInfoProduct,edm::InRun>(edm::InputTag(fGenRunInfoName)); 
   fTokTrgRes           = consumes<edm::TriggerResults>(edm::InputTag(fHLTTag)); 
   fTokTrgEvt           = consumes<trigger::TriggerEvent>(edm::InputTag(fHLTTag)); 
@@ -592,12 +594,14 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
   if(fUseTrigger) { 
     iEvent.getByToken(fTokTrgEvt,hTrgEvt);
     iEvent.getByToken(fTokTrgObj,hTrgObjs);
-    const edm::TriggerNames triggerNames = iEvent.triggerNames(*hTrgRes);
-    for(pat::TriggerObjectStandAlone tobj : *hTrgObjs) {
-      pat::TriggerObjectStandAlone patTriggerObjectStandAloneUnpacked(tobj);
-      patTriggerObjectStandAloneUnpacked.unpackPathNames(triggerNames);
+    if(fUseTriggerObject) { 
+      const edm::TriggerNames triggerNames = iEvent.triggerNames(*hTrgRes);
+      for(pat::TriggerObjectStandAlone tobj : *hTrgObjs) {
+	pat::TriggerObjectStandAlone patTriggerObjectStandAloneUnpacked(tobj);
+	patTriggerObjectStandAloneUnpacked.unpackPathNames(triggerNames);
       patTriggerObjectStandAloneUnpacked.unpackFilterLabels(iEvent,*hTrgRes);
       uFTrgObjs->push_back(patTriggerObjectStandAloneUnpacked);
+      }
     }
     if(fUseAOD) {hTrgEvtDummy  = &(*hTrgEvt); }
     else        {hTrgObjsDummy = uFTrgObjs; }
