@@ -1560,11 +1560,11 @@ void FillerJet::addJet(baconhep::TAddJet *pAddJet, TClonesArray *iSVArr,const re
   float lepCPt(-100), lepCEta(-100), lepCPhi(-100);
   float lepCId(0);
 
-  if(JetTools::leptons(itJet,3)> 0 && JetTools::leptons(itJet,2)<fConeSize) {
-    lepCPt = JetTools::leptons(itJet,2);
+  if(JetTools::leptons(itJet,3)> 0 && JetTools::leptons(itJet,7)<fConeSize) {
+    lepCPt = JetTools::leptons(itJet,3);
     lepCEta = JetTools::leptons(itJet,5);
     lepCPhi = JetTools::leptons(itJet,6);
-    lepCId = JetTools::leptons(itJet,7);
+    lepCId = JetTools::leptons(itJet,4);
   }
   
   pAddJet->lepCPt = lepCPt;
