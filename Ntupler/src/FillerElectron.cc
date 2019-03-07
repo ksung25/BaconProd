@@ -30,17 +30,12 @@ FillerElectron::FillerElectron(const edm::ParameterSet &iConfig, const bool useA
   fPuppiName             (iConfig.getUntrackedParameter<std::string>("edmPuppiName","puppi")),
   fPuppiNoLepName        (iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppiNoLep")),
   fUsePuppi              (iConfig.getUntrackedParameter<bool>("usePuppi",true)),
-  fEcalPFClusterIsoMapTag(iConfig.getUntrackedParameter<edm::InputTag>("edmEcalPFClusterIsoMapTag")),
-  fHcalPFClusterIsoMapTag(iConfig.getUntrackedParameter<edm::InputTag>("edmHcalPFClusterIsoMapTag")),
-  fEleMediumIdMapTag     (iConfig.getUntrackedParameter<edm::InputTag>("edmEleMediumIdMapTag")),
-  fEleTightIdMapTag      (iConfig.getUntrackedParameter<edm::InputTag>("edmEleTightIdMapTag")),
-  fMVAValuesMapTag       (iConfig.getUntrackedParameter<edm::InputTag>("edmMVAValuesTag")),
-  fMVACatsMapTag         (iConfig.getUntrackedParameter<edm::InputTag>("edmMVACatsTag")),
+  //fEcalPFClusterIsoMapTag(iConfig.getUntrackedParameter<edm::InputTag>("edmEcalPFClusterIsoMapTag")),
+  //fHcalPFClusterIsoMapTag(iConfig.getUntrackedParameter<edm::InputTag>("edmHcalPFClusterIsoMapTag")),
+  fMediumMVA             (iConfig.getUntrackedParameter<std::string>("edmEleMediumMVA")),
+  fTightMVA              (iConfig.getUntrackedParameter<std::string>("edmEleTightMVA")),
+  fMVA                   (iConfig.getUntrackedParameter<std::string>("edmEleMVA")),
   fSecondMVA             (iConfig.getUntrackedParameter<bool>("storeSecondMVA",false)),
-  fEleMediumIdIsoMapTag  (iConfig.getUntrackedParameter<edm::InputTag>("edmEleMediumIdIsoMapTag")),
-  fEleTightIdIsoMapTag   (iConfig.getUntrackedParameter<edm::InputTag>("edmEleTightIdIsoMapTag")),
-  fMVAValuesIsoMapTag    (iConfig.getUntrackedParameter<edm::InputTag>("edmMVAValuesIsoTag")),
-  fMVACatsIsoMapTag      (iConfig.getUntrackedParameter<edm::InputTag>("edmMVACatsIsoTag")),
   fUseTO                 (iConfig.getUntrackedParameter<bool>("useTriggerObject",false)),
   fUseAOD                (useAOD)
 {
@@ -55,16 +50,8 @@ FillerElectron::FillerElectron(const edm::ParameterSet &iConfig, const bool useA
   if(!fUseAOD) fTokPuppiNoLepPATName = iC.consumes<pat::PackedCandidateCollection>(fPuppiNoLepName);
   fTokTrackName      = iC.consumes<reco::TrackCollection>      (fTrackName);
   fTokConvName       = iC.consumes<reco::ConversionCollection>(fConvName);
-  fTokEcalPFClusterIsoMap = iC.consumes<edm::ValueMap<float> >(fEcalPFClusterIsoMapTag);
-  fTokHcalPFClusterIsoMap = iC.consumes<edm::ValueMap<float> >(fHcalPFClusterIsoMapTag);
-  fTokEleMediumIdMap      = iC.consumes<edm::ValueMap<bool>  >(fEleMediumIdMapTag);  
-  fTokEleTightIdMap       = iC.consumes<edm::ValueMap<bool>  >(fEleTightIdMapTag);  
-  fTokEleMVAValuesMap     = iC.consumes<edm::ValueMap<float> >(fMVAValuesMapTag);  
-  fTokEleMVACatsMap       = iC.consumes<edm::ValueMap<int>   >(fMVACatsMapTag);  
-  fTokEleMediumIdIsoMap   = iC.consumes<edm::ValueMap<bool>  >(fEleMediumIdIsoMapTag);  
-  fTokEleTightIdIsoMap    = iC.consumes<edm::ValueMap<bool>  >(fEleTightIdIsoMapTag);  
-  fTokEleMVAValuesIsoMap  = iC.consumes<edm::ValueMap<float> >(fMVAValuesIsoMapTag);  
-  fTokEleMVACatsIsoMap    = iC.consumes<edm::ValueMap<int>   >(fMVACatsIsoMapTag);  
+  //fTokEcalPFClusterIsoMap = iC.consumes<edm::ValueMap<float> >(fEcalPFClusterIsoMapTag);
+  //fTokHcalPFClusterIsoMap = iC.consumes<edm::ValueMap<float> >(fHcalPFClusterIsoMapTag);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -137,11 +124,11 @@ void FillerElectron::fill(TClonesArray *array,
 
   // Get PF cluster isolation value maps (not in AOD)
   edm::Handle<edm::ValueMap<float> > hEcalPFClusterIsoMap;
-  iEvent.getByToken(fTokEcalPFClusterIsoMap, hEcalPFClusterIsoMap);
+  //iEvent.getByToken(fTokEcalPFClusterIsoMap, hEcalPFClusterIsoMap);
   assert(hEcalPFClusterIsoMap.isValid());
 
   edm::Handle<edm::ValueMap<float> > hHcalPFClusterIsoMap;
-  iEvent.getByToken(fTokHcalPFClusterIsoMap, hHcalPFClusterIsoMap);
+  //iEvent.getByToken(fTokHcalPFClusterIsoMap, hHcalPFClusterIsoMap);
   assert(hHcalPFClusterIsoMap.isValid());
 
 
@@ -326,41 +313,6 @@ void FillerElectron::fill(TClonesArray *array,
   assert(hSCProduct.isValid());
   const reco::SuperClusterCollection *scCol = hSCProduct.product();
   
-  edm::Handle<edm::ValueMap<bool> > hEleMediumIdMap;
-  iEvent.getByToken(fTokEleMediumIdMap,hEleMediumIdMap);
-  assert(hEleMediumIdMap.isValid());
-
-  edm::Handle<edm::ValueMap<bool> > hEleTightIdMap;
-  iEvent.getByToken(fTokEleTightIdMap,hEleTightIdMap);
-  assert(hEleTightIdMap.isValid());
-
-  edm::Handle<edm::ValueMap<float> > hMVAValuesMap;
-  iEvent.getByToken(fTokEleMVAValuesMap,hMVAValuesMap);
-  assert(hMVAValuesMap.isValid());
-
-  edm::Handle<edm::ValueMap<int> > hMVACatsMap;
-  iEvent.getByToken(fTokEleMVACatsMap,hMVACatsMap);
-  assert(hMVACatsMap.isValid());
-
-  edm::Handle<edm::ValueMap<bool> > hEleMediumIdIsoMap;
-  edm::Handle<edm::ValueMap<bool> > hEleTightIdIsoMap;
-  edm::Handle<edm::ValueMap<float> > hMVAValuesIsoMap;
-  edm::Handle<edm::ValueMap<int> > hMVACatsIsoMap;
-
-  if (fSecondMVA) {
-    iEvent.getByToken(fTokEleMediumIdIsoMap,hEleMediumIdIsoMap);
-    assert(hEleMediumIdIsoMap.isValid());
-
-    iEvent.getByToken(fTokEleTightIdIsoMap,hEleTightIdIsoMap);
-    assert(hEleTightIdIsoMap.isValid());
-
-    iEvent.getByToken(fTokEleMVAValuesIsoMap,hMVAValuesIsoMap);
-    assert(hMVAValuesIsoMap.isValid());
-
-    iEvent.getByToken(fTokEleMVACatsIsoMap,hMVACatsIsoMap);
-    assert(hMVACatsIsoMap.isValid());
-  }
-
   const pat::PackedCandidateCollection *pfPuppi      = 0;
   const pat::PackedCandidateCollection *pfPuppiNoLep = 0;
   if(fUsePuppi) { 
@@ -405,6 +357,10 @@ void FillerElectron::fill(TClonesArray *array,
     pElectron->scEt       = (sc->energy())*(sc->position().Rho())/(sc->position().R());
     pElectron->scEta      = sc->eta();
     pElectron->scPhi      = sc->phi();
+
+    auto corrP4  = itEle->p4() * itEle->userFloat("ecalTrkEnergyPostCorr") / itEle->energy(); // apply scaling/smearing
+    pElectron->calibPt = corrP4.Pt();
+    pElectron->calibE = corrP4.E();
 
     pElectron->pfPt  = 0;
     pElectron->pfEta = 0;
@@ -480,18 +436,18 @@ void FillerElectron::fill(TClonesArray *array,
     pElectron->dPhiIn     = itEle->deltaPhiSuperClusterTrackAtVtx();
 
     pElectron->mvaBit     = 0; 
-    if((*hEleMediumIdMap)[eleBaseRef]) pElectron->mvaBit     |=  baconhep::kEleMVAMedBit;
-    if((*hEleTightIdMap) [eleBaseRef]) pElectron->mvaBit     |=  baconhep::kEleMVATightBit;
-    pElectron->mva        =  (*hMVAValuesMap)[eleBaseRef];
-    pElectron->mvaCat     =  (*hMVACatsMap)[eleBaseRef];
+    if (itEle->electronID(fMediumMVA)) pElectron->mvaBit |= baconhep::kEleMVAMedBit;
+    if (itEle->electronID(fTightMVA)) pElectron->mvaBit |= baconhep::kEleMVATightBit;
+    pElectron->mva = itEle->userFloat(fMVA+"Values");
+    pElectron->mvaCat = itEle->userInt(fMVA+"Categories");
 
-    if (fSecondMVA) {
-      pElectron->mvaIsoBit     = 0; 
-      if((*hEleMediumIdIsoMap)[eleBaseRef]) pElectron->mvaIsoBit     |=  baconhep::kEleMVAMedBit;
-      if((*hEleTightIdIsoMap) [eleBaseRef]) pElectron->mvaIsoBit     |=  baconhep::kEleMVATightBit;
-      pElectron->mvaIso        =  (*hMVAValuesIsoMap)[eleBaseRef];
-      pElectron->mvaIsoCat     =  (*hMVACatsIsoMap)[eleBaseRef];
-    }
+    //if (fSecondMVA) {
+    //  pElectron->mvaIsoBit     = 0; 
+    //  if((*hEleMediumIdIsoMap)[eleBaseRef]) pElectron->mvaIsoBit     |=  baconhep::kEleMVAMedBit;
+    //  if((*hEleTightIdIsoMap) [eleBaseRef]) pElectron->mvaIsoBit     |=  baconhep::kEleMVATightBit;
+    //  pElectron->mvaIso        =  (*hMVAValuesIsoMap)[eleBaseRef];
+    //  pElectron->mvaIsoCat     =  (*hMVACatsIsoMap)[eleBaseRef];
+    //}
 
     pElectron->isConv     = !itEle->passConversionVeto();
 
