@@ -128,29 +128,11 @@ if is_data_flag:
   process.AK8QGTaggerSubJetsCHS.jec  = cms.InputTag("ak8chsL1FastL2L3ResidualCorrector")
   process.CA15QGTaggerSubJetsCHS.jec = cms.InputTag("ak8chsL1FastL2L3ResidualCorrector")
 
-process.load("RecoEgamma.ElectronIdentification.egmGsfElectronIDs_cfi")
-process.load("RecoEgamma.PhotonIdentification.egmPhotonIDs_cfi")
-process.load("RecoEgamma.ElectronIdentification.ElectronMVAValueMapProducer_cfi")
-process.load("RecoEgamma/PhotonIdentification/PhotonIDValueMapProducer_cfi")
-process.load("RecoEgamma/PhotonIdentification/PhotonMVAValueMapProducer_cfi")
-from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
-process.egmGsfElectronIDSequence = cms.Sequence(process.egmGsfElectronIDs)
-switchOnVIDPhotonIdProducer(process, DataFormat.MiniAOD)
-my_id_modules = ['RecoEgamma.PhotonIdentification.Identification.mvaPhotonID_Spring15_25ns_nonTrig_V2p1_cff',
-                 'RecoEgamma.PhotonIdentification.Identification.mvaPhotonID_Fall17_94X_V1_cff',
-                 ]
-for idmod in my_id_modules:
-    setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection)
-
-switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
-my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronHLTPreselecition_Summer16_V1_cff',
-                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Summer16_80X_V1_cff',
-                 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring16_GeneralPurpose_V1_cff',
-                 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_noIso_V1_cff',
-                 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_iso_V1_cff',
-                 ]
-for idmod in my_id_modules:
-   setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
+from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
+setupEgammaPostRecoSeq(process,
+                       runVID=True,
+                       era='2017-Nov17ReReco', #era is new to select between 2016 / 2017,  it defaults to 2017
+                       phoIDModules=[]) #bug with default modules for photon VID; off for now
 
 # PF MET corrections
 from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
@@ -209,9 +191,10 @@ if do_alpaca:
 #--------------------------------------------------------------------------------
 # input settings
 #================================================================================
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring('file:test.root')
+                            #fileNames = cms.untracked.vstring('file:test.root')
+                            fileNames = cms.untracked.vstring('/store/data/Run2017F/DoubleEG/MINIAOD/31Mar2018-v1/90001/F61EA338-8E37-E811-A203-0025905C4262.root')
 )
 process.source.inputCommands = cms.untracked.vstring("keep *",
                                                      "drop *_MEtoEDMConverter_*_*")
@@ -306,15 +289,18 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     #edmMVAValuesTag           = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values'),
     #edmMVACatsTag             = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Categories')
     #----------------------    SETTINGS FOR 2017 (9X)     -----------------------
-    edmEleMediumIdIsoMapTag   = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Fall17-iso-V1-wp90'),
-    edmEleTightIdIsoMapTag    = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Fall17-iso-V1-wp80'),
-    edmMVAValuesIsoTag        = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17IsoV1Values'),
-    edmMVACatsIsoTag          = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17IsoV1Categories'),
-    storeSecondMVA            = cms.untracked.bool(True),
-    edmEleMediumIdMapTag      = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Fall17-noIso-V1-wp90'),
-    edmEleTightIdMapTag       = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Fall17-noIso-V1-wp80'),
-    edmMVAValuesTag           = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV1Values'),
-    edmMVACatsTag             = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV1Categories')
+    #edmEleMediumIdIsoMapTag   = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Fall17-iso-V1-wp90'),
+    #edmEleTightIdIsoMapTag    = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Fall17-iso-V1-wp80'),
+    #edmMVAValuesIsoTag        = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17IsoV1Values'),
+    #edmMVACatsIsoTag          = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17IsoV1Categories'),
+    edmEleMediumMVA           = cms.untracked.string('mvaEleID-Fall17-iso-V1-wp90'),
+    edmEleTightMVA            = cms.untracked.string('mvaEleID-Fall17-iso-V1-wp80'),
+    edmEleMVA                 = cms.untracked.string('ElectronMVAEstimatorRun2Fall17IsoV1'),
+    storeSecondMVA            = cms.untracked.bool(False),
+    #edmEleMediumIdMapTag      = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Fall17-noIso-V1-wp90'),
+    #edmEleTightIdMapTag       = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Fall17-noIso-V1-wp80'),
+    #edmMVAValuesTag           = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV1Values'),
+    #edmMVACatsTag             = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV1Categories')
 
   ),
   
@@ -334,13 +320,14 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     minPt                 = cms.untracked.double(10),
     edmName               = cms.untracked.string('slimmedPhotons'),
     edmSCName             = cms.untracked.InputTag('reducedEgamma','reducedSuperClusters'),
-    edmChHadIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoChargedIsolation"),        # EGM recommendation not in AOD/MINIAOD
-    edmNeuHadIsoMapTag    = cms.untracked.InputTag("photonIDValueMapProducer:phoNeutralHadronIsolation"),  # EGM recommendation not in AOD/MINIAOD
-    edmGammaIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoPhotonIsolation"),          # EGM recommendation not in AOD/MINIAOD
+    #edmChHadIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoChargedIsolation"),        # EGM recommendation not in AOD/MINIAOD
+    #edmNeuHadIsoMapTag    = cms.untracked.InputTag("photonIDValueMapProducer:phoNeutralHadronIsolation"),  # EGM recommendation not in AOD/MINIAOD
+    #edmGammaIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoPhotonIsolation"),          # EGM recommendation not in AOD/MINIAOD
     #FOR 2016 (8X)
     #edmPhoMVAIdTag        = cms.untracked.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring15NonTrig25nsV2p1Values")
     #FOR 2017 (8X)
-    edmPhoMVAIdTag        = cms.untracked.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRunIIFall17v1Values"),
+    #edmPhoMVAIdTag        = cms.untracked.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRunIIFall17v1Values"),
+    edmPhoMVA              = cms.untracked.string('PhotonMVAEstimatorRunIIFall17v1'),
     #edmPhoMVAIdTag        = cms.untracked.InputTag(""),
     useTriggerObject      = cms.untracked.bool(False),
   ),
@@ -778,11 +765,7 @@ process.baconSequence = cms.Sequence(
                                      process.ak4chsL1FastL2L3Corrector*
                                      process.ak4PuppiL1FastL2L3Corrector*
                                      process.pfNoPileUpJME            *
-                                     process.electronMVAValueMapProducer *
-                                     process.photonIDValueMapProducer *
-                                     process.photonMVAValueMapProducer*
-                                     process.egmGsfElectronIDSequence *
-                                     process.egmPhotonIDSequence      *
+                                     process.egammaPostRecoSeq        *
                                      process.puppiMETSequence          *
                                      #process.genjetsequence           *
                                      #process.AK4genjetsequenceCHS     *
