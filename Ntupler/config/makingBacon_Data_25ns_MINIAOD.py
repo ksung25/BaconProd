@@ -283,25 +283,14 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     useTriggerObject          = cms.untracked.bool(False),
     edmEcalPFClusterIsoMapTag = cms.untracked.InputTag('electronEcalPFClusterIsolationProducer'),
     edmHcalPFClusterIsoMapTag = cms.untracked.InputTag('electronHcalPFClusterIsolationProducer'),
-    #----------------------    SETTINGS FOR 2016 (8X)     -----------------------
-    #edmEleMediumIdMapTag      = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Spring16-GeneralPurpose-V1-wp90'),
-    #edmEleTightIdMapTag       = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Spring16-GeneralPurpose-V1-wp80'),
-    #edmMVAValuesTag           = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values'),
-    #edmMVACatsTag             = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Categories')
     #----------------------    SETTINGS FOR 2017 (9X)     -----------------------
-    #edmEleMediumIdIsoMapTag   = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Fall17-iso-V1-wp90'),
-    #edmEleTightIdIsoMapTag    = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Fall17-iso-V1-wp80'),
-    #edmMVAValuesIsoTag        = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17IsoV1Values'),
-    #edmMVACatsIsoTag          = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17IsoV1Categories'),
-    edmEleMediumMVA           = cms.untracked.string('mvaEleID-Fall17-iso-V1-wp90'),
-    edmEleTightMVA            = cms.untracked.string('mvaEleID-Fall17-iso-V1-wp80'),
-    edmEleMVA                 = cms.untracked.string('ElectronMVAEstimatorRun2Fall17IsoV1'),
-    storeSecondMVA            = cms.untracked.bool(False),
-    #edmEleMediumIdMapTag      = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Fall17-noIso-V1-wp90'),
-    #edmEleTightIdMapTag       = cms.untracked.InputTag('egmGsfElectronIDs:mvaEleID-Fall17-noIso-V1-wp80'),
-    #edmMVAValuesTag           = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV1Values'),
-    #edmMVACatsTag             = cms.untracked.InputTag('electronMVAValueMapProducer:ElectronMVAEstimatorRun2Fall17NoIsoV1Categories')
-
+    edmEleMediumMVA           = cms.untracked.string('mvaEleID-Fall17-noIso-V1-wp90'),
+    edmEleTightMVA            = cms.untracked.string('mvaEleID-Fall17-noIso-V1-wp80'),
+    edmEleMVA                 = cms.untracked.string('ElectronMVAEstimatorRun2Fall17NoIsoV1'),
+    edmEleMediumMVAIso        = cms.untracked.string('mvaEleID-Fall17-iso-V1-wp90'),
+    edmEleTightMVAIso         = cms.untracked.string('mvaEleID-Fall17-iso-V1-wp80'),
+    edmEleMVAIso              = cms.untracked.string('ElectronMVAEstimatorRun2Fall17IsoV1'),
+    storeSecondMVA            = cms.untracked.bool(True),
   ),
   
   Muon = cms.untracked.PSet(
@@ -323,12 +312,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     #edmChHadIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoChargedIsolation"),        # EGM recommendation not in AOD/MINIAOD
     #edmNeuHadIsoMapTag    = cms.untracked.InputTag("photonIDValueMapProducer:phoNeutralHadronIsolation"),  # EGM recommendation not in AOD/MINIAOD
     #edmGammaIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoPhotonIsolation"),          # EGM recommendation not in AOD/MINIAOD
-    #FOR 2016 (8X)
-    #edmPhoMVAIdTag        = cms.untracked.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRun2Spring15NonTrig25nsV2p1Values")
     #FOR 2017 (8X)
-    #edmPhoMVAIdTag        = cms.untracked.InputTag("photonMVAValueMapProducer:PhotonMVAEstimatorRunIIFall17v1Values"),
     edmPhoMVA              = cms.untracked.string('PhotonMVAEstimatorRunIIFall17v1'),
-    #edmPhoMVAIdTag        = cms.untracked.InputTag(""),
     useTriggerObject      = cms.untracked.bool(False),
   ),
   

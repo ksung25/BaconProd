@@ -35,6 +35,9 @@ FillerElectron::FillerElectron(const edm::ParameterSet &iConfig, const bool useA
   fMediumMVA             (iConfig.getUntrackedParameter<std::string>("edmEleMediumMVA")),
   fTightMVA              (iConfig.getUntrackedParameter<std::string>("edmEleTightMVA")),
   fMVA                   (iConfig.getUntrackedParameter<std::string>("edmEleMVA")),
+  fMediumMVAIso          (iConfig.getUntrackedParameter<std::string>("edmEleMediumMVAIso")),
+  fTightMVAIso           (iConfig.getUntrackedParameter<std::string>("edmEleTightMVAIso")),
+  fMVAIso                (iConfig.getUntrackedParameter<std::string>("edmEleMVAIso")),
   fSecondMVA             (iConfig.getUntrackedParameter<bool>("storeSecondMVA",false)),
   fUseTO                 (iConfig.getUntrackedParameter<bool>("useTriggerObject",false)),
   fUseAOD                (useAOD)
@@ -441,13 +444,13 @@ void FillerElectron::fill(TClonesArray *array,
     pElectron->mva = itEle->userFloat(fMVA+"Values");
     pElectron->mvaCat = itEle->userInt(fMVA+"Categories");
 
-    //if (fSecondMVA) {
-    //  pElectron->mvaIsoBit     = 0; 
-    //  if((*hEleMediumIdIsoMap)[eleBaseRef]) pElectron->mvaIsoBit     |=  baconhep::kEleMVAMedBit;
-    //  if((*hEleTightIdIsoMap) [eleBaseRef]) pElectron->mvaIsoBit     |=  baconhep::kEleMVATightBit;
-    //  pElectron->mvaIso        =  (*hMVAValuesIsoMap)[eleBaseRef];
-    //  pElectron->mvaIsoCat     =  (*hMVACatsIsoMap)[eleBaseRef];
-    //}
+    if (fSecondMVA) {
+      pElectron->mvaIsoBit     = 0; 
+      if (itEle->electronID(fMediumMVAIso)) pElectron->mvaIsoBit |= baconhep::kEleMVAMedBit;
+      if (itEle->electronID(fTightMVAIso)) pElectron->mvaIsoBit |= baconhep::kEleMVATightBit;
+      pElectron->mvaIso = itEle->userFloat(fMVAIso+"Values");
+      pElectron->mvaIsoCat = itEle->userInt(fMVAIso+"Categories");
+    }
 
     pElectron->isConv     = !itEle->passConversionVeto();
 
