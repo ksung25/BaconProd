@@ -30,8 +30,6 @@ FillerElectron::FillerElectron(const edm::ParameterSet &iConfig, const bool useA
   fPuppiName             (iConfig.getUntrackedParameter<std::string>("edmPuppiName","puppi")),
   fPuppiNoLepName        (iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppiNoLep")),
   fUsePuppi              (iConfig.getUntrackedParameter<bool>("usePuppi",true)),
-  //fEcalPFClusterIsoMapTag(iConfig.getUntrackedParameter<edm::InputTag>("edmEcalPFClusterIsoMapTag")),
-  //fHcalPFClusterIsoMapTag(iConfig.getUntrackedParameter<edm::InputTag>("edmHcalPFClusterIsoMapTag")),
   fMediumMVA             (iConfig.getUntrackedParameter<std::string>("edmEleMediumMVA")),
   fTightMVA              (iConfig.getUntrackedParameter<std::string>("edmEleTightMVA")),
   fMVA                   (iConfig.getUntrackedParameter<std::string>("edmEleMVA")),
@@ -53,8 +51,6 @@ FillerElectron::FillerElectron(const edm::ParameterSet &iConfig, const bool useA
   if(!fUseAOD) fTokPuppiNoLepPATName = iC.consumes<pat::PackedCandidateCollection>(fPuppiNoLepName);
   fTokTrackName      = iC.consumes<reco::TrackCollection>      (fTrackName);
   fTokConvName       = iC.consumes<reco::ConversionCollection>(fConvName);
-  //fTokEcalPFClusterIsoMap = iC.consumes<edm::ValueMap<float> >(fEcalPFClusterIsoMapTag);
-  //fTokHcalPFClusterIsoMap = iC.consumes<edm::ValueMap<float> >(fHcalPFClusterIsoMapTag);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -124,15 +120,6 @@ void FillerElectron::fill(TClonesArray *array,
   edm::ESHandle<TransientTrackBuilder> hTransientTrackBuilder;
   iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",hTransientTrackBuilder);
   const TransientTrackBuilder *transientTrackBuilder = hTransientTrackBuilder.product();
-
-  // Get PF cluster isolation value maps (not in AOD)
-  edm::Handle<edm::ValueMap<float> > hEcalPFClusterIsoMap;
-  //iEvent.getByToken(fTokEcalPFClusterIsoMap, hEcalPFClusterIsoMap);
-  assert(hEcalPFClusterIsoMap.isValid());
-
-  edm::Handle<edm::ValueMap<float> > hHcalPFClusterIsoMap;
-  //iEvent.getByToken(fTokHcalPFClusterIsoMap, hHcalPFClusterIsoMap);
-  assert(hHcalPFClusterIsoMap.isValid());
 
 
   for(reco::GsfElectronCollection::const_iterator itEle = eleCol->begin(); itEle!=eleCol->end(); ++itEle) {

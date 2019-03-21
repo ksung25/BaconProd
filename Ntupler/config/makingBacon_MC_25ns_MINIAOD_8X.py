@@ -11,10 +11,8 @@ do_alpaca     = False
 cmssw_base = os.environ['CMSSW_BASE']
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if is_data_flag:
-  #process.GlobalTag.globaltag = cms.string('90X_upgrade2017_realistic_v20')
   process.GlobalTag.globaltag = cms.string('94X_mcRun2_asymptotic_v3')
 else:
-  #process.GlobalTag.globaltag = cms.string('90X_upgrade2017_realistic_v20')
   process.GlobalTag.globaltag = cms.string('94X_mcRun2_asymptotic_v3')
 
 #JEC
@@ -313,9 +311,6 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     minPt                 = cms.untracked.double(10),
     edmName               = cms.untracked.string('slimmedPhotons'),
     edmSCName             = cms.untracked.InputTag('reducedEgamma','reducedSuperClusters'),
-    #edmChHadIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoChargedIsolation"),        # EGM recommendation not in AOD/MINIAOD
-    #edmNeuHadIsoMapTag    = cms.untracked.InputTag("photonIDValueMapProducer:phoNeutralHadronIsolation"),  # EGM recommendation not in AOD/MINIAOD
-    #edmGammaIsoMapTag     = cms.untracked.InputTag("photonIDValueMapProducer:phoPhotonIsolation"),          # EGM recommendation not in AOD/MINIAOD
     #FOR 2016 (8X)
     edmPhoMVA              = cms.untracked.string('PhotonMVAEstimatorRun2Spring16NonTrigV1'),
     useTriggerObject      = cms.untracked.bool(False),
