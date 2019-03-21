@@ -89,6 +89,12 @@ namespace baconhep
       edm::InputTag fEleTightIdMapTag;
       edm::InputTag fMVAValuesMapTag;
       edm::InputTag fMVACatsMapTag;
+      std::string fMediumMVA;
+      std::string fTightMVA;
+      std::string fMVA;
+      std::string fMediumMVAIso;
+      std::string fTightMVAIso;
+      std::string fMVAIso;
       bool fSecondMVA;
       edm::InputTag fEleMediumIdIsoMapTag;
       edm::InputTag fEleTightIdIsoMapTag;
@@ -96,7 +102,7 @@ namespace baconhep
       edm::InputTag fMVACatsIsoMapTag;
       bool fUseTO;
       bool fUseAOD;
-
+      
       edm::EDGetTokenT<reco::GsfElectronCollection>  fTokEleName;
       edm::EDGetTokenT<pat::ElectronCollection>      fTokPatEleName;
       edm::EDGetTokenT<reco::BeamSpot>               fTokBSName;

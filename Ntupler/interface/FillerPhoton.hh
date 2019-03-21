@@ -88,6 +88,7 @@ namespace baconhep
       edm::InputTag fNeuHadIsoMapTag;
       edm::InputTag fGammaIsoMapTag;
       edm::InputTag fPhoMVAMapTag;
+      std::string fMVA;
       bool fUseTO;
       bool fUseAOD;
  //      PhotonMVACalculator *fPhotonMVA; 

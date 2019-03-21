@@ -121,6 +121,12 @@ void FillerGenInfo::fill(TGenEventInfo *genEvtInfo, TClonesArray *particlesArr, 
     pGenPart->phi    = itGenP->phi();
     pGenPart->y      = itGenP->rapidity();
     pGenPart->mass   = itGenP->mass();
+    pGenPart->isPromptFinalState = itGenP->isPromptFinalState();
+    pGenPart->isDirectPromptTauDecayProductFinalState = itGenP->isDirectPromptTauDecayProductFinalState();
+    pGenPart->isHardProcess = itGenP->isHardProcess();
+    pGenPart->fromHardProcessDecayed = itGenP->fromHardProcessDecayed();
+    pGenPart->fromHardProcessFinalState = itGenP->fromHardProcessFinalState();
+    pGenPart->isPromptDecayed = itGenP->isPromptDecayed();
     if(itGenP->numberOfMothers() >  0 ) {
       int lId = -2;
       edm::Ptr<reco::GenParticle> lMomPtr = edm::refToPtr(itGenP->motherRef()); 
