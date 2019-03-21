@@ -180,9 +180,6 @@ void FillerElectron::fill(TClonesArray *array,
     pElectron->neuHadIso = itEle->pfIsolationVariables().sumNeutralHadronEt;
     pElectron->puIso     = itEle->pfIsolationVariables().sumPUPt;
 
-    pElectron->ecalPFClusIso = (*hEcalPFClusterIsoMap)[eleBaseRef];
-    pElectron->hcalPFClusIso = (*hHcalPFClusterIsoMap)[eleBaseRef];
-
     if(fUsePuppi) { 
       double pEta = pElectron->pfEta;
       double pPhi = pElectron->pfPhi;
