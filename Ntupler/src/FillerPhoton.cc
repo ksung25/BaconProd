@@ -249,7 +249,8 @@ void FillerPhoton::fill(TClonesArray *array,
     auto corrP4  = itPho->p4() * itPho->userFloat("ecalEnergyPostCorr") / itPho->energy();
     pPhoton->calibPt = corrP4.Pt();
     pPhoton->calibE = corrP4.E();
-
+    
+    pPhoton->eRes = itPho->getCorrectedEnergyError(itPho->getCandidateP4type())/itPho->getCorrectedEnergy(itPho->getCandidateP4type());
 
     //
     // Isolation
@@ -272,11 +273,12 @@ void FillerPhoton::fill(TClonesArray *array,
     //
     // Identification
     //==============================
-    pPhoton->hovere   = itPho->hadronicOverEm();
-    pPhoton->sthovere = itPho->hadTowOverEm();
-    pPhoton->sieie    = itPho->full5x5_sigmaIetaIeta();
-    pPhoton->sipip    = 0;  // (!) todo (lazy tools)
-    pPhoton->r9       = itPho->r9();  // (!) change to full5x5 after 7_2_0 MC?
+    pPhoton->hovere     = itPho->hadronicOverEm();
+    pPhoton->sthovere   = itPho->hadTowOverEm();
+    pPhoton->sieie      = itPho->full5x5_sigmaIetaIeta();
+    pPhoton->sipip      = 0;  // (!) todo (lazy tools)
+    pPhoton->r9         = itPho->r9();  // (!) change to full5x5 after 7_2_0 MC?
+    pPhoton->r9_full5x5 = itPho->full5x5_r9();
 
     pPhoton->fiducialBits=0;
     if(itPho->isEB())        pPhoton->fiducialBits |= kIsEB;
