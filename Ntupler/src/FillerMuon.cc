@@ -110,6 +110,7 @@ void FillerMuon::fill(TClonesArray *array,
     pMuon->phi    = itMu->muonBestTrack()->phi();
     pMuon->ptErr  = itMu->muonBestTrack()->ptError();
     pMuon->q      = itMu->muonBestTrack()->charge();
+    pMuon->btt    = itMu->muonBestTrackType();
     pMuon->staPt  = itMu->standAloneMuon().isNonnull() ? itMu->standAloneMuon()->pt()  : 0;
     pMuon->staEta = itMu->standAloneMuon().isNonnull() ? itMu->standAloneMuon()->eta() : 0;
     pMuon->staPhi = itMu->standAloneMuon().isNonnull() ? itMu->standAloneMuon()->phi() : 0;   
@@ -130,6 +131,11 @@ void FillerMuon::fill(TClonesArray *array,
     pMuon->gammaIso  = itMu->pfIsolationR04().sumPhotonEt;
     pMuon->neuHadIso = itMu->pfIsolationR04().sumNeutralHadronEt;
     pMuon->puIso     = itMu->pfIsolationR04().sumPUPt;
+
+    pMuon->chHadIso03  = itMu->pfIsolationR03().sumChargedHadronPt;
+    pMuon->gammaIso03  = itMu->pfIsolationR03().sumPhotonEt;
+    pMuon->neuHadIso03 = itMu->pfIsolationR03().sumNeutralHadronEt;
+    pMuon->puIso03     = itMu->pfIsolationR03().sumPUPt;
     
     if(fUsePuppi) { 
       double pEta = pMuon->pfEta;
@@ -379,6 +385,7 @@ void FillerMuon::fill(TClonesArray *array,
     pMuon->phi    = itMu->muonBestTrack()->phi();
     pMuon->ptErr  = itMu->muonBestTrack()->ptError();
     pMuon->q      = itMu->muonBestTrack()->charge();
+    pMuon->btt    = itMu->muonBestTrackType();
     pMuon->staPt  = itMu->standAloneMuon().isNonnull() ? itMu->standAloneMuon()->pt()  : 0;
     pMuon->staEta = itMu->standAloneMuon().isNonnull() ? itMu->standAloneMuon()->eta() : 0;
     pMuon->staPhi = itMu->standAloneMuon().isNonnull() ? itMu->standAloneMuon()->phi() : 0;
@@ -398,6 +405,11 @@ void FillerMuon::fill(TClonesArray *array,
     pMuon->gammaIso  = itMu->pfIsolationR04().sumPhotonEt;
     pMuon->neuHadIso = itMu->pfIsolationR04().sumNeutralHadronEt;
     pMuon->puIso     = itMu->pfIsolationR04().sumPUPt;
+
+    pMuon->chHadIso03  = itMu->pfIsolationR03().sumChargedHadronPt;
+    pMuon->gammaIso03  = itMu->pfIsolationR03().sumPhotonEt;
+    pMuon->neuHadIso03 = itMu->pfIsolationR03().sumNeutralHadronEt;
+    pMuon->puIso03     = itMu->pfIsolationR03().sumPUPt;
 
     if(fUsePuppi) { 
       double pEta = pMuon->pfEta;
