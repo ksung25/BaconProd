@@ -89,6 +89,8 @@ namespace baconhep
       edm::InputTag fEleTightIdMapTag;
       edm::InputTag fMVAValuesMapTag;
       edm::InputTag fMVACatsMapTag;
+      std::string fMVAV2Iso;
+      std::string fMVAV2NoIso;
       std::string fMediumMVA;
       std::string fTightMVA;
       std::string fMVA;

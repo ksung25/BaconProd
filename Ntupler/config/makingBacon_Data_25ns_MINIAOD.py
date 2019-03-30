@@ -283,6 +283,8 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     useTriggerObject          = cms.untracked.bool(False),
     edmEcalPFClusterIsoMapTag = cms.untracked.InputTag('electronEcalPFClusterIsolationProducer'),
     edmHcalPFClusterIsoMapTag = cms.untracked.InputTag('electronHcalPFClusterIsolationProducer'),
+    edmEleMVAV2Iso            = cms.untracked.string('ElectronMVAEstimatorRun2Fall17IsoV2'),
+    edmEleMVAV2NoIso          = cms.untracked.string('ElectronMVAEstimatorRun2Fall17NoIsoV2'),
     #----------------------    SETTINGS FOR 2017 (9X)     -----------------------
     edmEleMediumMVA           = cms.untracked.string('mvaEleID-Fall17-noIso-V1-wp90'),
     edmEleTightMVA            = cms.untracked.string('mvaEleID-Fall17-noIso-V1-wp80'),

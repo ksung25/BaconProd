@@ -30,6 +30,8 @@ FillerElectron::FillerElectron(const edm::ParameterSet &iConfig, const bool useA
   fPuppiName             (iConfig.getUntrackedParameter<std::string>("edmPuppiName","puppi")),
   fPuppiNoLepName        (iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppiNoLep")),
   fUsePuppi              (iConfig.getUntrackedParameter<bool>("usePuppi",true)),
+  fMVAV2Iso              (iConfig.getUntrackedParameter<std::string>("edmEleMVAV2Iso")),
+  fMVAV2NoIso            (iConfig.getUntrackedParameter<std::string>("edmEleMVAV2NoIso")),
   fMediumMVA             (iConfig.getUntrackedParameter<std::string>("edmEleMediumMVA")),
   fTightMVA              (iConfig.getUntrackedParameter<std::string>("edmEleTightMVA")),
   fMVA                   (iConfig.getUntrackedParameter<std::string>("edmEleMVA")),
@@ -421,6 +423,12 @@ void FillerElectron::fill(TClonesArray *array,
     pElectron->dEtaInSeed = dEtaInSeed(*itEle);
     pElectron->dEtaIn     = itEle->deltaEtaSuperClusterTrackAtVtx();
     pElectron->dPhiIn     = itEle->deltaPhiSuperClusterTrackAtVtx();
+
+    // saving v2 electron MVA IDs
+    pElectron->mvaV2Iso     = itEle->userFloat(fMVAV2Iso+"Values");
+    pElectron->mvaV2NoIso   = itEle->userFloat(fMVAV2NoIso+"Values");
+    pElectron->mvaV2IsoCat     = itEle->userInt(fMVAV2Iso+"Categories");
+    pElectron->mvaV2NoIsoCat   = itEle->userInt(fMVAV2NoIso+"Categories");
 
     pElectron->mvaBit     = 0; 
     if (itEle->electronID(fMediumMVA)) pElectron->mvaBit |= baconhep::kEleMVAMedBit;
