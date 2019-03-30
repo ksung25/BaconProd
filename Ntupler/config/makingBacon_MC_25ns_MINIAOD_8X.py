@@ -294,7 +294,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmEleMediumMVAIso        = cms.untracked.string(''), 
     edmEleTightMVAIso         = cms.untracked.string(''),
     edmEleMVAIso              = cms.untracked.string(''),
+    edmEleMVAHZZ              = cms.untracked.string('ElectronMVAEstimatorRun2Spring16HZZV1'),
     storeSecondMVA            = cms.untracked.bool(False),
+    storeHZZMVA               = cms.untracked.bool(True),
   ),
   
   Muon = cms.untracked.PSet(

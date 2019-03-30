@@ -97,7 +97,9 @@ namespace baconhep
       std::string fMediumMVAIso;
       std::string fTightMVAIso;
       std::string fMVAIso;
+      std::string fMVAHZZ;
       bool fSecondMVA;
+      bool fStoreHZZMVA;
       edm::InputTag fEleMediumIdIsoMapTag;
       edm::InputTag fEleTightIdIsoMapTag;
       edm::InputTag fMVAValuesIsoMapTag;

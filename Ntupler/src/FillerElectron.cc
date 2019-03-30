@@ -38,7 +38,9 @@ FillerElectron::FillerElectron(const edm::ParameterSet &iConfig, const bool useA
   fMediumMVAIso          (iConfig.getUntrackedParameter<std::string>("edmEleMediumMVAIso")),
   fTightMVAIso           (iConfig.getUntrackedParameter<std::string>("edmEleTightMVAIso")),
   fMVAIso                (iConfig.getUntrackedParameter<std::string>("edmEleMVAIso")),
+  fMVAHZZ                (iConfig.getUntrackedParameter<std::string>("edmEleMVAHZZ")),
   fSecondMVA             (iConfig.getUntrackedParameter<bool>("storeSecondMVA",false)),
+  fStoreHZZMVA           (iConfig.getUntrackedParameter<bool>("storeHZZMVA",false)),
   fUseTO                 (iConfig.getUntrackedParameter<bool>("useTriggerObject",false)),
   fUseAOD                (useAOD)
 {
@@ -442,6 +444,11 @@ void FillerElectron::fill(TClonesArray *array,
       if (itEle->electronID(fTightMVAIso)) pElectron->mvaIsoBit |= baconhep::kEleMVATightBit;
       pElectron->mvaIso = itEle->userFloat(fMVAIso+"Values");
       pElectron->mvaIsoCat = itEle->userInt(fMVAIso+"Categories");
+    }
+
+    if (fStoreHZZMVA) {
+        pElectron->mvaHZZ = itEle->userFloat(fMVAHZZ+"Values");
+        pElectron->mvaHZZCat = itEle->userInt(fMVAHZZ+"Categories");
     }
 
     pElectron->isConv     = !itEle->passConversionVeto();
