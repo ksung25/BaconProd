@@ -32,6 +32,7 @@ FillerPhoton::FillerPhoton(const edm::ParameterSet &iConfig, const bool useAOD,e
   fConvName          (iConfig.getUntrackedParameter<std::string>("edmConversionName","allConversions")),
   fSCName            (iConfig.getUntrackedParameter<edm::InputTag>("edmSCName")),//,"particleFlowEGamma")),
   fMVA               (iConfig.getUntrackedParameter<std::string>("edmPhoMVA")),
+  fMVAV2             (iConfig.getUntrackedParameter<std::string>("edmPhoMVAV2")),
   fUseTO             (iConfig.getUntrackedParameter<bool>("useTriggerObject",false)),
   fUseAOD            (useAOD)
 {
@@ -310,7 +311,11 @@ void FillerPhoton::fill(TClonesArray *array,
 
     // Photon MVA ID: https://twiki.cern.ch/twiki/bin/view/CMS/MultivariatePhotonIdentificationRun2
     pPhoton->mva = itPho->userFloat(fMVA+"Values"); 
-
+    pPhoton->mvaCat = itPho->userInt(fMVA+"Categories"); 
+    
+    // v2 photon MVA
+    pPhoton->mvaV2 = itPho->userFloat(fMVAV2+"Values");
+    pPhoton->mvaV2Cat = itPho->userInt(fMVAV2+"Categories");
 
     if(fUseTO) pPhoton->hltMatchBits = TriggerTools::matchHLT(pPhoton->eta, pPhoton->phi, triggerRecords, triggerObjects);
   }

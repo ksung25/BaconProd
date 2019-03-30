@@ -30,13 +30,17 @@ FillerElectron::FillerElectron(const edm::ParameterSet &iConfig, const bool useA
   fPuppiName             (iConfig.getUntrackedParameter<std::string>("edmPuppiName","puppi")),
   fPuppiNoLepName        (iConfig.getUntrackedParameter<std::string>("edmPuppiNoLepName","puppiNoLep")),
   fUsePuppi              (iConfig.getUntrackedParameter<bool>("usePuppi",true)),
+  fMVAV2Iso              (iConfig.getUntrackedParameter<std::string>("edmEleMVAV2Iso")),
+  fMVAV2NoIso            (iConfig.getUntrackedParameter<std::string>("edmEleMVAV2NoIso")),
   fMediumMVA             (iConfig.getUntrackedParameter<std::string>("edmEleMediumMVA")),
   fTightMVA              (iConfig.getUntrackedParameter<std::string>("edmEleTightMVA")),
   fMVA                   (iConfig.getUntrackedParameter<std::string>("edmEleMVA")),
   fMediumMVAIso          (iConfig.getUntrackedParameter<std::string>("edmEleMediumMVAIso")),
   fTightMVAIso           (iConfig.getUntrackedParameter<std::string>("edmEleTightMVAIso")),
   fMVAIso                (iConfig.getUntrackedParameter<std::string>("edmEleMVAIso")),
+  fMVAHZZ                (iConfig.getUntrackedParameter<std::string>("edmEleMVAHZZ")),
   fSecondMVA             (iConfig.getUntrackedParameter<bool>("storeSecondMVA",false)),
+  fStoreHZZMVA           (iConfig.getUntrackedParameter<bool>("storeHZZMVA",false)),
   fUseTO                 (iConfig.getUntrackedParameter<bool>("useTriggerObject",false)),
   fUseAOD                (useAOD)
 {
@@ -422,6 +426,12 @@ void FillerElectron::fill(TClonesArray *array,
     pElectron->dEtaIn     = itEle->deltaEtaSuperClusterTrackAtVtx();
     pElectron->dPhiIn     = itEle->deltaPhiSuperClusterTrackAtVtx();
 
+    // saving v2 electron MVA IDs
+    pElectron->mvaV2Iso     = itEle->userFloat(fMVAV2Iso+"Values");
+    pElectron->mvaV2NoIso   = itEle->userFloat(fMVAV2NoIso+"Values");
+    pElectron->mvaV2IsoCat     = itEle->userInt(fMVAV2Iso+"Categories");
+    pElectron->mvaV2NoIsoCat   = itEle->userInt(fMVAV2NoIso+"Categories");
+
     pElectron->mvaBit     = 0; 
     if (itEle->electronID(fMediumMVA)) pElectron->mvaBit |= baconhep::kEleMVAMedBit;
     if (itEle->electronID(fTightMVA)) pElectron->mvaBit |= baconhep::kEleMVATightBit;
@@ -434,6 +444,11 @@ void FillerElectron::fill(TClonesArray *array,
       if (itEle->electronID(fTightMVAIso)) pElectron->mvaIsoBit |= baconhep::kEleMVATightBit;
       pElectron->mvaIso = itEle->userFloat(fMVAIso+"Values");
       pElectron->mvaIsoCat = itEle->userInt(fMVAIso+"Categories");
+    }
+
+    if (fStoreHZZMVA) {
+        pElectron->mvaHZZ = itEle->userFloat(fMVAHZZ+"Values");
+        pElectron->mvaHZZCat = itEle->userInt(fMVAHZZ+"Categories");
     }
 
     pElectron->isConv     = !itEle->passConversionVeto();
