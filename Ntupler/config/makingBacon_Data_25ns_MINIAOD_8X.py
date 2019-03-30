@@ -308,6 +308,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     minPt                 = cms.untracked.double(10),
     edmName               = cms.untracked.string('slimmedPhotons'),
     edmSCName             = cms.untracked.InputTag('reducedEgamma','reducedSuperClusters'),
+    edmPhoMVAV2            = cms.untracked.string('PhotonMVAEstimatorRunIIFall17v2'),
     #FOR 2016 (8X)
     edmPhoMVA              = cms.untracked.string('PhotonMVAEstimatorRun2Spring16NonTrigV1'),
     useTriggerObject      = cms.untracked.bool(False),
