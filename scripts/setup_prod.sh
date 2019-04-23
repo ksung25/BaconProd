@@ -6,11 +6,7 @@ if test -z $CMSSW_VERSION; then
   return 0;
 fi
 
-CURRDIR=$PWD
-PATCHDIR=/afs/cern.ch/work/c/cmantill/public/94x/
-cd $CMSSW_BASE/src
-
-cp -r ${PATCHDIR}/* ./
+git cms-merge-topic cmantill:baconprod-10213-v15
 
 echo
 echo "[BaconProd] Setup complete!"
