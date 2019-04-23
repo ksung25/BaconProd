@@ -191,15 +191,19 @@ def addBTagging(process,jets='ak4PFJetsCHS',cone=0.4,head='AK4',tail='CHS',useMi
 	    shallow_tag_infos = cms.InputTag(head+'PFBoostedDoubleSVTagInfos'+tail),
             jets = cms.InputTag(jets)
             ))
-
-        setattr(process, head+'PFBoostedDeepDoubleBvLJetTags'+tail,
+        setattr(process, head+'PFBoostedDeepDoubleBJetTags'+tail, 
             pfDeepDoubleBJetTags.clone(
+            src = cms.InputTag(head+"PFBoostedDeepDoubleBTagInfos"+tail),
+            graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDB_mass_independent.pb')
+            ))
+        setattr(process, head+'PFBoostedDeepDoubleBvLJetTags'+tail,
+            pfDeepDoubleBvLJetTags.clone(
             src = cms.InputTag(head+"PFBoostedDeepDoubleBTagInfos"+tail),
             graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDB_mass_independent.pb')
             ))
 	#Deep Double B - No Mass Sculpting Penalty
         setattr(process, head+'PFBoostedDeepDoubleBvLNoMassSculptPenJetTags'+tail,
-            pfDeepDoubleBJetTags.clone(
+            pfDeepDoubleBvLJetTags.clone(
             src = cms.InputTag(head+"PFBoostedDeepDoubleBTagInfos"+tail),
             graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleX/94X/V01/DDB.pb')
             #graph_path = cms.FileInPath('RecoBTag/Combined/data/DeepDoubleB/V01/constant_graph_PtCut.pb')
