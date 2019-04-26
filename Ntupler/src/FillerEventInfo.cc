@@ -59,6 +59,9 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig, const bool us
   edm::InputTag lBadChCand      ("BadChargedCandidateFilter");
   edm::InputTag lBadPFMuon      ("BadPFMuonFilter");
   edm::InputTag lMetFilters     ("TriggerResults","");
+  edm::InputTag lPrefiring      ("prefiringweight:nonPrefiringProb");
+  edm::InputTag lPrefiringUp    ("prefiringweight:nonPrefiringProbUp");
+  edm::InputTag lPrefiringDown  ("prefiringweight:nonPrefiringProbDown");
   fTokBeamHaloSummary                    = iC.consumes<reco::BeamHaloSummary> (lBeamHaloSummary);
   fTokHBHENoiseFilterResultProducer      = iC.consumes<bool>                  (lHBHENoiseFilter);
   fTokHcalLaserEventFilter               = iC.consumes<bool>                  (lLaserEvtFilter);
@@ -71,6 +74,9 @@ FillerEventInfo::FillerEventInfo(const edm::ParameterSet &iConfig, const bool us
   fTokBadChCand                          = iC.consumes<bool>                  (lBadChCand);
   fTokBadPFMuon                          = iC.consumes<bool>                  (lBadPFMuon);
   fTokMetFiltersTag                      = iC.consumes<edm::TriggerResults>   (lMetFilters);
+  fTokPrefWeight                         = iC.consumes<double>                (lPrefiring);
+  fTokPrefWeightUp                       = iC.consumes<double>                (lPrefiringUp);
+  fTokPrefWeightDown                     = iC.consumes<double>                (lPrefiringDown);
 }
 //--------------------------------------------------------------------------------------------------
 FillerEventInfo::~FillerEventInfo(){}
@@ -128,6 +134,19 @@ void FillerEventInfo::fill(TEventInfo *evtInfo,
   evtInfo->bsx = bs->x0();
   evtInfo->bsy = bs->y0();
   evtInfo->bsz = bs->z0();
+
+  // Egamma prefiring weights
+  edm::Handle<double> prefweight;
+  iEvent.getByToken(fTokPrefWeight, prefweight);
+  evtInfo->prefweight = (*prefweight);
+
+  edm::Handle<double> prefweightUp;
+  iEvent.getByToken(fTokPrefWeightUp, prefweightUp);
+  evtInfo->prefweightUp = (*prefweightUp);
+  
+  edm::Handle<double> prefweightDown;
+  iEvent.getByToken(fTokPrefWeightDown, prefweightDown);
+  evtInfo->prefweightDown = (*prefweightDown);
   	
 
   //

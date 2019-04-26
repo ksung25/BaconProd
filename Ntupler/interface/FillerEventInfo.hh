@@ -102,6 +102,9 @@ namespace baconhep
     edm::EDGetTokenT<bool>                        fTokBadChCand                    ;
     edm::EDGetTokenT<bool>                        fTokBadPFMuon                    ;
     edm::EDGetTokenT<edm::TriggerResults>         fTokMetFiltersTag                ;
+    edm::EDGetTokenT<double>                      fTokPrefWeight                    ;
+    edm::EDGetTokenT<double>                      fTokPrefWeightUp                  ;
+    edm::EDGetTokenT<double>                      fTokPrefWeightDown                ;
   };
 }
 #endif

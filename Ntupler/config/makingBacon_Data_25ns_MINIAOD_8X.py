@@ -130,6 +130,12 @@ setupEgammaPostRecoSeq(process,
                        era='2016-Legacy', #era is new to select between 2016 / 2017,  it defaults to 2017
                        phoIDModules=[]) #bug with default modules for photon VID; off for now
 
+from PhysicsTools.PatUtils.l1ECALPrefiringWeightProducer_cfi import l1ECALPrefiringWeightProducer
+process.prefiringweight = l1ECALPrefiringWeightProducer.clone(
+    DataEra = cms.string("2016BtoH"), 
+    UseJetEMPt = cms.bool(False),
+    PrefiringRateSystematicUncty = cms.double(0.2),
+    SkipWarnings = False)
 # PF MET corrections
 from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 runMetCorAndUncFromMiniAOD(process,
@@ -747,6 +753,7 @@ process.baconSequence = cms.Sequence(
                                      process.ak4PuppiL1FastL2L3Corrector*
                                      process.pfNoPileUpJME            *
                                      process.egammaPostRecoSeq        *
+                                     process.prefiringweight          *
                                      process.puppiMETSequence          *
                                      #process.genjetsequence           *
                                      #process.AK4genjetsequenceCHS     *
