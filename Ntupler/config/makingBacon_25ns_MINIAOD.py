@@ -36,11 +36,7 @@ options.register('era',
 # user input values
 options.parseArguments()
 
-#isData  = True                                      # flag for if process data
-#doHLTFilter = True                                      # flag to skip events that fail relevant triggers
 hlt_filename  = "BaconAna/DataFormats/data/HLTFile_25ns"   # list of relevant triggers
-#doAlpaca     = False
-#era           = '2016'                                     # data-taking era (2016, 2016_legacy, 2017, or 2018)
 
 cmssw_base = os.environ['CMSSW_BASE']
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
@@ -131,10 +127,6 @@ addBTagging(process,'AK4PFJetsPuppi' ,0.4,'AK4' ,'Puppi')
 addBTagging(process,'AK8PFJetsPuppi' ,0.8,'AK8' ,'Puppi')
 addBTagging(process,'CA15PFJetsPuppi',1.5,'CA15','Puppi')
 addBTaggingAK4CHS(process,'updatedPatJets'    ,0.4,'AK4' ,'CHS',True,True)
-if options.era == '2017' or options.era == '2018':
-    process.AK4PFImpactParameterTagInfosPuppi.computeGhostTrack = cms.bool(False)
-    process.AK8PFImpactParameterTagInfosPuppi.computeGhostTrack = cms.bool(False)
-    process.CA15PFImpactParameterTagInfosPuppi.computeGhostTrack = cms.bool(False)
 
 setMiniAODGenJets(process)
 setMiniAODAK4CHS(process)
@@ -297,14 +289,11 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     isActive             = cms.untracked.bool(True),
     edmPFCandName        = cms.untracked.string('packedPFCandidates'),
     edmPileupInfoName    = cms.untracked.string('slimmedAddPileupInfo'),
-    #edmPileupInfoName    = cms.untracked.string('addPileupInfo'),
     edmBeamspotName      = cms.untracked.string('offlineBeamSpot'),
     edmMETName           = cms.untracked.string('slimmedMETs'),
-    #edmPFMETName         = cms.untracked.InputTag('slimmedMETs'),
-    edmPFMETName         = cms.untracked.InputTag('slimmedMETsV2','','MakingBacon'),
+    edmPFMETName         = cms.untracked.InputTag('slimmedMETsV2'),
     edmMVAMETName        = cms.untracked.string(''),
-    #edmPuppETName        = cms.untracked.string('slimmedMETsPuppi'),
-    edmPuppETName        = cms.untracked.InputTag('slimmedMETsPuppi','','MakingBacon'), 
+    edmPuppETName        = cms.untracked.InputTag('slimmedMETsPuppi'),
     edmAlpacaMETName     = cms.untracked.string(alpacaMet),
     edmPupAlpacaMETName  = cms.untracked.string(alpacaPuppiMet),
     edmRhoForIsoName     = cms.untracked.string('fixedGridRhoFastjetAll'),
@@ -355,7 +344,6 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmHcalPFClusterIsoMapTag = cms.untracked.InputTag('electronHcalPFClusterIsolationProducer'),
     edmEleMVAV2Iso            = cms.untracked.string('ElectronMVAEstimatorRun2Fall17IsoV2'),
     edmEleMVAV2NoIso          = cms.untracked.string('ElectronMVAEstimatorRun2Fall17NoIsoV2'),
-    #----------------------    SETTINGS FOR 2016 (8X)     -----------------------
     edmEleMediumMVA           = cms.untracked.string('mvaEleID-Spring16-GeneralPurpose-V1-wp90'),
     edmEleTightMVA            = cms.untracked.string('mvaEleID-Spring16-GeneralPurpose-V1-wp80'),
     edmEleMVA                 = cms.untracked.string('ElectronMVAEstimatorRun2Spring16GeneralPurposeV1'),
@@ -371,7 +359,6 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     isActive                  = cms.untracked.bool(True),
     minPt                     = cms.untracked.double(3),
     edmName                   = cms.untracked.string('slimmedMuons'),
-    #puppi
     edmPuppiName              = cms.untracked.string('puppi'),
     edmPuppiNoLepName         = cms.untracked.string('puppiNoLep'),
     usePuppi                  = cms.untracked.bool(True),
@@ -384,7 +371,6 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmName               = cms.untracked.string('slimmedPhotons'),
     edmSCName             = cms.untracked.InputTag('reducedEgamma','reducedSuperClusters'),
     edmPhoMVAV2            = cms.untracked.string('PhotonMVAEstimatorRunIIFall17v2'),
-    #FOR 2016 (8X)
     edmPhoMVA              = cms.untracked.string('PhotonMVAEstimatorRun2Spring16NonTrigV1'),
     useTriggerObject      = cms.untracked.bool(False),
   ),
@@ -420,7 +406,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     BRegNNStd               = cms.untracked.double(0.31628304719924927),
 
     # names of various jet-related collections
-    jetName              = cms.untracked.string('selectedUpdatedPatJets'),#selectedUpdatedPatJets'),#updatedPatJetsTransientCorrected'),#updatedPatJets'),#slimmedJets'),
+    jetName              = cms.untracked.string('selectedUpdatedPatJets'),
     genJetName           = cms.untracked.string('slimmedGenJets'),
     csvBTagName          = cms.untracked.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
     mvaBTagName          = cms.untracked.string('pfCombinedMVAV2BJetTags'),
@@ -450,8 +436,7 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmRhoName  = cms.untracked.string('fixedGridRhoFastjetAll'),
 
     # ORDERD list of pileup jet ID input files
-    jetPUIDFiles = cms.untracked.vstring('',
-                                         'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
+    jetPUIDFiles = cms.untracked.vstring('', 'BaconProd/Utils/data/TMVAClassificationCategory_JetID_53X_chs_Dec2012.weights.xml'),
     jetBoostedBtaggingFiles = cms.untracked.string('BaconProd/Utils/data/BoostedSVDoubleCA15_withSubjet_v4.weights.xml'),
     BRegNNFileName          = cms.untracked.string('BaconProd/Utils/data/breg_training_2016_updated.pb'),
     BRegNNMean              = cms.untracked.double(1.0454729795455933),
@@ -521,7 +506,6 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     edmRhoName  = cms.untracked.string('fixedGridRhoFastjetAll'),
 
     # names of various jet-related collections
-    #jetName              = cms.untracked.string('slimmedJetsAK8'),
     jetName              = cms.untracked.string('AK8PFJetsCHS'),
     genJetName           = cms.untracked.string('AK8GenJetsCHS'),
     jetFlavorName        = cms.untracked.string('AK8FlavorCHS'),
@@ -816,8 +800,6 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
 if options.era == '2017' or options.era == '2018':
     process.ntupler.useTriggerObject = cms.untracked.bool(False)
     process.ntupler.TriggerObject = cms.untracked.string("slimmedPatTrigger")
-    process.ntupler.Info.edmPuppETName = cms.untracked.InputTag('slimmedMETsPuppi')
-    process.ntupler.GenInfo.fillLHEWeights = cms.untracked.bool(False)
 
     #electron
     process.ntupler.Electron.edmEleMediumMVA = cms.untracked.string('mvaEleID-Fall17-noIso-V1-wp90')
@@ -873,11 +855,13 @@ if options.era == '2017' or options.era == '2018':
     process.ntupler.CA15Puppi.genJetName = cms.untracked.string('slimmedGenJetsAK8') 
 
 if options.isData:
+    process.ntupler.GenInfo.fillLHEWeights = cms.untracked.bool(False)
     process.ntupler.AK4CHS.deepCMVABTagName = cms.untracked.string('')
     process.ntupler.AK4CHS.deepCMVABTagNameb = cms.untracked.string('')
     process.ntupler.AK4CHS.deepCMVABTagNamec = cms.untracked.string('')
     process.ntupler.AK4CHS.deepCMVABTagNamel = cms.untracked.string('')
     process.ntupler.AK4CHS.deepCMVABTagNamebb = cms.untracked.string('')
+    
 
 if options.isData:
     process.baconSequence = cms.Sequence(
