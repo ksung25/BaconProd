@@ -370,8 +370,9 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     minPt                 = cms.untracked.double(10),
     edmName               = cms.untracked.string('slimmedPhotons'),
     edmSCName             = cms.untracked.InputTag('reducedEgamma','reducedSuperClusters'),
-    edmPhoMVAV2            = cms.untracked.string('PhotonMVAEstimatorRunIIFall17v2'),
-    edmPhoMVA              = cms.untracked.string('PhotonMVAEstimatorRun2Spring16NonTrigV1'),
+    edmPhoMVASpring16     = cms.untracked.string('PhotonMVAEstimatorRun2Spring16NonTrigV1'),
+    edmPhoMVAFall17V1     = cms.untracked.string('PhotonMVAEstimatorRunIIFall17v1'),
+    edmPhoMVAFall17V2     = cms.untracked.string('PhotonMVAEstimatorRunIIFall17v2'),
     useTriggerObject      = cms.untracked.bool(False),
   ),
   
@@ -811,9 +812,6 @@ if options.era == '2017' or options.era == '2018':
     process.ntupler.Electron.edmEleMVAHZZ = cms.untracked.string('')
     process.ntupler.Electron.storeSecondMVA = cms.untracked.bool(True)
     process.ntupler.Electron.storeHZZMVA = cms.untracked.bool(False)
-
-    #photon
-    process.ntupler.Photon.edmPhoMVA = cms.untracked.string('PhotonMVAEstimatorRunIIFall17v1')
 
     #AK4CHS
     process.ntupler.AK4CHS.BRegNNFileName = cms.untracked.string('BaconProd/Utils/data/breg_training_2017.pb')
