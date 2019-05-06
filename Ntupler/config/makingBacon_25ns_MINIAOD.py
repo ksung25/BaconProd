@@ -252,7 +252,8 @@ elif options.era == '2017':
     if options.isData:
         test_file = cms.untracked.vstring('/store/data/Run2017F/DoubleEG/MINIAOD/31Mar2018-v1/90001/F61EA338-8E37-E811-A203-0025905C4262.root')
     else:
-        test_file = cms.untracked.vstring('/store/mc/RunIIFall17MiniAOD/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/20000/46FB5EDE-F708-E811-A50F-0025905C53A4.root')
+        #test_file = cms.untracked.vstring('/store/mc/RunIIFall17MiniAOD/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/20000/46FB5EDE-F708-E811-A50F-0025905C53A4.root')
+        test_file = cms.untracked.vstring('/store/mc/RunIIFall17MiniAOD/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/00000/005DC030-D3F4-E711-889A-02163E01A62D.root')
 
 process.source = cms.Source("PoolSource",
                             #fileNames = cms.untracked.vstring('/store/mc/RunIISummer16MiniAODv2/GluGluHToZG_M-125_13TeV_powheg_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/50000/702BC677-2AC8-E611-A5B3-02163E011463.root')
@@ -342,17 +343,23 @@ process.ntupler = cms.EDAnalyzer('NtuplerMod',
     useTriggerObject          = cms.untracked.bool(False),
     edmEcalPFClusterIsoMapTag = cms.untracked.InputTag('electronEcalPFClusterIsolationProducer'),
     edmHcalPFClusterIsoMapTag = cms.untracked.InputTag('electronHcalPFClusterIsolationProducer'),
-    edmEleMVAV2Iso            = cms.untracked.string('ElectronMVAEstimatorRun2Fall17IsoV2'),
-    edmEleMVAV2NoIso          = cms.untracked.string('ElectronMVAEstimatorRun2Fall17NoIsoV2'),
+
+    edmEleMVASpring16         = cms.untracked.string('ElectronMVAEstimatorRun2Spring16GeneralPurposeV1'),
+    edmEleMVAFall17V1Iso        = cms.untracked.string('ElectronMVAEstimatorRun2Fall17IsoV1'),
+    edmEleMVAFall17V1NoIso      = cms.untracked.string('ElectronMVAEstimatorRun2Fall17NoIsoV1'),
+    edmEleMVAFall17V2Iso        = cms.untracked.string('ElectronMVAEstimatorRun2Fall17IsoV2'),
+    edmEleMVAFall17V2NoIso      = cms.untracked.string('ElectronMVAEstimatorRun2Fall17NoIsoV2'),
+    edmEleMVASpring16HZZ      = cms.untracked.string('ElectronMVAEstimatorRun2Spring16HZZV1'),
+
     edmEleMediumMVA           = cms.untracked.string('mvaEleID-Spring16-GeneralPurpose-V1-wp90'),
     edmEleTightMVA            = cms.untracked.string('mvaEleID-Spring16-GeneralPurpose-V1-wp80'),
-    edmEleMVA                 = cms.untracked.string('ElectronMVAEstimatorRun2Spring16GeneralPurposeV1'),
-    edmEleMediumMVAIso        = cms.untracked.string(''), 
-    edmEleTightMVAIso         = cms.untracked.string(''),
-    edmEleMVAIso              = cms.untracked.string(''),
-    edmEleMVAHZZ              = cms.untracked.string('ElectronMVAEstimatorRun2Spring16HZZV1'),
-    storeSecondMVA            = cms.untracked.bool(False),
-    storeHZZMVA               = cms.untracked.bool(True),
+
+    #edmEleMVA                 = cms.untracked.string('ElectronMVAEstimatorRun2Spring16GeneralPurposeV1'),
+    #edmEleMediumMVAIso        = cms.untracked.string(''), 
+    #edmEleTightMVAIso         = cms.untracked.string(''),
+    #edmEleMVAIso              = cms.untracked.string(''),
+    #storeSecondMVA            = cms.untracked.bool(False),
+    #storeHZZMVA               = cms.untracked.bool(True),
   ),
   
   Muon = cms.untracked.PSet(
@@ -805,13 +812,13 @@ if options.era == '2017' or options.era == '2018':
     #electron
     process.ntupler.Electron.edmEleMediumMVA = cms.untracked.string('mvaEleID-Fall17-noIso-V1-wp90')
     process.ntupler.Electron.edmEleTightMVA = cms.untracked.string('mvaEleID-Fall17-noIso-V1-wp80')
-    process.ntupler.Electron.edmEleMVA = cms.untracked.string('ElectronMVAEstimatorRun2Fall17NoIsoV1')
-    process.ntupler.Electron.edmEleMediumMVAIso = cms.untracked.string('mvaEleID-Fall17-iso-V1-wp90')
-    process.ntupler.Electron.edmEleTightMVAIso = cms.untracked.string('mvaEleID-Fall17-iso-V1-wp80')
-    process.ntupler.Electron.edmEleMVAIso = cms.untracked.string('ElectronMVAEstimatorRun2Fall17IsoV1')
-    process.ntupler.Electron.edmEleMVAHZZ = cms.untracked.string('')
-    process.ntupler.Electron.storeSecondMVA = cms.untracked.bool(True)
-    process.ntupler.Electron.storeHZZMVA = cms.untracked.bool(False)
+    #process.ntupler.Electron.edmEleMVA = cms.untracked.string('ElectronMVAEstimatorRun2Fall17NoIsoV1')
+    #process.ntupler.Electron.edmEleMediumMVAIso = cms.untracked.string('mvaEleID-Fall17-iso-V1-wp90')
+    #process.ntupler.Electron.edmEleTightMVAIso = cms.untracked.string('mvaEleID-Fall17-iso-V1-wp80')
+    #process.ntupler.Electron.edmEleMVAIso = cms.untracked.string('ElectronMVAEstimatorRun2Fall17IsoV1')
+    #process.ntupler.Electron.edmEleMVAHZZ = cms.untracked.string('')
+    #process.ntupler.Electron.storeSecondMVA = cms.untracked.bool(True)
+    #process.ntupler.Electron.storeHZZMVA = cms.untracked.bool(False)
 
     #AK4CHS
     process.ntupler.AK4CHS.BRegNNFileName = cms.untracked.string('BaconProd/Utils/data/breg_training_2017.pb')

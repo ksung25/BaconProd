@@ -82,17 +82,23 @@ namespace baconhep
       std::string fPuppiNoLepName; 
       bool fUsePuppi;
 
-      std::string fMVAV2Iso;
-      std::string fMVAV2NoIso;
+      //std::string fMVAV2Iso;
+      //std::string fMVAV2NoIso;
+      //std::string fMVA;
+      //std::string fMediumMVAIso;
+      //std::string fTightMVAIso;
+      //std::string fMVAIso;
+      //std::string fMVAHZZ;
+      //bool fSecondMVA;
+      //bool fStoreHZZMVA;
+      std::string fMVASpring16;
+      std::string fMVAFall17V1Iso;
+      std::string fMVAFall17V1NoIso;
+      std::string fMVAFall17V2Iso;
+      std::string fMVAFall17V2NoIso;
+      std::string fMVASpring16HZZ;
       std::string fMediumMVA;
       std::string fTightMVA;
-      std::string fMVA;
-      std::string fMediumMVAIso;
-      std::string fTightMVAIso;
-      std::string fMVAIso;
-      std::string fMVAHZZ;
-      bool fSecondMVA;
-      bool fStoreHZZMVA;
       bool fUseTO;
       bool fUseAOD;
       
