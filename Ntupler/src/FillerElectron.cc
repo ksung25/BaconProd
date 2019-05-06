@@ -355,6 +355,18 @@ void FillerElectron::fill(TClonesArray *array,
     auto corrP4  = itEle->p4() * itEle->userFloat("ecalTrkEnergyPostCorr") / itEle->energy(); // apply scaling/smearing
     pElectron->calibPt = corrP4.Pt();
     pElectron->calibE = corrP4.E();
+    pElectron->calibEcalE = itEle->userFloat("ecalEnergyPostCorr");
+    pElectron->calibPtErr = itEle->userFloat("ecalTrkEnergyErrPostCorr")*itEle->pt()/itEle->p();
+    pElectron->energyScaleStatUp = itEle->userFloat("energyScaleStatUp");
+    pElectron->energyScaleStatDown = itEle->userFloat("energyScaleStatDown");
+    pElectron->energyScaleSystUp = itEle->userFloat("energyScaleSystUp");
+    pElectron->energyScaleSystDown = itEle->userFloat("energyScaleSystDown");
+    pElectron->energyScaleGainUp = itEle->userFloat("energyScaleGainUp");
+    pElectron->energyScaleGainDown = itEle->userFloat("energyScaleGainDown");
+    pElectron->energySigmaRhoUp = itEle->userFloat("energySigmaRhoUp");
+    pElectron->energySigmaRhoDown = itEle->userFloat("energySigmaRhoDown");
+    pElectron->energySigmaPhiUp = itEle->userFloat("energySigmaPhiUp");
+    pElectron->energySigmaPhiDown = itEle->userFloat("energySigmaPhiDown");
 
     pElectron->pfPt  = 0;
     pElectron->pfEta = 0;
