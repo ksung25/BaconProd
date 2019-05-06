@@ -251,6 +251,17 @@ void FillerPhoton::fill(TClonesArray *array,
     auto corrP4  = itPho->p4() * itPho->userFloat("ecalEnergyPostCorr") / itPho->energy();
     pPhoton->calibPt = corrP4.Pt();
     pPhoton->calibE = corrP4.E();
+    pPhoton->ecalEnergyErrPostCorr = itPho->userFloat("ecalEnergyErrPostCorr");
+    pPhoton->energyScaleStatUp = itPho->userFloat("energyScaleStatUp");
+    pPhoton->energyScaleStatDown = itPho->userFloat("energyScaleStatDown");
+    pPhoton->energyScaleSystUp = itPho->userFloat("energyScaleSystUp");
+    pPhoton->energyScaleSystDown = itPho->userFloat("energyScaleSystDown");
+    pPhoton->energyScaleGainUp = itPho->userFloat("energyScaleGainUp");
+    pPhoton->energyScaleGainDown = itPho->userFloat("energyScaleGainDown");
+    pPhoton->energySigmaRhoUp = itPho->userFloat("energySigmaRhoUp");
+    pPhoton->energySigmaRhoDown = itPho->userFloat("energySigmaRhoDown");
+    pPhoton->energySigmaPhiUp = itPho->userFloat("energySigmaPhiUp");
+    pPhoton->energySigmaPhiDown = itPho->userFloat("energySigmaPhiDown");
     
     pPhoton->eRes = itPho->getCorrectedEnergyError(itPho->getCandidateP4type())/itPho->getCorrectedEnergy(itPho->getCandidateP4type());
 
