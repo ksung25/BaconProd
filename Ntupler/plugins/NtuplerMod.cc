@@ -714,6 +714,7 @@ void NtuplerMod::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
 //--------------------------------------------------------------------------------------------------
 void NtuplerMod::initHLT(const edm::TriggerResults& result, const edm::TriggerNames& triggerNames)
 {
+  assert(kNTrigBit >= fTrigger->fRecords.size()); // check that TriggerBits is sufficiently long 
   for(unsigned int irec=0; irec<fTrigger->fRecords.size(); irec++) {
     fTrigger->fRecords[irec].hltPathName  = "";
     fTrigger->fRecords[irec].hltPathIndex = (unsigned int)-1;
