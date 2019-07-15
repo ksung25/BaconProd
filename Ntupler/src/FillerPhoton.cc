@@ -31,8 +31,9 @@ FillerPhoton::FillerPhoton(const edm::ParameterSet &iConfig, const bool useAOD,e
   fEleName           (iConfig.getUntrackedParameter<std::string>("edmElectronName","gedGsfElectrons")),
   fConvName          (iConfig.getUntrackedParameter<std::string>("edmConversionName","allConversions")),
   fSCName            (iConfig.getUntrackedParameter<edm::InputTag>("edmSCName")),//,"particleFlowEGamma")),
-  fMVA               (iConfig.getUntrackedParameter<std::string>("edmPhoMVA")),
-  fMVAV2             (iConfig.getUntrackedParameter<std::string>("edmPhoMVAV2")),
+  fMVASpring16       (iConfig.getUntrackedParameter<std::string>("edmPhoMVASpring16")),
+  fMVAFall17V1       (iConfig.getUntrackedParameter<std::string>("edmPhoMVAFall17V1")),
+  fMVAFall17V2       (iConfig.getUntrackedParameter<std::string>("edmPhoMVAFall17V2")),
   fUseTO             (iConfig.getUntrackedParameter<bool>("useTriggerObject",false)),
   fUseAOD            (useAOD)
 {
@@ -250,6 +251,17 @@ void FillerPhoton::fill(TClonesArray *array,
     auto corrP4  = itPho->p4() * itPho->userFloat("ecalEnergyPostCorr") / itPho->energy();
     pPhoton->calibPt = corrP4.Pt();
     pPhoton->calibE = corrP4.E();
+    pPhoton->ecalEnergyErrPostCorr = itPho->userFloat("ecalEnergyErrPostCorr");
+    pPhoton->energyScaleStatUp = itPho->userFloat("energyScaleStatUp");
+    pPhoton->energyScaleStatDown = itPho->userFloat("energyScaleStatDown");
+    pPhoton->energyScaleSystUp = itPho->userFloat("energyScaleSystUp");
+    pPhoton->energyScaleSystDown = itPho->userFloat("energyScaleSystDown");
+    pPhoton->energyScaleGainUp = itPho->userFloat("energyScaleGainUp");
+    pPhoton->energyScaleGainDown = itPho->userFloat("energyScaleGainDown");
+    pPhoton->energySigmaRhoUp = itPho->userFloat("energySigmaRhoUp");
+    pPhoton->energySigmaRhoDown = itPho->userFloat("energySigmaRhoDown");
+    pPhoton->energySigmaPhiUp = itPho->userFloat("energySigmaPhiUp");
+    pPhoton->energySigmaPhiDown = itPho->userFloat("energySigmaPhiDown");
     
     pPhoton->eRes = itPho->getCorrectedEnergyError(itPho->getCandidateP4type())/itPho->getCorrectedEnergy(itPho->getCandidateP4type());
 
@@ -310,12 +322,19 @@ void FillerPhoton::fill(TClonesArray *array,
     pPhoton->passElectronVeto = itPho->passElectronVeto(); // here for backwards compatibility
 
     // Photon MVA ID: https://twiki.cern.ch/twiki/bin/view/CMS/MultivariatePhotonIdentificationRun2
-    pPhoton->mva = itPho->userFloat(fMVA+"Values"); 
-    pPhoton->mvaCat = itPho->userInt(fMVA+"Categories"); 
+    //pPhoton->mva = itPho->userFloat(fMVA+"Values"); 
+    //pPhoton->mvaCat = itPho->userInt(fMVA+"Categories"); 
+    //
+    //// v2 photon MVA
+    //pPhoton->mvaV2 = itPho->userFloat(fMVAV2+"Values");
+    //pPhoton->mvaV2Cat = itPho->userInt(fMVAV2+"Categories");
     
-    // v2 photon MVA
-    pPhoton->mvaV2 = itPho->userFloat(fMVAV2+"Values");
-    pPhoton->mvaV2Cat = itPho->userInt(fMVAV2+"Categories");
+    pPhoton->mvaSpring16    = itPho->userFloat(fMVASpring16+"Values");
+    pPhoton->mvaSpring16Cat = itPho->userInt(fMVASpring16+"Categories"); 
+    pPhoton->mvaFall17V1    = itPho->userFloat(fMVAFall17V1+"Values");
+    pPhoton->mvaFall17V1Cat = itPho->userInt(fMVAFall17V1+"Categories");
+    pPhoton->mvaFall17V2    = itPho->userFloat(fMVAFall17V2+"Values");
+    pPhoton->mvaFall17V2Cat = itPho->userInt(fMVAFall17V2+"Categories");
 
     if(fUseTO) pPhoton->hltMatchBits = TriggerTools::matchHLT(pPhoton->eta, pPhoton->phi, triggerRecords, triggerObjects);
   }

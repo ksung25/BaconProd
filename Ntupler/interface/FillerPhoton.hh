@@ -79,11 +79,11 @@ namespace baconhep
       edm::EDGetTokenT<reco::ConversionCollection>   fTokConvName;
       edm::EDGetTokenT<reco::SuperClusterCollection> fTokSCName;
       
-      std::string fMVA;
-      std::string fMVAV2;
+      std::string fMVASpring16;
+      std::string fMVAFall17V1;
+      std::string fMVAFall17V2;
       bool fUseTO;
       bool fUseAOD;
- //      PhotonMVACalculator *fPhotonMVA; 
   };
 }
 #endif
